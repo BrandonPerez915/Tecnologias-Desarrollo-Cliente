@@ -1,1 +1,43 @@
-<p>user-info works!</p>
+<div class="flex flex-col justify-center text-amber-50 bg-blue-950 p-10 gap-5 w-full h-full">
+  @if (user(); as selectedUser) {
+    <h1 class="text-2xl">USER INFO</h1>
+    <table>
+      <tbody>
+        <tr>
+          <td>Name: {{ selectedUser.name }}</td>
+        </tr>
+        <tr>
+          <td>Username: {{ selectedUser.username }}</td>
+        </tr>
+        <tr>
+          <td>Email: {{ selectedUser.email }}</td>
+        </tr>
+        <tr>
+          <td>Phone: {{ selectedUser.phone }}</td>
+        </tr>
+        <tr>
+          <td>Website: {{ selectedUser.website }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h1 class="text-2xl">COMPANY</h1>
+    <table>
+      <tbody>
+        <tr>
+          <td>Name: {{ selectedUser.company.name }}</td>
+        </tr>
+        <tr>
+          <td>Catch Phrase: {{ selectedUser.company.catchPhrase }}</td>
+        </tr>
+        <tr>
+          <td>BS: {{ selectedUser.company.bs }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <button (click)="clearUser.emit()" class="cursor-pointer duration-200 ease-in hover:bg-blue-900 p-2">Clear user</button>
+  } @else {
+    <h1 class="text-l">Select a user to see their info</h1>
+  }
+</div>

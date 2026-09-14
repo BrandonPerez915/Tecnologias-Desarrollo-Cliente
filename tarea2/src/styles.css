@@ -1,1 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
 @import 'tailwindcss';
+
+@layer base {
+  html,
+  body {
+    @apply h-full w-full font-[Raleway] bg-amber-50;
+  }
+
+  app-root {
+    @apply block h-full w-full;
+  }
+}

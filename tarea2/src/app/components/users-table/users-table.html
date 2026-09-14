@@ -1,1 +1,16 @@
-<p class="bg-blue-500">users-table works!</p>
+<table class="w-full h-full">
+  <thead class="text-center text-2xl">USERS</thead>
+  <tbody>
+    @for (user of users; track user.email) {
+      @if ($even) {
+        <tr class="text-blue-950 h-1 cursor-pointer duration-200 ease-in hover:bg-amber-100" (click)="handleUserClick(user)">
+          <td class="p-3">{{user.name}} ({{user.username}})</td>
+        </tr>
+      } @else {
+        <tr class="bg-blue-950 text-amber-50 p-5 h-1 cursor-pointer duration-200 ease-in hover:bg-blue-900" (click)="handleUserClick(user)">
+          <td class="p-3">{{user.name}} ({{user.username}})</td>
+        </tr>
+      }
+    }
+  </tbody>
+</table>
