@@ -1,0 +1,96 @@
+<main class="page">
+  <header class="page-header">
+    <div>
+      <h1>Componentes</h1>
+      <p>Botones del design system de ImeiHub</p>
+    </div>
+    <a class="proto-link" [href]="prototypeUrl" target="_blank" rel="noopener">Ver prototipo</a>
+  </header>
+
+  <section class="card">
+    <h2>Button</h2>
+    <p class="hint">variant: primary | secondary | danger | ghost</p>
+
+    <div class="grid">
+      <span class="col-label"></span>
+      <span class="col-label">Normal</span>
+      <span class="col-label">Con icono</span>
+      <span class="col-label">Disabled</span>
+
+      @for (v of variants; track v) {
+        <span class="row-label">{{ v }}</span>
+        <div><button app-button [variant]="v" (click)="onClick()">Guardar</button></div>
+        <div>
+          <button app-button [variant]="v" icon="plus" (click)="onClick()">Agregar producto</button>
+        </div>
+        <div><button app-button [variant]="v" icon="check" disabled>Confirmar</button></div>
+      }
+    </div>
+    <p class="hint">clicks: {{ clicks() }}</p>
+  </section>
+
+  <section class="card">
+    <h2>Como se usan en el prototipo</h2>
+    <div class="row">
+      <button app-button icon="plus">Nueva orden</button>
+      <button app-button variant="secondary" icon="arrow-down">Exportar datos</button>
+      <button app-button variant="secondary" icon="scan">Escaneo con cámara</button>
+      <button app-button variant="danger" icon="logout">Cerrar caja</button>
+      <button app-button variant="secondary">Cancelar</button>
+      <button app-button variant="secondary" icon="receipt" [badge]="3">Cambiar orden</button>
+    </div>
+
+    <h3>fullWidth</h3>
+    <div class="stack">
+      <button app-button fullWidth icon="printer">Imprimir etiqueta de precio</button>
+      <button app-button fullWidth icon="return">Marcar devolución</button>
+      <button app-button fullWidth type="submit" icon="check">Confirmar pago de MXN 12,499</button>
+      <button app-button fullWidth disabled>Continuar al cobro</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>IconButton</h2>
+    <p class="hint">
+      variant: outline | soft | bare · dot para notificaciones · label obligatorio (aria-label)
+    </p>
+    <div class="row">
+      <figure>
+        <button app-icon-button icon="close" label="Cerrar"></button>
+        <figcaption>outline</figcaption>
+      </figure>
+      <figure>
+        <button app-icon-button icon="bell" label="Notificaciones" dot></button>
+        <figcaption>outline + dot</figcaption>
+      </figure>
+      <figure>
+        <button app-icon-button icon="bell" label="Notificaciones" variant="soft" dot></button>
+        <figcaption>soft + dot</figcaption>
+      </figure>
+      <figure>
+        <button app-icon-button icon="bell" label="Notificaciones" variant="bare"></button>
+        <figcaption>bare</figcaption>
+      </figure>
+      <figure>
+        <button app-icon-button icon="menu" label="Menú" variant="bare"></button>
+        <figcaption>menu</figcaption>
+      </figure>
+      <figure>
+        <button app-icon-button icon="filter" label="Filtros"></button>
+        <figcaption>filter</figcaption>
+      </figure>
+      <figure>
+        <button app-icon-button icon="settings" label="Ajustes" disabled></button>
+        <figcaption>disabled</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>BackButton</h2>
+    <div class="row">
+      <button app-back-button>Volver al panel</button>
+      <button app-back-button>Volver al inventario</button>
+    </div>
+  </section>
+</main>

@@ -1,1 +1,45 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --primary: #2457e6;
+  --primary-dark: #173ca8;
+  --primary-soft: #edf2ff;
+  --ink: #172033;
+  --muted: #718096;
+  --line: #e4e8ee;
+  --soft: #f4f6f8;
+  --surface: #fff;
+  --green: #15966b;
+  --green-soft: #e9f8f2;
+  --orange: #e66c38;
+  --orange-soft: #fff0e9;
+  --red: #d94a4a;
+  --red-soft: #fff0f0;
+  --shadow: 0 8px 28px #22325412;
+  --type-badge: 10px;
+  --type-badge-small: 9px;
+  --type-counter: 8px;
+  --font-sans: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--soft);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
