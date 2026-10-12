@@ -1,0 +1,39 @@
+<div class="search-bar-wrapper">
+  <div class="search-container">
+    <span class="material-symbols-outlined search-icon">search</span>
+    <input
+      type="search"
+      id="search-input"
+      class="search-input"
+      [ngModel]="query"
+      placeholder="Buscar por título, director, productor, género..."
+      autocomplete="off"
+    />
+
+    @if (query) {
+      <button
+        type="button"
+        class="clear-btn"
+        aria-label="Limpiar búsqueda"
+      >
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    }
+
+    <div class="criterion-dropdown-container">
+      <select
+        id="search-criterion"
+        class="criterion-select"
+        aria-label="Criterio de búsqueda"
+      >
+        <option value="all">Todo</option>
+        <option value="title">Título</option>
+        <option value="director">Director</option>
+        <option value="producer">Productor</option>
+        <option value="genre">Género</option>
+        <option value="year">Año</option>
+      </select>
+      <span class="material-symbols-outlined dropdown-arrow">expand_more</span>
+    </div>
+  </div>
+</div>
