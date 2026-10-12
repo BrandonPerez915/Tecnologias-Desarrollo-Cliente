@@ -1,0 +1,92 @@
+<!-- Sticky Navbar -->
+<app-navbar pageTitle="Explorar"></app-navbar>
+
+<main class="explore-page-main">
+  <div class="container-responsive content-wrapper">
+    <!-- Header -->
+    <header class="explore-header">
+      <h1 class="explore-title">Explorar Catálogo</h1>
+      <p class="explore-subtitle">
+        Descubre obras maestras del cine por tus géneros favoritos, directores premiados y colecciones curatoriales.
+      </p>
+    </header>
+
+    <!-- Genre Tiles Grid -->
+    <section class="section-block">
+      <div class="section-header">
+        <span class="marker crimson"></span>
+        <h2 class="section-title">Géneros Populares</h2>
+      </div>
+
+      <div class="genre-tiles-grid">
+        <div
+          *ngFor="let g of genreCategories"
+          class="genre-card"
+          (click)="exploreByGenre(g.filter)"
+          role="button"
+          tabindex="0"
+        >
+          <div class="genre-icon-box">
+            <span class="material-symbols-outlined">{{ g.icon }}</span>
+          </div>
+          <div class="genre-info">
+            <span class="genre-name">{{ g.name }}</span>
+            <span class="genre-count">{{ g.count }} títulos</span>
+          </div>
+          <span class="material-symbols-outlined arrow-right">chevron_right</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Directors Section -->
+    <section class="section-block">
+      <div class="section-header">
+        <span class="marker amber"></span>
+        <h2 class="section-title">Directores de Culto</h2>
+      </div>
+
+      <div class="directors-grid">
+        <div
+          *ngFor="let dir of featuredDirectors"
+          class="director-card"
+          (click)="exploreByDirector(dir.filter)"
+          role="button"
+          tabindex="0"
+        >
+          <img [src]="dir.avatar" [alt]="dir.name" class="director-avatar" />
+          <div class="director-details">
+            <h3 class="director-name">{{ dir.name }}</h3>
+            <p class="director-movies">{{ dir.movies.join(' • ') }}</p>
+          </div>
+          <span class="explore-pill">Ver obras</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Trending Movies Carousel / Row -->
+    <section class="section-block">
+      <div class="section-header">
+        <span class="marker emerald"></span>
+        <h2 class="section-title">Títulos Mejor Valorados</h2>
+      </div>
+
+      <div class="trending-rail no-scrollbar">
+        <div
+          *ngFor="let movie of movieService.movies()"
+          class="trending-card"
+          [routerLink]="['/movies', movie.id]"
+        >
+          <div class="trending-poster-box">
+            <img [src]="movie.posterUrl" [alt]="movie.title" class="poster-img" />
+            <div class="trending-rating">
+              <span class="material-symbols-outlined fill star-icon">star</span>
+              <span>{{ movie.rating }}</span>
+            </div>
+          </div>
+          <h4 class="trending-title">{{ movie.title }}</h4>
+          <span class="trending-meta">{{ movie.year }} • {{ movie.genres[0] }}</span>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>

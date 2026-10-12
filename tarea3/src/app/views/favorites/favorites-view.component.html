@@ -1,0 +1,97 @@
+<!-- Sticky Navbar -->
+<app-navbar pageTitle="Favoritos"></app-navbar>
+
+<main class="favorites-page-main">
+  <div class="container-responsive content-wrapper">
+    <!-- Header Section -->
+    <header class="favorites-header-section">
+      <div class="header-titles">
+        <h1 class="main-title">Mis Películas Favoritas</h1>
+        <p class="counter-text">
+          {{ movieService.favoritesCount() }}
+          {{ movieService.favoritesCount() === 1 ? 'película guardada' : 'películas guardadas' }}
+        </p>
+      </div>
+
+      <button
+        *ngIf="movieService.favoritesCount() > 0"
+        type="button"
+        class="btn-clear-all"
+        (click)="clearAllFavorites()"
+      >
+        <span class="material-symbols-outlined">delete_sweep</span>
+        <span>Vaciar</span>
+      </button>
+    </header>
+
+    <!-- Controls Bar: Filter & Sort (Only shown when there are favorites) -->
+    <section class="controls-bar" *ngIf="movieService.favoritesCount() > 0">
+      <!-- Search within favorites -->
+      <div class="search-input-box">
+        <span class="material-symbols-outlined search-icon">search</span>
+        <input
+          type="text"
+          class="input-filter"
+          [ngModel]="filterTerm()"
+          (ngModelChange)="onSearchChange($event)"
+          placeholder="Filtrar por título o director..."
+        />
+        <button
+          *ngIf="filterTerm()"
+          type="button"
+          class="clear-icon-btn"
+          (click)="clearSearchTerm()"
+        >
+          <span class="material-symbols-outlined">cancel</span>
+        </button>
+      </div>
+
+      <!-- Sorting Selector -->
+      <div class="sort-selector-box">
+        <span class="material-symbols-outlined sort-icon">swap_vert</span>
+        <select
+          class="sort-dropdown"
+          [value]="currentSort()"
+          (change)="onSortChange($event)"
+          aria-label="Ordenar favoritos"
+        >
+          <option *ngFor="let opt of sortOptions" [value]="opt.value">
+            {{ opt.label }}
+          </option>
+        </select>
+        <span class="material-symbols-outlined arrow-down">expand_more</span>
+      </div>
+    </section>
+
+    <!-- Favorites Cards List -->
+    <section class="favorites-list-section" *ngIf="processedFavorites().length > 0">
+      <div class="favorites-grid">
+        <app-movie-card
+          *ngFor="let movie of processedFavorites()"
+          [movie]="movie"
+          layout="favorite"
+        ></app-movie-card>
+      </div>
+    </section>
+
+    <!-- Empty State for Search Filter within Favorites -->
+    <app-empty-state
+      *ngIf="movieService.favoritesCount() > 0 && processedFavorites().length === 0"
+      icon="search_off"
+      title="Sin coincidencias en favoritos"
+      description="No encontramos películas guardadas que coincidan con tu término de búsqueda."
+      actionLabel="Limpiar filtro"
+      (actionClick)="clearSearchTerm()"
+    ></app-empty-state>
+
+    <!-- Empty State when Zero Favorites Total -->
+    <app-empty-state
+      *ngIf="movieService.favoritesCount() === 0"
+      icon="heart_broken"
+      title="Aún no tienes favoritos"
+      description="Explora nuestro catálogo y presiona el ícono del corazón en cualquier película para guardarla aquí."
+      actionLabel="Explorar catálogo"
+      [routerLink]="['/movies']"
+    ></app-empty-state>
+  </div>
+</main>

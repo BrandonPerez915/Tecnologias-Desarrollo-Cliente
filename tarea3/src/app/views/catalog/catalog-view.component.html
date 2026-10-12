@@ -1,0 +1,49 @@
+<!-- Sticky Navbar -->
+<app-navbar pageTitle="Películas"></app-navbar>
+
+<main class="catalog-page-main">
+  <div class="container-responsive content-wrapper">
+    <!-- Search & Filter Controls -->
+    <section class="search-filters-section">
+      <app-search-bar></app-search-bar>
+      <app-filter-chips></app-filter-chips>
+    </section>
+
+    <!-- Hero Spotlight Section (Only shown when not actively querying, or as top banner) -->
+    <section class="spotlight-section" *ngIf="!movieService.searchQuery()">
+      <app-hero-spotlight [movie]="featuredMovie"></app-hero-spotlight>
+    </section>
+
+    <!-- Catalog Results Section Header -->
+    <section class="results-header-section">
+      <div class="header-left">
+        <h3 class="catalog-heading">Catálogo Completo</h3>
+        <span class="count-pill">
+          {{ filteredMovies.length }} {{ filteredMovies.length === 1 ? 'título' : 'títulos' }}
+        </span>
+      </div>
+      <span class="timestamp-label">Actualizado hoy</span>
+    </section>
+
+    <!-- Movies List/Grid -->
+    <section class="movies-grid-section" *ngIf="filteredMovies.length > 0">
+      <div class="movies-container">
+        <app-movie-card
+          *ngFor="let movie of filteredMovies"
+          [movie]="movie"
+          layout="horizontal"
+        ></app-movie-card>
+      </div>
+    </section>
+
+    <!-- Empty State -->
+    <app-empty-state
+      *ngIf="filteredMovies.length === 0"
+      icon="movie_off"
+      title="Sin resultados encontrados"
+      description="No encontramos ninguna película que coincida con tus criterios de búsqueda. Intenta con otros términos o limpia los filtros."
+      actionLabel="Restablecer filtros"
+      (actionClick)="resetAllFilters()"
+    ></app-empty-state>
+  </div>
+</main>
