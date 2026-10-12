@@ -1,0 +1,69 @@
+<header class="navbar-header glass-header pt-safe">
+  <div class="navbar-container container-responsive">
+    <!-- Left Section: Page Title / Back Button -->
+    <div class="left-section">
+      @if (showBackButton) {
+        <button
+        type="button"
+        class="back-button"
+        aria-label="Volver atrás"
+        >
+          <span class="material-symbols-outlined">arrow_back</span>
+        </button>
+      }
+      <a routerLink="/movies" class="brand-link">
+        <span class="brand-name">Streamov</span>
+      </a>
+
+      @if(pageTitle) {
+        <div class="section-divider"></div>
+        <h1 class="page-title">{{ pageTitle }}</h1>
+      }
+    </div>
+
+    <!-- Center Desktop Navigation Links -->
+    <nav class="desktop-nav-links" aria-label="Navegación principal">
+      <a
+        routerLink="/movies"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="nav-link"
+      >
+        <span class="material-symbols-outlined nav-icon">movie</span>
+        <span>Películas</span>
+      </a>
+
+      <a
+        routerLink="/favorites"
+        routerLinkActive="active"
+        class="nav-link"
+      >
+        <span class="material-symbols-outlined nav-icon">favorite</span>
+        <span>Favoritos</span>
+        <span *ngIf="favoritesCount > 0" class="fav-counter-badge">
+          {{ favoritesCount }}
+        </span>
+      </a>
+
+      <a
+        routerLink="/explore"
+        routerLinkActive="active"
+        class="nav-link"
+      >
+        <span class="material-symbols-outlined nav-icon">explore</span>
+        <span>Explorar</span>
+      </a>
+    </nav>
+
+    <!-- Right Section: Profile -->
+    <div class="right-section">
+      <div class="profile-avatar-wrapper">
+        <img
+          src="https://imgs.search.brave.com/PCA63ZRPJS3HOtp8WbSi3ZMbXLljijlOxVziv2zPCoQ/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9tZWRp/YS5nZXR0eWltYWdl/cy5jb20vaWQvMTQw/NjE5NzczMC9lcy9m/b3RvL3JldHJhdG8t/ZGUtdW4tam92ZW4t/aW5kaW8tZ3VhcG8u/anBnP3M9NjEyeDYx/MiZ3PTAmaz0yMCZj/PXptQkJHazluc2Y4/TnZMWHJyMndtME1M/NzBIb2JZUW1WRFU0/M3NITmRzWVE9"
+          alt="Usuario Avatar"
+          class="profile-img"
+        />
+      </div>
+    </div>
+  </div>
+</header>
