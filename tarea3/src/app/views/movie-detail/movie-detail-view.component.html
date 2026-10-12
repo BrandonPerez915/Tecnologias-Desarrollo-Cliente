@@ -5,7 +5,7 @@
 ></app-navbar>
 
 <main class="movie-detail-main">
-  <ng-container *ngIf="movie() as m; else notFound">
+  @if (movie(); as m) {
     <!-- Hero Backdrop Section with Layered Vignette Scrim -->
     <div class="hero-backdrop-container">
       <div
@@ -54,7 +54,9 @@
             [alt]="'Póster oficial de ' + m.title"
             class="poster-img"
           />
-          <span class="poster-imax-tag" *ngIf="m.badges.includes('IMAX')">IMAX</span>
+          @if (m.badges.includes('IMAX')) {
+            <span class="poster-imax-tag">IMAX</span>
+          }
         </div>
 
         <!-- Essential Metadata beside poster -->
@@ -62,7 +64,9 @@
           <div class="score-pill">
             <span class="material-symbols-outlined fill star-icon">star</span>
             <span class="score-number">{{ m.rating }} ★</span>
-            <span class="score-votes" *ngIf="m.ratingCount">({{ m.ratingCount }})</span>
+            @if (m.ratingCount) {
+              <span class="score-votes">({{ m.ratingCount }})</span>
+            }
           </div>
 
           <h2 class="detail-title">{{ m.title }}</h2>
@@ -72,13 +76,17 @@
 
       <!-- Badges Row -->
       <div class="badges-row">
-        <span *ngFor="let badge of m.badges" class="tech-badge">
-          {{ badge }}
-        </span>
+        @for (badge of m.badges; track badge) {
+          <span class="tech-badge">
+            {{ badge }}
+          </span>
+        }
         <span class="tech-badge duration">{{ m.duration }}</span>
-        <span *ngFor="let g of m.genres" class="tech-badge genre">
-          {{ g }}
-        </span>
+        @for (g of m.genres; track g) {
+          <span class="tech-badge genre">
+            {{ g }}
+          </span>
+        }
       </div>
 
       <!-- Primary Interactive Favorite CTA with Dynamic States -->
@@ -135,22 +143,25 @@
       </section>
 
       <!-- Principal Cast Section -->
-      <section class="cast-section" *ngIf="m.cast.length > 0">
-        <div class="section-title-row justify-between">
-          <div class="title-with-marker">
-            <span class="pill-marker amber"></span>
-            <h3 class="section-heading">Reparto Principal</h3>
+      @if (m.cast.length > 0) {
+        <section class="cast-section">
+          <div class="section-title-row justify-between">
+            <div class="title-with-marker">
+              <span class="pill-marker amber"></span>
+              <h3 class="section-heading">Reparto Principal</h3>
+            </div>
+            <span class="cast-count-label">{{ m.cast.length }} estrellas</span>
           </div>
-          <span class="cast-count-label">{{ m.cast.length }} estrellas</span>
-        </div>
 
-        <div class="cast-grid">
-          <app-cast-card
-            *ngFor="let actor of m.cast"
-            [member]="actor"
-          ></app-cast-card>
-        </div>
-      </section>
+          <div class="cast-grid">
+            @for (actor of m.cast; track actor.name) {
+              <app-cast-card
+                [member]="actor"
+              ></app-cast-card>
+            }
+          </div>
+        </section>
+      }
 
       <!-- Technical Data Section (Ficha Técnica) -->
       <section class="technical-section">
@@ -162,9 +173,7 @@
         <app-technical-specs [specs]="m.technicalSheet"></app-technical-specs>
       </section>
     </div>
-  </ng-container>
-
-  <ng-template #notFound>
+  } @else {
     <div class="container-responsive py-12">
       <app-empty-state
         icon="movie_off"
@@ -174,5 +183,5 @@
         (actionClick)="goBack()"
       ></app-empty-state>
     </div>
-  </ng-template>
+  }
 </main>

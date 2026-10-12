@@ -10,9 +10,11 @@
     </section>
 
     <!-- Hero Spotlight Section (Only shown when not actively querying, or as top banner) -->
-    <section class="spotlight-section" *ngIf="!movieService.searchQuery()">
-      <app-hero-spotlight [movie]="featuredMovie"></app-hero-spotlight>
-    </section>
+    @if (!movieService.searchQuery()) {
+      <section class="spotlight-section">
+        <app-hero-spotlight [movie]="featuredMovie"></app-hero-spotlight>
+      </section>
+    }
 
     <!-- Catalog Results Section Header -->
     <section class="results-header-section">
@@ -26,24 +28,26 @@
     </section>
 
     <!-- Movies List/Grid -->
-    <section class="movies-grid-section" *ngIf="filteredMovies.length > 0">
-      <div class="movies-container">
-        <app-movie-card
-          *ngFor="let movie of filteredMovies"
-          [movie]="movie"
-          layout="horizontal"
-        ></app-movie-card>
-      </div>
-    </section>
-
-    <!-- Empty State -->
-    <app-empty-state
-      *ngIf="filteredMovies.length === 0"
-      icon="movie_off"
-      title="Sin resultados encontrados"
-      description="No encontramos ninguna película que coincida con tus criterios de búsqueda. Intenta con otros términos o limpia los filtros."
-      actionLabel="Restablecer filtros"
-      (actionClick)="resetAllFilters()"
-    ></app-empty-state>
+    @if (filteredMovies.length > 0) {
+      <section class="movies-grid-section">
+        <div class="movies-container">
+          @for (movie of filteredMovies; track movie.id) {
+            <app-movie-card
+              [movie]="movie"
+              layout="horizontal"
+            ></app-movie-card>
+          }
+        </div>
+      </section>
+    } @else {
+      <!-- Empty State -->
+      <app-empty-state
+        icon="movie_off"
+        title="Sin resultados encontrados"
+        description="No encontramos ninguna película que coincida con tus criterios de búsqueda. Intenta con otros términos o limpia los filtros."
+        actionLabel="Restablecer filtros"
+        (actionClick)="resetAllFilters()"
+      ></app-empty-state>
+    }
   </div>
 </main>
