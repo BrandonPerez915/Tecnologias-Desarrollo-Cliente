@@ -1,0 +1,44 @@
+<section class="hero-spotlight-card">
+  <!-- Background Image with Double Cinematic Scrim -->
+  <div
+    class="hero-backdrop"
+    [style.backgroundImage]="'url(' + movie.backdropUrl + ')'"
+    role="img"
+    [attr.aria-label]="movie.title"
+  >
+    <div class="scrim-vertical"></div>
+    <div class="scrim-radial"></div>
+  </div>
+
+  <!-- Hero Content Overlay -->
+  <div class="hero-content">
+    <div class="meta-row">
+      <span class="featured-tag">
+        Destacado de la semana
+      </span>
+      <app-rating-badge [rating]="movie.rating" size="sm"></app-rating-badge>
+    </div>
+
+    <h2 class="hero-title">{{ movie.title }}</h2>
+
+    <p class="hero-synopsis line-clamp-2">
+      {{ movie.synopsis }}
+    </p>
+
+    <div class="actions-row">
+      <a
+        [routerLink]="['/movies', movie.id]"
+        class="btn-detail"
+      >
+        <span class="material-symbols-outlined play-icon fill">play_arrow</span>
+        <span>Ver Detalle</span>
+      </a>
+
+      <app-favorite-button
+        [movieId]="movie.id"
+        [movieTitle]="movie.title"
+        size="lg"
+      ></app-favorite-button>
+    </div>
+  </div>
+</section>

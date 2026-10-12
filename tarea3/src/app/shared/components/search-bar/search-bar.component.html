@@ -6,6 +6,7 @@
       id="search-input"
       class="search-input"
       [ngModel]="query"
+      (ngModelChange)="onQueryChange($event)"
       placeholder="Buscar por título, director, productor, género..."
       autocomplete="off"
     />
@@ -14,6 +15,7 @@
       <button
         type="button"
         class="clear-btn"
+        (click)="clearSearch()"
         aria-label="Limpiar búsqueda"
       >
         <span class="material-symbols-outlined">close</span>
@@ -24,6 +26,8 @@
       <select
         id="search-criterion"
         class="criterion-select"
+        [value]="criterion"
+        (change)="onCriterionChange($event)"
         aria-label="Criterio de búsqueda"
       >
         <option value="all">Todo</option>

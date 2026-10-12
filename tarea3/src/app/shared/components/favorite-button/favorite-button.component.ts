@@ -1,5 +1,7 @@
 import { Component, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MovieService } from '../../services/movie.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-favorite-button',
@@ -14,8 +16,14 @@ export class FavoriteButtonComponent {
   @Input() size: 'sm' | 'md' | 'lg' = 'md';
   @Input() variant: 'circle' | 'pill' = 'circle';
 
-  public isFavorite = false;
+  private readonly movieService = inject(MovieService);
+  private readonly toastService = inject(ToastService);
+
   public isAnimating = false;
+
+  get isFavorite(): boolean {
+    return this.movieService.isFavorite(this.movieId);
+  }
 
   toggleFavorite(event: Event): void {
     event.preventDefault();
@@ -24,7 +32,15 @@ export class FavoriteButtonComponent {
     this.isAnimating = true;
     setTimeout(() => {
       this.isAnimating = false;
-      this.isFavorite = !this.isFavorite;
     }, 250);
+
+    const isNowFav = this.movieService.toggleFavorite(this.movieId);
+    const title = this.movieTitle ? `"${this.movieTitle}" ` : '';
+
+    if (isNowFav) {
+      this.toastService.show(`${title}agregada a Favoritos`, 'favorite', 'success');
+    } else {
+      this.toastService.show(`${title}eliminada de Favoritos`, 'heart_broken', 'info');
+    }
   }
 }

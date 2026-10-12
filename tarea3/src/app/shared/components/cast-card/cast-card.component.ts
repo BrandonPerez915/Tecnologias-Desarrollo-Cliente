@@ -1,11 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-interface CastMember {
-  name: string;
-  role: string;
-  avatarUrl: string;
-}
+import { CastMember } from '../../models/movie.model';
 
 @Component({
   selector: 'app-cast-card',

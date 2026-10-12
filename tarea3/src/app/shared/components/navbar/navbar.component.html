@@ -7,6 +7,7 @@
         type="button"
         class="back-button"
         aria-label="Volver atrás"
+        (click)="goBack()"
         >
           <span class="material-symbols-outlined">arrow_back</span>
         </button>
@@ -40,9 +41,11 @@
       >
         <span class="material-symbols-outlined nav-icon">favorite</span>
         <span>Favoritos</span>
-        <span *ngIf="favoritesCount > 0" class="fav-counter-badge">
+        @if (favoritesCount > 0) {
+          <span class="fav-counter-badge">
           {{ favoritesCount }}
-        </span>
+          </span>
+        }
       </a>
 
       <a

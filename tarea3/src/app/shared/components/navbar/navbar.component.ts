@@ -1,7 +1,7 @@
 import { Component, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-
+import { MovieService } from '../../services/movie.service';
 
 @Component({
   selector: 'app-navbar',
@@ -14,5 +14,18 @@ export class NavbarComponent {
   @Input() pageTitle = 'Películas';
   @Input() showBackButton = false;
 
-  favoritesCount: number = 3;
+  private readonly router = inject(Router);
+  public readonly movieService = inject(MovieService);
+
+  get favoritesCount(): number {
+    return this.movieService.favoritesCount();
+  }
+
+  goBack(): void {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      this.router.navigate(['/movies']);
+    }
+  }
 }
