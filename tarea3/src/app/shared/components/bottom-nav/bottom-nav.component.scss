@@ -1,0 +1,85 @@
+.bottom-nav-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  width: 100%;
+  background: rgba(10, 14, 24, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--color-outline-subtle);
+  box-shadow: 0 -4px 28px rgba(0, 0, 0, 0.7);
+
+  @media (min-width: 768px) {
+    display: none; /* Hidden on tablets and desktop since top bar handles navigation */
+  }
+}
+
+.bottom-nav-container {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 1rem;
+}
+
+.bottom-nav-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  min-height: 44px;
+  gap: 0.2rem;
+  color: var(--color-on-surface-variant);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+
+  &:active {
+    transform: scale(0.92);
+  }
+
+  .tab-icon {
+    font-size: 24px;
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+
+  .tab-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  &.active {
+    color: var(--color-primary-container);
+
+    .tab-icon {
+      transform: scale(1.1);
+      color: var(--color-primary-container);
+    }
+
+    .tab-label {
+      font-weight: 700;
+      color: var(--color-on-surface);
+    }
+  }
+
+  .icon-wrapper {
+    position: relative;
+    display: inline-flex;
+
+    .tab-counter-badge {
+      position: absolute;
+      top: -4px;
+      right: -8px;
+      background-color: var(--color-primary-container);
+      color: #ffffff;
+      font-size: 0.625rem;
+      font-weight: 800;
+      line-height: 1;
+      padding: 2px 5px;
+      border-radius: var(--radius-full);
+      box-shadow: 0 0 10px rgba(255, 81, 103, 0.7);
+    }
+  }
+}

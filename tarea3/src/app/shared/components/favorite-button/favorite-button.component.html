@@ -1,0 +1,20 @@
+<button
+  type="button"
+  [attr.aria-label]="isFavorite ? 'Quitar de Favoritos' : 'Añadir a Favoritos'"
+  [class]="'fav-btn size-' + size + ' variant-' + variant"
+  [class.active]="isFavorite"
+  [class.animate-pop]="isAnimating"
+  (click)="toggleFavorite($event)"
+>
+  <span
+    class="material-symbols-outlined fav-icon"
+    [class.fill]="isFavorite"
+  >
+    {{ isFavorite ? 'favorite' : 'favorite' }}
+  </span>
+  @if (variant === 'pill') {
+    <span class="pill-label">
+      {{ isFavorite ? 'En Favoritos' : 'Añadir a Favoritos' }}
+    </span>
+  }
+</button>

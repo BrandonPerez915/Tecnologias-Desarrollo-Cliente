@@ -1,0 +1,56 @@
+<div class="technical-specs-container">
+  <!-- Dirección Card -->
+  <div class="spec-card">
+    <div class="spec-left">
+      <div class="spec-icon-badge crimson">
+        <span class="material-symbols-outlined">movie_edit</span>
+      </div>
+      <div class="spec-info">
+        <span class="spec-label">Dirección</span>
+        <span class="spec-value">{{ specs.direction }}</span>
+      </div>
+    </div>
+    <span class="spec-tag">Principal</span>
+  </div>
+
+  <!-- Guion Card -->
+  <div class="spec-card">
+    <div class="spec-left">
+      <div class="spec-icon-badge amber">
+        <span class="material-symbols-outlined">history_edu</span>
+      </div>
+      <div class="spec-info">
+        <span class="spec-label">Guion</span>
+        <span class="spec-value">{{ specs.screenplay }}</span>
+      </div>
+    </div>
+    @if (specs.novel) {
+      <span class="spec-tag">Basado en</span>
+    }
+  </div>
+
+  <!-- Producción Card -->
+  <div class="spec-card">
+    <div class="spec-left">
+      <div class="spec-icon-badge emerald">
+        <span class="material-symbols-outlined">video_settings</span>
+      </div>
+      <div class="spec-info">
+        <span class="spec-label">Producción</span>
+        <span class="spec-value">{{ specs.production }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Two Column Metadata -->
+  <div class="specs-grid-2">
+    <div class="spec-card mini">
+      <span class="spec-label">Género</span>
+      <span class="spec-value">{{ specs.genre }}</span>
+    </div>
+    <div class="spec-card mini">
+      <span class="spec-label">País / Idioma</span>
+      <span class="spec-value">{{ specs.countryLanguage }}</span>
+    </div>
+  </div>
+</div>

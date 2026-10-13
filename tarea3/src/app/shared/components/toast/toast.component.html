@@ -1,0 +1,13 @@
+@let currentToast = toastService.toast();
+@if (currentToast) {
+  <div
+  class="toast-notification-banner"
+  [class]="'type-' + (currentToast.type || 'info')"
+  role="alert"
+  >
+    <span class="material-symbols-outlined toast-icon fill">
+      {{ currentToast.icon }}
+    </span>
+    <span class="toast-message">{{ currentToast.message }}</span>
+  </div>
+}

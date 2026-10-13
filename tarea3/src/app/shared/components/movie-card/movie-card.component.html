@@ -1,0 +1,81 @@
+<article [class]="'movie-card-article layout-' + layout">
+  <!-- Poster Container -->
+  <div class="poster-container">
+    <img
+      [src]="movie.posterUrl"
+      [alt]="'Póster de ' + movie.title"
+      class="poster-image"
+      loading="lazy"
+    />
+    <div class="poster-scrim"></div>
+    <div class="poster-rating">
+      <app-rating-badge [rating]="movie.rating" size="sm"></app-rating-badge>
+    </div>
+  </div>
+
+  <!-- Content Details -->
+  <div class="card-details">
+    <div class="header-section">
+      <div class="header-content">
+        <div class="meta-row">
+          <span class="genre-tag">{{ movie.genres[0] }}</span>
+          <span class="year-tag">{{ movie.year }}</span>
+          @if (layout !== 'favorite') {
+            <span class="duration-tag">• {{ movie.duration }}</span>
+          }
+        </div>
+        <h4 class="movie-title">{{ movie.title }}</h4>
+      </div>
+
+      <!-- Favorite Action -->
+      <div class="fav-action">
+        <app-favorite-button
+          [movieId]="movie.id"
+          [movieTitle]="movie.title"
+          size="md"
+        ></app-favorite-button>
+      </div>
+    </div>
+
+    <!-- Director & Producer Credits -->
+    <div class="credits-block">
+      <p class="credit-line">
+        <span class="credit-label">Director:</span>
+        <span class="credit-value">{{ movie.director }}</span>
+      </p>
+      <p class="credit-line">
+        <span class="credit-label">Productor:</span>
+        <span class="credit-value">{{ movie.producer }}</span>
+      </p>
+    </div>
+
+    <!-- Synopsis -->
+     @if (layout !== 'favorite') {
+      <p class="synopsis-text line-clamp-2">
+        {{ movie.synopsis }}
+      </p>
+    }
+
+    <!-- Bottom Actions Row -->
+    <div class="footer-actions">
+      <a
+        [routerLink]="['/movies', movie.id]"
+        class="detail-link"
+      >
+        <span>Ver Detalle</span>
+        <span class="material-symbols-outlined arrow-icon">arrow_forward</span>
+      </a>
+
+      @if (layout === 'favorite') {
+        <button
+          type="button"
+          class="quick-play-btn"
+          [routerLink]="['/movies', movie.id]"
+          aria-label="Reproducir o ver"
+        >
+          <span class="material-symbols-outlined fill">play_arrow</span>
+        </button>
+      }
+    </div>
+  </div>
+</article>
