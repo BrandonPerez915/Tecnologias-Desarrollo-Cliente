@@ -93,4 +93,58 @@
       <button app-back-button>Volver al inventario</button>
     </div>
   </section>
+
+  <section class="card">
+    <h2>Field</h2>
+    <p class="hint">
+      label, icon, hint, error, required, disabled · [(value)] para two-way binding
+    </p>
+    <div class="form-grid">
+      <app-field
+        label="Correo electrónico"
+        icon="mail"
+        type="email"
+        placeholder="tu@negocio.com"
+        autocomplete="email"
+        hint="Lo usas para iniciar sesión"
+        required
+        [(value)]="email"
+      />
+      <app-field
+        label="Teléfono"
+        icon="phone"
+        type="tel"
+        inputMode="tel"
+        placeholder="33 1234 5678"
+      />
+      <app-field
+        label="IMEI"
+        icon="scan"
+        inputMode="numeric"
+        value="35209"
+        error="El IMEI debe tener 15 dígitos"
+      />
+      <app-field label="Nombre del puesto" icon="store" value="SmartFix Celulares" disabled />
+      <app-field label="Precio" inputMode="decimal" placeholder="0.00">
+        <span class="suffix">MXN</span>
+      </app-field>
+    </div>
+    <p class="hint">valor: {{ email() || '-' }}</p>
+  </section>
+
+  <section class="card">
+    <h2>PasswordField</h2>
+    <div class="form-grid">
+      <app-password-field required [(value)]="password">
+        <a labelExtra class="small-link" href="#">¿Olvidaste tu contraseña?</a>
+      </app-password-field>
+      <app-password-field
+        label="Confirmar contraseña"
+        autocomplete="new-password"
+        error="Las contraseñas no coinciden"
+      />
+      <app-password-field label="Contraseña actual" hint="Mínimo 8 caracteres" />
+      <app-password-field label="Bloqueada" disabled />
+    </div>
+  </section>
 </main>
