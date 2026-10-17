@@ -147,4 +147,61 @@
       <app-password-field label="Bloqueada" disabled />
     </div>
   </section>
+
+  <section class="card">
+    <h2>PageHeading</h2>
+    <p class="hint">eyebrow, title, subtitle · slot headingActions</p>
+    <div class="frame">
+      <app-page-heading
+        eyebrow="Martes, 18 de junio"
+        title="Inventario"
+        subtitle="Equipos, series e IMEI registrados en tu puesto"
+      >
+        <button headingActions app-button variant="secondary" icon="arrow-down">Exportar</button>
+        <button headingActions app-button icon="plus">Agregar producto</button>
+      </app-page-heading>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Amount</h2>
+    <p class="hint">size: normal | large | hero · currency</p>
+    <div class="row">
+      <app-amount>1,250</app-amount>
+      <app-amount size="large">48,920</app-amount>
+      <app-amount currency="USD">320</app-amount>
+    </div>
+    <div class="hero-box">
+      <app-amount size="hero">18,450</app-amount>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>StatusBadge</h2>
+    <p class="hint">
+      tone: success | warning | danger | neutral · [dot]="false" para quitar el punto
+    </p>
+    <div class="row">
+      <app-status-badge tone="success">Pagado</app-status-badge>
+      <app-status-badge tone="warning">Pendiente</app-status-badge>
+      <app-status-badge tone="danger">Vencido</app-status-badge>
+      <app-status-badge>Borrador</app-status-badge>
+      <app-status-badge tone="success" [dot]="false">Disponible</app-status-badge>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>BrandLogo</h2>
+    <p class="hint">size: sm | md | lg · theme: light | dark · badge, subtitle, clickable</p>
+    <div class="row">
+      <app-brand-logo size="sm" />
+      <app-brand-logo badge="POS" />
+      <app-brand-logo size="lg" subtitle="TPV e inventario" />
+      <app-brand-logo [showText]="false" />
+    </div>
+    <div class="dark-box">
+      <app-brand-logo size="sm" theme="dark" badge="POS" clickable />
+      <app-brand-logo theme="dark" subtitle="SmartFix Celulares" />
+    </div>
+  </section>
 </main>
