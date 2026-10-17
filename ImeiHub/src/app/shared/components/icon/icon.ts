@@ -21,6 +21,7 @@ export type IconName =
   | 'image'
   | 'user'
   | 'check'
+  | 'more'
   | 'calendar'
   | 'tag'
   | 'return'
@@ -28,7 +29,14 @@ export type IconName =
   | 'filter'
   | 'receipt'
   | 'settings'
-  | 'logout';
+  | 'logout'
+  | 'lock'
+  | 'mail'
+  | 'eye'
+  | 'eye-off'
+  | 'store'
+  | 'phone'
+  | 'shield';
 
 @Component({
   selector: 'app-icon',
