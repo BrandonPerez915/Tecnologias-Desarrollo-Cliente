@@ -1,0 +1,51 @@
+.page-heading {
+  margin-bottom: 26px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.eyebrow {
+  margin: 0 0 5px;
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.page-heading h1 {
+  margin: 0 0 6px;
+  color: var(--ink);
+  font-size: clamp(30px, 3vw, 41px);
+  line-height: 1.12;
+  letter-spacing: -1.15px;
+}
+
+.page-subtitle {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+@media (max-width: 600px) {
+  .page-heading {
+    margin-bottom: 20px;
+    align-items: flex-start;
+  }
+  .page-heading .eyebrow {
+    display: none;
+  }
+  .page-heading h1 {
+    font-size: 29px;
+  }
+  .page-subtitle {
+    max-width: 260px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .heading-action {
+    display: none;
+  }
+}

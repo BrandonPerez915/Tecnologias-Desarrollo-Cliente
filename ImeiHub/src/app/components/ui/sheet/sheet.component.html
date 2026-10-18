@@ -1,0 +1,30 @@
+<div
+  class="overlay sheet-overlay"
+  role="presentation"
+  (mousedown)="onBackdropClick($event)"
+>
+  <div
+    [class]="'sheet' + (wide() ? ' sheet-wide wide' : '')"
+    role="dialog"
+    aria-modal="true"
+  >
+    <div class="sheet-handle"></div>
+    <div class="sheet-header sheet-head">
+      <div>
+        <h2>{{ title() }}</h2>
+        @if (subtitle()) {
+          <p>{{ subtitle() }}</p>
+        }
+      </div>
+      <button
+        type="button"
+        class="close-button"
+        aria-label="Cerrar modal"
+        (click)="close.emit()"
+      >
+        <app-icon name="close"></app-icon>
+      </button>
+    </div>
+    <ng-content></ng-content>
+  </div>
+</div>

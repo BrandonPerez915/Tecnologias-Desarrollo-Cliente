@@ -1,0 +1,22 @@
+<article class="feature-card panel">
+  <div class="feature-card-top">
+    <span [class]="'quick-icon ' + tone()">
+      <app-icon [name]="icon()" [size]="20"></app-icon>
+    </span>
+    @if (badge()) {
+      <span [class]="'type-badge-sm feature-card-badge tone-' + tone()">
+        {{ badge() }}
+      </span>
+    }
+  </div>
+
+  <h3 class="type-h3 feature-card-title">{{ title() }}</h3>
+  <p class="type-body-sm feature-card-desc">{{ description() }}</p>
+
+  @if (highlight()) {
+    <div class="feature-card-footer">
+      <app-icon name="check" [size]="14" className="text-success"></app-icon>
+      <span class="type-caption">{{ highlight() }}</span>
+    </div>
+  }
+</article>
