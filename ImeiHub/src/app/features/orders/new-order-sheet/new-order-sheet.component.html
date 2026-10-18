@@ -1,0 +1,72 @@
+<app-sheet
+  title="Crear nueva orden"
+  subtitle="Define cómo identificar y gestionar esta venta."
+  (close)="close.emit()"
+>
+  <form (ngSubmit)="submitForm()">
+    <label class="new-order-name-field">
+      <span>
+        Nombre de la orden <small>Opcional</small>
+      </span>
+      <input
+        [(ngModel)]="newOrderName"
+        name="newOrderName"
+        placeholder="#1043"
+      />
+      <small>
+        Si no escribes un nombre, se utilizará automáticamente #1043.
+      </small>
+    </label>
+    <div class="new-order-type">
+      <span class="form-label">Tipo de cliente</span>
+      <div>
+        <button
+          type="button"
+          [class.active]="newOrderType === 'Minorista'"
+          (click)="newOrderType = 'Minorista'"
+        >
+          <span class="order-type-icon">
+            <app-icon name="user"></app-icon>
+          </span>
+          <span>
+            <strong>Minorista</strong>
+            <small>Venta directa a cliente final</small>
+          </span>
+          @if (newOrderType === 'Minorista') {
+            <i>
+              <app-icon name="check" [size]="12"></app-icon>
+            </i>
+          }
+        </button>
+        <button
+          type="button"
+          [class.active]="newOrderType === 'Mayorista'"
+          (click)="newOrderType = 'Mayorista'"
+        >
+          <span class="order-type-icon">
+            <app-icon name="box"></app-icon>
+          </span>
+          <span>
+            <strong>Mayorista</strong>
+            <small>Compra por volumen o distribuidor</small>
+          </span>
+          @if (newOrderType === 'Mayorista') {
+            <i>
+              <app-icon name="check" [size]="12"></app-icon>
+            </i>
+          }
+        </button>
+      </div>
+    </div>
+    <div class="new-order-note">
+      <app-icon name="receipt" [size]="18"></app-icon>
+      <span>
+        La nueva orden se creará vacía y podrás añadir productos desde su
+        encabezado.
+      </span>
+    </div>
+    <app-button type="submit" icon="plus" className="full-button">
+      Crear orden
+    </app-button>
+  </form>
+</app-sheet>

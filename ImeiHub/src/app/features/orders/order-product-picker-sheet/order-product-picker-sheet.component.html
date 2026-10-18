@@ -1,0 +1,74 @@
+<app-sheet
+  title="Añadir productos a la orden"
+  subtitle="Busca y selecciona artículos del inventario."
+  (close)="close.emit()"
+  [wide]="true"
+>
+  <div class="order-inventory-tools">
+    <label class="search-box">
+      <app-icon name="search" [size]="18"></app-icon>
+      <input
+        [(ngModel)]="orderSearch"
+        placeholder="Buscar por nombre o SKU"
+      />
+    </label>
+    <div class="order-inventory-filters">
+      <label>
+        <span>Tipo</span>
+        <select [(ngModel)]="orderProductType">
+          @for (item of typeOptions; track item) {
+            <option [value]="item">
+              {{ getTypeLabel(item) }}
+            </option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>Stock</span>
+        <select [(ngModel)]="orderStockFilter">
+          <option value="Any stock">Cualquier nivel</option>
+          <option value="In stock">Disponible</option>
+          <option value="Low stock">Stock bajo</option>
+        </select>
+      </label>
+    </div>
+  </div>
+  <div class="order-inventory-results">
+    <div class="order-inventory-results-head">
+      <span>{{ filteredProducts().length }} productos encontrados</span>
+      <small>Haz clic para añadir a la orden</small>
+    </div>
+    <div class="picker-products inventory-picker-grid">
+      @for (product of filteredProducts(); track product.id) {
+        <button
+          type="button"
+          (click)="addProduct.emit({ id: product.id, name: product.name })"
+        >
+          <span class="product-thumb">
+            <app-icon
+              [name]="product.type === 'Smartphones' ? 'scan' : 'box'"
+              [size]="20"
+            ></app-icon>
+          </span>
+          <span>
+            <strong>{{ product.name }}</strong>
+            <small>
+              {{ product.sku }} · {{ product.stock }} disponibles
+            </small>
+          </span>
+          <b>MXN {{ product.price }}</b>
+          <span class="picker-add">
+            <app-icon name="plus" [size]="15"></app-icon>
+            {{ items()[product.id] ? items()[product.id] : '' }}
+          </span>
+        </button>
+      }
+    </div>
+  </div>
+  <div class="order-inventory-footer">
+    <span>
+      <strong>{{ totalItemsCount() }}</strong> artículos en la orden
+    </span>
+    <app-button (clicked)="close.emit()">Listo</app-button>
+  </div>
+</app-sheet>

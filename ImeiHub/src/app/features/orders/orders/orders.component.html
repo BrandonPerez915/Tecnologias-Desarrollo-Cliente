@@ -1,0 +1,69 @@
+@if (showCheckout()) {
+  <app-order-checkout-view
+    [activeOrderName]="activeOrderName()"
+    [activeOrderCustomer]="activeOrderCustomer()"
+    [activeItems]="activeItems()"
+    [total]="total()"
+    (back)="showCheckout.set(false)"
+    (complete)="onCheckoutComplete()"
+  ></app-order-checkout-view>
+} @else {
+  <div class="page">
+    <app-page-heading
+      title="Órdenes"
+      subtitle="Agrupa productos, prepara ventas y gestiona pedidos activos."
+    >
+      <div heading-actions>
+        <app-button icon="plus" (clicked)="showNewOrder.set(true)">
+          Nueva orden
+        </app-button>
+      </div>
+    </app-page-heading>
+
+    <app-order-workspace
+      [activeOrderName]="activeOrderName()"
+      [activeOrderCustomer]="activeOrderCustomer()"
+      [customOrderType]="customOrderType()"
+      [activeOrder]="activeOrder()"
+      [ordersCount]="orders().length"
+      [activeItems]="activeItems()"
+      [total]="total()"
+      (openOrders)="showOrders.set(true)"
+      (openPicker)="showPicker.set(true)"
+      (updateQuantity)="updateQuantity($event.id, $event.change)"
+      (continueToCheckout)="showCheckout.set(true)"
+    ></app-order-workspace>
+
+    @if (showPicker()) {
+      <app-order-product-picker-sheet
+        [products]="inventoryService.products()"
+        [items]="items()"
+        [totalItemsCount]="totalItemCount()"
+        (addProduct)="handleAddProduct($event.id, $event.name)"
+        (close)="showPicker.set(false)"
+      ></app-order-product-picker-sheet>
+    }
+
+    @if (showOrders()) {
+      <app-open-orders-sheet
+        [orders]="orders()"
+        [activeOrder]="activeOrder()"
+        (selectOrderChange)="activeOrder.set($event)"
+        (close)="showOrders.set(false)"
+      ></app-open-orders-sheet>
+    }
+
+    @if (showNewOrder()) {
+      <app-new-order-sheet
+        (createOrder)="handleCreateNewOrder($event.name, $event.type)"
+        (close)="showNewOrder.set(false)"
+      ></app-new-order-sheet>
+    }
+
+    <div class="mobile-page-action">
+      <app-button icon="plus" (clicked)="showPicker.set(true)">
+        Añadir producto
+      </app-button>
+    </div>
+  </div>
+}

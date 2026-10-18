@@ -1,0 +1,105 @@
+<section class="orders-layout">
+  <div class="panel order-workspace">
+    <div class="order-workspace-header">
+      <div>
+        <span>Orden activa</span>
+        <h2>{{ activeOrderName() }}</h2>
+        <p>
+          {{ activeOrderCustomer() }}
+          {{
+            customOrderType() && activeOrder() === '1043'
+              ? ' · ' + customOrderType()
+              : ''
+          }}
+          · Hoy, 13:04
+        </p>
+      </div>
+      <div class="order-header-actions">
+        <app-button
+          variant="secondary"
+          icon="receipt"
+          (clicked)="openOrders.emit()"
+        >
+          Cambiar orden <b>{{ ordersCount() }}</b>
+        </app-button>
+        <app-button
+          variant="secondary"
+          icon="plus"
+          (clicked)="openPicker.emit()"
+        >
+          Añadir producto
+        </app-button>
+      </div>
+    </div>
+
+    <div class="order-items-head">
+      <span>Producto</span>
+      <span>Cantidad</span>
+      <span>Subtotal</span>
+    </div>
+    <div class="order-items">
+      @if (activeItems().length > 0) {
+        @for (item of activeItems(); track item.product.id) {
+          <div class="order-item-row">
+            <div class="order-product">
+              <span class="product-thumb">
+                <app-icon
+                  [name]="item.product.type === 'Smartphones' ? 'scan' : 'box'"
+                  [size]="20"
+                ></app-icon>
+              </span>
+              <span>
+                <strong>{{ item.product.name }}</strong>
+                <small>{{ item.product.sku }}</small>
+              </span>
+            </div>
+            <div class="order-stepper">
+              <button
+                type="button"
+                [attr.aria-label]="'Quitar una unidad de ' + item.product.name"
+                (click)="updateQuantity.emit({ id: item.product.id, change: -1 })"
+              >
+                −
+              </button>
+              <strong>{{ item.quantity }}</strong>
+              <button
+                type="button"
+                [attr.aria-label]="'Añadir una unidad de ' + item.product.name"
+                (click)="updateQuantity.emit({ id: item.product.id, change: 1 })"
+              >
+                +
+              </button>
+            </div>
+            <strong class="order-subtotal">
+              MXN {{ getSubtotal(item) }}
+            </strong>
+          </div>
+        }
+      } @else {
+        <div class="order-empty">
+          <app-icon name="receipt" [size]="30"></app-icon>
+          <strong>Esta orden está vacía</strong>
+          <span>
+            Añade productos desde el botón superior para comenzar.
+          </span>
+        </div>
+      }
+    </div>
+    <div class="order-summary">
+      <div>
+        <span>Artículos</span>
+        <strong>{{ totalItemQuantity }}</strong>
+      </div>
+      <div>
+        <span>Total de la orden</span>
+        <app-amount size="large">{{ formattedTotal }}</app-amount>
+      </div>
+      <app-button
+        [disabled]="activeItems().length === 0"
+        (clicked)="continueToCheckout.emit()"
+      >
+        Continuar al cobro
+      </app-button>
+    </div>
+  </div>
+</section>

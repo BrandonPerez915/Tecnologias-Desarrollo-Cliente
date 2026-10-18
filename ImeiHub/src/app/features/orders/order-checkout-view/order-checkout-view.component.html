@@ -1,0 +1,290 @@
+<div class="page checkout-page">
+  <button type="button" class="back-button" (click)="back.emit()">
+    <app-icon name="return" [size]="17"></app-icon> Volver a la orden
+  </button>
+  <app-page-heading
+    title="Completar el cobro"
+    [subtitle]="'Orden ' + activeOrderName() + ' · ' + activeOrderCustomer()"
+  ></app-page-heading>
+  <div class="checkout-page-layout">
+    <section class="panel checkout-purchase-panel">
+      <div class="checkout-panel-header">
+        <div>
+          <span>Detalle de la compra</span>
+          <h2>{{ activeOrderName() }}</h2>
+        </div>
+        <app-status-badge tone="neutral">
+          {{ totalItemCount }} artículos
+        </app-status-badge>
+      </div>
+      <div class="checkout-product-list">
+        @for (item of activeItems(); track item.product.id) {
+          <div class="checkout-product-row">
+            <span class="product-thumb">
+              <app-icon
+                [name]="item.product.type === 'Smartphones' ? 'scan' : 'box'"
+                [size]="20"
+              ></app-icon>
+            </span>
+            <span>
+              <strong>{{ item.product.name }}</strong>
+              <small>
+                {{ item.product.sku }} · MXN {{ item.product.price }} c/u
+              </small>
+            </span>
+            <span>
+              <small>Cantidad</small>
+              <strong>{{ item.quantity }}</strong>
+            </span>
+            <strong>
+              MXN {{ getSubtotal(item) }}
+            </strong>
+          </div>
+        }
+      </div>
+      <div class="checkout-purchase-summary">
+        <span>
+          <small>Cliente</small>
+          <strong>{{ activeOrderCustomer() }}</strong>
+        </span>
+        <span>
+          <small>Fecha y hora</small>
+          <strong>Hoy, 13:04</strong>
+        </span>
+      </div>
+    </section>
+
+    <section class="panel checkout-payment-panel">
+      <form (ngSubmit)="submitPayment($event)" novalidate>
+        <div class="checkout-order-total">
+          <span>Total a cobrar</span>
+          <app-amount size="hero">{{ total().toLocaleString('es-MX') }}</app-amount>
+        </div>
+
+        <div class="checkout-section">
+          <span class="form-label">Método de pago</span>
+          <div class="checkout-payment-methods">
+            @for (method of paymentMethods; track method.name) {
+              <button
+                type="button"
+                [class.active]="paymentMethod === method.name"
+                (click)="paymentMethod = method.name"
+              >
+                <span>
+                  <app-icon [name]="method.icon"></app-icon>
+                </span>
+                <strong>{{ method.name }}</strong>
+                <small>{{ method.detail }}</small>
+                @if (paymentMethod === method.name) {
+                  <i>
+                    <app-icon name="check" [size]="12"></app-icon>
+                  </i>
+                }
+              </button>
+            }
+          </div>
+        </div>
+
+        @if (paymentMethod === 'Efectivo') {
+          <div class="cash-payment-fields">
+            <app-field
+              label="Efectivo recibido"
+              [placeholder]="total().toLocaleString('es-MX')"
+              type="number"
+              inputMode="decimal"
+              [min]="total()"
+              [required]="true"
+              [value]="cashReceived()"
+              [error]="cashError()"
+              (valueChange)="onCashReceivedChange($event)"
+              (blur)="validateCashReceived()"
+            >
+              <span class="field-suffix">MXN</span>
+            </app-field>
+            <div>
+              <span>Cambio estimado</span>
+              <strong>
+                MXN {{ estimatedChange }}
+              </strong>
+            </div>
+          </div>
+        }
+
+        @if (paymentMethod === 'Transferencia') {
+          <div class="payment-detail-card">
+            <div class="payment-detail-heading">
+              <span>
+                <app-icon name="swap" [size]="18"></app-icon>
+              </span>
+              <span>
+                <strong>Datos para transferencia</strong>
+                <small>Comparte estos datos con el cliente</small>
+              </span>
+            </div>
+            <dl>
+              <div>
+                <dt>Banco receptor</dt>
+                <dd>BBVA México</dd>
+              </div>
+              <div>
+                <dt>Beneficiario</dt>
+                <dd>ImeiHub Comercio</dd>
+              </div>
+              <div>
+                <dt>CLABE</dt>
+                <dd>012 180 004587321 9</dd>
+              </div>
+              <div>
+                <dt>Concepto</dt>
+                <dd>Orden {{ activeOrderName() }}</dd>
+              </div>
+            </dl>
+            <app-field
+              label="Referencia o folio de la transferencia"
+              placeholder="Introduce el folio de confirmación bancaria"
+              [value]="transferRef()"
+              (valueChange)="transferRef.set($event)"
+            ></app-field>
+          </div>
+        }
+
+        @if (paymentMethod === 'Tarjeta') {
+          <div class="payment-detail-card">
+            <div class="payment-detail-heading">
+              <span>
+                <app-icon name="cash" [size]="18"></app-icon>
+              </span>
+              <span>
+                <strong>Pago con tarjeta</strong>
+                <small>Procesa el cobro en la terminal vinculada</small>
+              </span>
+            </div>
+            <dl>
+              <div>
+                <dt>Terminal</dt>
+                <dd>Mercado Pago · Caja 01</dd>
+              </div>
+              <div>
+                <dt>Importe</dt>
+                <dd>MXN {{ total().toLocaleString('es-MX') }}</dd>
+              </div>
+            </dl>
+            <div class="payment-reference-fields">
+              <app-field
+                label="Últimos 4 dígitos"
+                placeholder="4589"
+                [value]="cardLast4()"
+                (valueChange)="cardLast4.set($event)"
+              ></app-field>
+              <app-field
+                label="Código de autorización"
+                placeholder="p. ej., 483921"
+                [required]="true"
+                [value]="cardAuth()"
+                [error]="cardAuthError()"
+                (valueChange)="onCardAuthChange($event)"
+                (blur)="validateCardAuth()"
+              ></app-field>
+            </div>
+          </div>
+        }
+
+        <label class="invoice-toggle">
+          <span class="invoice-toggle-icon">
+            <app-icon name="receipt"></app-icon>
+          </span>
+          <span>
+            <strong>Generar factura electrónica</strong>
+            <small>Añadir los datos fiscales del cliente</small>
+          </span>
+          <input
+            type="checkbox"
+            [(ngModel)]="generateInvoice"
+            name="generateInvoice"
+          />
+          <i></i>
+        </label>
+
+        @if (generateInvoice) {
+          <div class="invoice-fields">
+            <app-field
+              label="Nombre o razón social"
+              placeholder="Nombre de la empresa o cliente"
+              [required]="true"
+              [value]="invoiceName()"
+              [error]="invoiceNameError()"
+              (valueChange)="onInvoiceNameChange($event)"
+              (blur)="validateInvoiceName()"
+            ></app-field>
+
+            <app-field
+              label="RFC"
+              placeholder="XAXX010101000"
+              [required]="true"
+              [value]="invoiceRfc()"
+              [error]="invoiceRfcError()"
+              (valueChange)="onInvoiceRfcChange($event)"
+              (blur)="validateInvoiceRfc()"
+            ></app-field>
+
+            <app-field
+              label="Correo electrónico para factura"
+              placeholder="facturas@cliente.com"
+              type="email"
+              [required]="true"
+              [value]="invoiceEmail()"
+              [error]="invoiceEmailError()"
+              (valueChange)="onInvoiceEmailChange($event)"
+              (blur)="validateInvoiceEmail()"
+            ></app-field>
+          </div>
+        }
+
+        <label class="invoice-toggle print-ticket-toggle">
+          <span class="invoice-toggle-icon">
+            <app-icon name="printer"></app-icon>
+          </span>
+          <span>
+            <strong>Imprimir ticket</strong>
+            <small>
+              Enviar el comprobante a la impresora al confirmar
+            </small>
+          </span>
+          <input
+            type="checkbox"
+            [(ngModel)]="printTicket"
+            name="printTicket"
+          />
+          <i></i>
+        </label>
+
+        <div class="checkout-confirmation">
+          <div>
+            <span>Método seleccionado</span>
+            <strong>{{ paymentMethod }}</strong>
+          </div>
+          <div>
+            <span>Comprobante</span>
+            <strong>
+              {{
+                generateInvoice
+                  ? 'Factura'
+                  : printTicket
+                    ? 'Ticket impreso'
+                    : 'Sin impresión'
+              }}
+            </strong>
+          </div>
+        </div>
+
+        <app-button
+          type="submit"
+          icon="check"
+          className="full-button"
+        >
+          Confirmar pago de MXN {{ total().toLocaleString('es-MX') }}
+        </app-button>
+      </form>
+    </section>
+  </div>
+</div>

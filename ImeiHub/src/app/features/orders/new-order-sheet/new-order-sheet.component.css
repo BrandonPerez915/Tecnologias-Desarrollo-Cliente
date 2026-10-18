@@ -1,0 +1,19 @@
+.new-order-name-field { margin-bottom: 18px; display: grid; gap: 8px; }
+.new-order-name-field > span { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: #586579; font-size: 12px; font-weight: 800; }
+.new-order-name-field > span small { padding: 3px 6px; border-radius: 999px; color: #778397; background: #eef1f5; font-size: var(--type-badge-small); font-weight: 800; text-transform: uppercase; }
+.new-order-name-field input { width: 100%; height: 45px; padding: 0 12px; border: 1px solid #dfe4ea; border-radius: 9px; outline: 0; color: var(--ink); background: white; font-size: 12px; }
+.new-order-name-field input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(36,87,230,.09); }
+.new-order-name-field > small { color: #8a95a5; font-size: 12px; line-height: 1.4; }
+.new-order-type { margin-bottom: 17px; }
+.new-order-type > div { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.new-order-type button { position: relative; min-height: 79px; padding: 11px; border: 1px solid var(--line); border-radius: 11px; display: grid; grid-template-columns: 36px 1fr; align-items: center; gap: 9px; background: white; cursor: pointer; text-align: left; }
+.new-order-type button.active { border-color: var(--primary); background: var(--primary-soft); box-shadow: 0 0 0 1px var(--primary); }
+.order-type-icon { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 9px; color: var(--primary); background: #f0f3fa; }
+.new-order-type button.active .order-type-icon { background: white; }
+.new-order-type button > span:nth-child(2) { display: grid; gap: 4px; }
+.new-order-type strong { font-size: 12px; }
+.new-order-type small { color: #8994a5; font-size: 12px; line-height: 1.35; }
+.new-order-type button > i { position: absolute; top: 7px; right: 7px; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; color: white; background: var(--primary); }
+.new-order-note { margin-bottom: 18px; padding: 11px; border-radius: 9px; display: flex; align-items: center; gap: 9px; color: #64728a; background: #f4f6f9; }
+.new-order-note svg { flex: 0 0 auto; color: var(--primary); }
+.new-order-note span { font-size: 12px; line-height: 1.45; }

@@ -1,0 +1,15 @@
+.orders-modal-list { display: grid; gap: 7px; }
+.orders-modal-list > button { min-height: 67px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; display: grid; grid-template-columns: 78px 1fr 18px; align-items: center; gap: 10px; background: white; cursor: pointer; text-align: left; }
+.orders-modal-list > button:hover { background: #f8f9fb; }
+.orders-modal-list > button.active { border-color: var(--primary); background: var(--primary-soft); box-shadow: 0 0 0 1px var(--primary); }
+.orders-modal-number { display: flex; align-items: center; gap: 6px; color: var(--primary); font-size: 12px; font-weight: 800; }
+.orders-modal-list > button > span:nth-child(2) { min-width: 0; display: grid; gap: 3px; }
+.orders-modal-list strong { font-size: 12px; }
+.orders-modal-list small { color: #8994a5; font-size: 12px; }
+.orders-modal-list > button > svg { color: #919baa; }
+.orders-modal-new { margin-top: 12px; }
+
+@media (max-width: 600px) {
+  .orders-modal-list > button { grid-template-columns: 70px 1fr 18px; }
+  .orders-modal-list .status { display: none; }
+}
