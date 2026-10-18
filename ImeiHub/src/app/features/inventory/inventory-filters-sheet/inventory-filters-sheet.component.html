@@ -1,0 +1,92 @@
+<app-sheet
+  title="Filtros de inventario"
+  subtitle="Ajusta los criterios para encontrar productos rápidamente."
+  (close)="close.emit()"
+  [wide]="true"
+>
+  <section
+    class="advanced-filters filter-modal-grid"
+    aria-label="Filtros avanzados del inventario"
+  >
+    <div class="filter-field">
+      <label for="product-color">Color</label>
+      <select
+        id="product-color"
+        [ngModel]="color()"
+        (ngModelChange)="colorChange.emit($event)"
+      >
+        @for (item of colors(); track item) {
+          <option [value]="item">
+            {{ getColorLabel(item) }}
+          </option>
+        }
+      </select>
+    </div>
+    <div class="filter-field price-filter">
+      <label for="min-price">Rango de precios</label>
+      <div>
+        <span>MXN</span>
+        <input
+          id="min-price"
+          type="number"
+          min="0"
+          inputMode="numeric"
+          placeholder="Mín."
+          [ngModel]="minPrice()"
+          (ngModelChange)="minPriceChange.emit($event)"
+        />
+        <i>–</i>
+        <input
+          aria-label="Precio máximo"
+          type="number"
+          min="0"
+          inputMode="numeric"
+          placeholder="Máx."
+          [ngModel]="maxPrice()"
+          (ngModelChange)="maxPriceChange.emit($event)"
+        />
+      </div>
+    </div>
+    <div class="filter-field">
+      <label for="stock-status">Nivel de stock</label>
+      <select
+        id="stock-status"
+        [ngModel]="stockStatus()"
+        (ngModelChange)="stockStatusChange.emit($event)"
+      >
+        @for (item of stockOptions; track item.value) {
+          <option [value]="item.value">
+            {{ item.label }}
+          </option>
+        }
+      </select>
+    </div>
+    <div class="filter-field">
+      <label for="sort-stock">Ordenar por</label>
+      <select
+        id="sort-stock"
+        [ngModel]="sortBy()"
+        (ngModelChange)="sortByChange.emit($event)"
+      >
+        @for (item of sortOptions; track item.value) {
+          <option [value]="item.value">
+            {{ item.label }}
+          </option>
+        }
+      </select>
+    </div>
+  </section>
+  <div class="filter-modal-actions">
+    <button
+      type="button"
+      class="reset-filters"
+      (click)="resetFilters.emit()"
+      [disabled]="activeFilterCount() === 0 && sortBy() === 'Name A–Z'"
+    >
+      Restablecer filtros
+    </button>
+    <app-button (clicked)="close.emit()">
+      Ver {{ visibleCount() }} productos
+    </app-button>
+  </div>
+</app-sheet>

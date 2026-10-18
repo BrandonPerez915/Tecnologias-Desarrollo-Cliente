@@ -1,0 +1,278 @@
+<div class="page inventory-add-page">
+  <button type="button" class="back-button" (click)="close.emit()">
+    <app-icon name="return" [size]="17"></app-icon> Volver al inventario
+  </button>
+  <app-page-heading
+    title="Agregar producto"
+    subtitle="Registra toda la información necesaria para incorporar un artículo al inventario."
+  ></app-page-heading>
+  <form (ngSubmit)="submitForm($event)" novalidate>
+    <div class="product-form-layout">
+      <section class="panel product-form-section">
+        <div class="product-form-heading">
+          <span class="product-form-icon">
+            <app-icon name="box"></app-icon>
+          </span>
+          <span>
+            <strong>Información del producto</strong>
+            <small>Datos principales para identificarlo en el catálogo</small>
+          </span>
+        </div>
+        <div class="product-form-grid">
+          <app-field
+            label="Nombre del producto"
+            placeholder="p. ej., iPhone 15 Pro · 256GB"
+            [required]="true"
+            [value]="name()"
+            [error]="nameError()"
+            (valueChange)="onNameChange($event)"
+            (blur)="validateName()"
+          ></app-field>
+
+          <app-field
+            label="Marca"
+            placeholder="p. ej., Apple, Samsung, Xiaomi"
+            [value]="brand()"
+            (valueChange)="brand.set($event)"
+          ></app-field>
+
+          <app-field
+            label="Modelo"
+            placeholder="p. ej., A3104, SM-S928B"
+            [value]="model()"
+            (valueChange)="model.set($event)"
+          ></app-field>
+
+          <label class="form-select-field">
+            <span>Tipo de producto</span>
+            <select [ngModel]="type()" name="productType" (ngModelChange)="type.set($event)">
+              <option value="Smartphones">Smartphone</option>
+              <option value="Tablets">Tablet</option>
+              <option value="Computers">Laptop / Computadora</option>
+              <option value="Accessories">Accesorio</option>
+              <option value="Audio">Audio / Auriculares</option>
+            </select>
+          </label>
+
+          <label class="form-select-field">
+            <span>Categoría</span>
+            <select [ngModel]="category()" name="productCategory" (ngModelChange)="category.set($event)">
+              <option value="Phones">Teléfonos</option>
+              <option value="Computers">Computadoras</option>
+              <option value="Tablets">Tablets</option>
+              <option value="Chargers">Cargadores</option>
+              <option value="Cases">Fundas</option>
+              <option value="Cables">Cables</option>
+              <option value="Audio">Audio</option>
+            </select>
+          </label>
+
+          <label class="form-select-field">
+            <span>Estado</span>
+            <select [ngModel]="condition()" name="productCondition" (ngModelChange)="condition.set($event)">
+              <option value="Nuevo">Nuevo</option>
+              <option value="Seminuevo">Seminuevo</option>
+              <option value="Reacondicionado">Reacondicionado</option>
+            </select>
+          </label>
+
+          <label class="product-description-field">
+            <span>Descripción</span>
+            <textarea
+              placeholder="Características, capacidad, compatibilidad y notas relevantes"
+              [ngModel]="description()"
+              name="description"
+              (ngModelChange)="description.set($event)"
+            ></textarea>
+          </label>
+        </div>
+      </section>
+
+      <section class="panel product-form-section">
+        <div class="product-form-heading">
+          <span class="product-form-icon">
+            <app-icon name="scan"></app-icon>
+          </span>
+          <span>
+            <strong>Identificadores</strong>
+            <small>Códigos para búsqueda, escaneo y trazabilidad</small>
+          </span>
+        </div>
+        <div class="product-form-grid">
+          <app-field
+            label="SKU"
+            placeholder="p. ej., APL-IP15P-256-NT"
+            [value]="sku()"
+            (valueChange)="sku.set($event)"
+          ></app-field>
+
+          <app-field
+            label="Código de barras"
+            placeholder="Escanea o introduce el código"
+            icon="scan"
+            [value]="barcode()"
+            (valueChange)="barcode.set($event)"
+          ></app-field>
+
+          <app-field
+            label="IMEI / Número de serie"
+            placeholder="Identificador único del artículo"
+            icon="tag"
+            [value]="serial()"
+            (valueChange)="serial.set($event)"
+          ></app-field>
+        </div>
+      </section>
+
+      <section class="panel product-form-section">
+        <div class="product-form-heading">
+          <span class="product-form-icon">
+            <app-icon name="tag"></app-icon>
+          </span>
+          <span>
+            <strong>Precios</strong>
+            <small>Coste, margen permitido y precio de venta</small>
+          </span>
+        </div>
+        <div class="product-form-grid three-columns">
+          <app-field
+            label="Precio de coste"
+            placeholder="0.00"
+            type="number"
+            inputMode="decimal"
+            [min]="0"
+            [required]="true"
+            [value]="cost()"
+            [error]="costError()"
+            (valueChange)="onCostChange($event)"
+            (blur)="validateCost()"
+          >
+            <span class="field-suffix">MXN</span>
+          </app-field>
+
+          <app-field
+            label="Precio mínimo"
+            placeholder="0.00"
+            type="number"
+            inputMode="decimal"
+            [min]="0"
+            [required]="true"
+            [value]="minPrice()"
+            [error]="minPriceError()"
+            (valueChange)="onMinPriceChange($event)"
+            (blur)="validateMinPrice()"
+          >
+            <span class="field-suffix">MXN</span>
+          </app-field>
+
+          <app-field
+            label="Precio ideal (venta)"
+            placeholder="0.00"
+            type="number"
+            inputMode="decimal"
+            [min]="0"
+            [required]="true"
+            [value]="price()"
+            [error]="priceError()"
+            (valueChange)="onPriceChange($event)"
+            (blur)="validatePrice()"
+          >
+            <span class="field-suffix">MXN</span>
+          </app-field>
+        </div>
+      </section>
+
+      <section class="panel product-form-section">
+        <div class="product-form-heading">
+          <span class="product-form-icon">
+            <app-icon name="box"></app-icon>
+          </span>
+          <span>
+            <strong>Existencias y ubicación</strong>
+            <small>Disponibilidad inicial y localización física</small>
+          </span>
+        </div>
+        <div class="variant-editor">
+          <div class="variant-editor-header">
+            <span>Variantes del producto</span>
+            <strong>{{ totalNewProductStock }} unidades en total</strong>
+          </div>
+          <div class="variant-list">
+            @for (variant of newProductVariants(); track variant.id; let index = $index) {
+              <div class="variant-row">
+                <label>
+                  <span>Color {{ index + 1 }}</span>
+                  <select
+                    [ngModel]="variant.color"
+                    [name]="'color-' + variant.id"
+                    (ngModelChange)="updateVariant(variant.id, 'color', $event)"
+                  >
+                    <option value="">Seleccionar color</option>
+                    @for (color of colorList; track color) {
+                      <option [value]="color">{{ color }}</option>
+                    }
+                  </select>
+                </label>
+                <label>
+                  <span>Stock</span>
+                  <input
+                    type="number"
+                    min="0"
+                    inputMode="numeric"
+                    placeholder="0"
+                    [ngModel]="variant.stock"
+                    [name]="'stock-' + variant.id"
+                    (ngModelChange)="updateVariant(variant.id, 'stock', $event)"
+                  />
+                </label>
+                <button
+                  type="button"
+                  class="variant-remove"
+                  [attr.aria-label]="'Eliminar variante ' + (index + 1)"
+                  [disabled]="newProductVariants().length === 1"
+                  (click)="removeVariant(variant.id)"
+                >
+                  <app-icon name="close" [size]="17"></app-icon>
+                </button>
+              </div>
+            }
+          </div>
+          <app-button
+            variant="secondary"
+            icon="plus"
+            className="variant-add-button"
+            (clicked)="addVariant()"
+          >
+            Agregar otra variante
+          </app-button>
+        </div>
+        <div class="product-form-grid inventory-location-grid">
+          <app-field
+            label="Ubicación"
+            placeholder="p. ej., Vitrina A · Fila 2"
+            [value]="location()"
+            (valueChange)="location.set($event)"
+          ></app-field>
+          <app-field
+            label="Proveedor"
+            placeholder="Nombre del proveedor"
+            [value]="supplier()"
+            (valueChange)="supplier.set($event)"
+          ></app-field>
+        </div>
+      </section>
+    </div>
+    <div class="product-form-actions">
+      <app-button variant="secondary" (clicked)="close.emit()">
+        Cancelar
+      </app-button>
+      <app-button type="submit" icon="plus" [disabled]="submitting()">
+        @if (submitting()) {
+          Guardando...
+        } @else {
+          Agregar producto
+        }
+      </app-button>
+    </div>
+  </form>
+</div>

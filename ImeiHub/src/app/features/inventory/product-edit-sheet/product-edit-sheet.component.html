@@ -1,0 +1,98 @@
+<app-sheet
+  title="Editar producto"
+  [subtitle]="'Actualiza la información de ' + product().name + '.'"
+  (close)="close.emit()"
+  [wide]="true"
+>
+  <form (ngSubmit)="submitForm($event)" novalidate>
+    <div class="edit-product-grid">
+      <app-field
+        label="Nombre del producto"
+        [required]="true"
+        [value]="name()"
+        [error]="nameError()"
+        (valueChange)="onNameChange($event)"
+        (blur)="validateName()"
+      ></app-field>
+
+      <app-field
+        label="SKU"
+        [required]="true"
+        [value]="sku()"
+        [error]="skuError()"
+        (valueChange)="onSkuChange($event)"
+        (blur)="validateSku()"
+      ></app-field>
+
+      <app-field
+        label="Precio ideal (venta)"
+        type="number"
+        inputMode="decimal"
+        [min]="0"
+        [required]="true"
+        [value]="price()"
+        [error]="priceError()"
+        (valueChange)="onPriceChange($event)"
+        (blur)="validatePrice()"
+      >
+        <span class="field-suffix">MXN</span>
+      </app-field>
+
+      <app-field
+        label="Precio mínimo"
+        type="number"
+        inputMode="decimal"
+        [min]="0"
+        [required]="true"
+        [value]="minPrice()"
+        [error]="minPriceError()"
+        (valueChange)="onMinPriceChange($event)"
+        (blur)="validateMinPrice()"
+      >
+        <span class="field-suffix">MXN</span>
+      </app-field>
+
+      <app-field
+        label="Precio de coste"
+        type="number"
+        inputMode="decimal"
+        [min]="0"
+        [required]="true"
+        [value]="cost()"
+        [error]="costError()"
+        (valueChange)="onCostChange($event)"
+        (blur)="validateCost()"
+      >
+        <span class="field-suffix">MXN</span>
+      </app-field>
+
+      <app-field
+        label="Stock total"
+        type="number"
+        inputMode="numeric"
+        [min]="0"
+        [required]="true"
+        [value]="stock()"
+        [error]="stockError()"
+        (valueChange)="onStockChange($event)"
+        (blur)="validateStock()"
+      ></app-field>
+    </div>
+
+    <div class="edit-product-note">
+      <app-icon name="warning" [size]="17"></app-icon>
+      <span>
+        Los precios mínimo e ideal ayudan al equipo a negociar sin vender
+        por debajo del margen permitido.
+      </span>
+    </div>
+
+    <app-button type="submit" className="full-button" [disabled]="submitting()">
+      @if (submitting()) {
+        Guardando cambios...
+      } @else {
+        Guardar cambios
+      }
+    </app-button>
+  </form>
+</app-sheet>

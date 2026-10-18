@@ -1,0 +1,76 @@
+<div class="inventory-toolbar">
+  <div class="inventory-search-wrap">
+    <label class="search-box">
+      <app-icon name="search" [size]="19"></app-icon>
+      <input
+        aria-label="Buscar en el inventario"
+        placeholder="Buscar por nombre del producto"
+        [ngModel]="inventorySearch()"
+        (focus)="inventorySearchOpenChange.emit(true)"
+        (ngModelChange)="onSearchChange($event)"
+        (blur)="onBlur()"
+      />
+    </label>
+    @if (inventorySearchOpen() && inventorySearch().trim()) {
+      <div class="inventory-suggestions">
+        @if (inventorySuggestions().length > 0) {
+          @for (product of inventorySuggestions(); track product.id) {
+            <button
+              type="button"
+              (mousedown)="$event.preventDefault()"
+              (click)="selectSuggestion.emit(product)"
+            >
+              <span class="product-thumb">
+                <app-icon
+                  [name]="product.type === 'Smartphones' ? 'scan' : 'box'"
+                  [size]="19"
+                ></app-icon>
+              </span>
+              <span>
+                <strong>{{ product.name }}</strong>
+                <small>
+                  {{ product.sku }} · MXN {{ product.price }}
+                </small>
+              </span>
+              <app-icon name="chevron" [size]="15"></app-icon>
+            </button>
+          }
+        } @else {
+          <span class="inventory-no-suggestions">
+            No se encontraron productos con “{{ inventorySearch().trim() }}”.
+          </span>
+        }
+      </div>
+    }
+  </div>
+  <app-button
+    variant="secondary"
+    icon="scan"
+    className="inventory-scan"
+    (clicked)="open.emit('scanner')"
+  >
+    Escaneo con cámara
+  </app-button>
+</div>
+<div class="filter-chips" aria-label="Categorías del inventario">
+  @for (item of categories(); track item) {
+    <button
+      type="button"
+      [class.active]="category() === item"
+      (click)="categoryChange.emit(item)"
+    >
+      {{ item === 'All' ? 'Todos' : (typeLabels[item] || item) }}
+    </button>
+  }
+  <button
+    type="button"
+    [class.active]="activeFilterCount() > 0"
+    class="advanced-filter-trigger"
+    (click)="openFilters.emit()"
+  >
+    <app-icon name="filter" [size]="15"></app-icon> Filtros
+    @if (activeFilterCount() > 0) {
+      <b>{{ activeFilterCount() }}</b>
+    }
+  </button>
+</div>

@@ -1,0 +1,140 @@
+<div
+  class="overlay product-detail-overlay"
+  role="presentation"
+  (mousedown)="onBackdropClick($event)"
+>
+  <aside
+    class="panel item-detail item-detail-modal"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="'Detalles de ' + product().name"
+  >
+    <div class="product-detail-modal-header">
+      <button
+        type="button"
+        class="close-button"
+        aria-label="Cerrar detalles del producto"
+        (click)="close.emit()"
+      >
+        <app-icon name="close"></app-icon>
+      </button>
+    </div>
+    <div class="detail-visual">
+      <div class="detail-device">
+        <app-icon
+          [name]="product().type === 'Smartphones' ? 'scan' : 'box'"
+          [size]="42"
+        ></app-icon>
+      </div>
+    </div>
+    <div class="detail-title">
+      <p>{{ getCategoryLabel(product().category) }}</p>
+      <div class="detail-title-heading">
+        <h2>{{ product().name }}</h2>
+        <app-status-badge [tone]="currentVariantStock <= 2 ? 'danger' : 'success'">
+          {{
+            currentVariantStock === 0
+              ? 'Agotado'
+              : currentVariantStock <= 2
+                ? 'Stock bajo'
+                : 'Disponible'
+          }}
+        </app-status-badge>
+      </div>
+      <span>{{ product().sku }}</span>
+    </div>
+    <div class="detail-price">
+      <div>
+        <p>Precio ideal</p>
+        <app-amount size="large">{{ product().price }}</app-amount>
+        <small>Precio recomendado de venta</small>
+      </div>
+      <div>
+        <p>Precio mínimo</p>
+        <app-amount size="large">{{ getMinPrice() }}</app-amount>
+        <small>Límite para negociación</small>
+      </div>
+    </div>
+    <section class="detail-section">
+      <div class="detail-section-heading">
+        <div>
+          <span>Variante de color</span>
+          <strong>Selecciona la variante exacta</strong>
+        </div>
+        <small>
+          {{ totalVariantStock }} unidades en total
+        </small>
+      </div>
+      <div class="detail-color-options">
+        @for (variant of product().variants; track variant.color) {
+          <button
+            type="button"
+            [class.active]="detailColor() === variant.color"
+            (click)="detailColorChange.emit(variant.color)"
+          >
+            <i
+              [class]="'color-swatch swatch-' + getSwatchClass(variant.color)"
+            ></i>
+            <span>{{ getColorLabel(variant.color) }}</span>
+            <b>{{ variant.stock }}</b>
+          </button>
+        }
+      </div>
+    </section>
+    <section class="detail-section product-information">
+      <div class="detail-section-heading">
+        <div>
+          <span>Información del producto</span>
+          <strong>Identificadores y datos del registro</strong>
+        </div>
+      </div>
+      <dl>
+        <div>
+          <dt>ID de producto / escáner</dt>
+          <dd>{{ getIdentifier().barcode }}</dd>
+        </div>
+        <div>
+          <dt>
+            {{
+              product().type === 'Smartphones' || product().type === 'Tablets'
+                ? 'IMEI'
+                : 'Número de serie'
+            }}
+          </dt>
+          <dd>{{ getIdentifier().serial }}</dd>
+        </div>
+        <div>
+          <dt>Tipo de producto</dt>
+          <dd>{{ getTypeLabel(product().type) }}</dd>
+        </div>
+        <div>
+          <dt>Estado</dt>
+          <dd>{{ getIdentifier().condition }}</dd>
+        </div>
+        <div>
+          <dt>Precio de coste</dt>
+          <dd>MXN {{ product().cost }}</dd>
+        </div>
+        <div>
+          <dt>Añadido al inventario</dt>
+          <dd>{{ getIdentifier().added }}</dd>
+        </div>
+      </dl>
+    </section>
+    <app-button
+      icon="printer"
+      className="full-button print-button"
+      (clicked)="open.emit('print')"
+    >
+      Imprimir etiqueta de precio
+    </app-button>
+    <div class="detail-footer-actions">
+      <button type="button" class="edit-link" (click)="edit.emit()">
+        <app-icon name="swap" [size]="14"></app-icon> Editar datos del artículo
+      </button>
+      <button type="button" class="delete-link text-danger" (click)="handleDelete()">
+        <app-icon name="close" [size]="14"></app-icon> Eliminar del inventario
+      </button>
+    </div>
+  </aside>
+</div>

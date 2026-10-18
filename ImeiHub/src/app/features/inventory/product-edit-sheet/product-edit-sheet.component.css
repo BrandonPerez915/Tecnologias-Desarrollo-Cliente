@@ -1,0 +1,10 @@
+.edit-product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+.edit-product-grid .field:first-child { grid-column: span 2; }
+.edit-product-note { margin: 2px 0 18px; padding: 11px; border-radius: 9px; display: flex; align-items: center; gap: 9px; color: #7a603b; background: #fff8e9; }
+.edit-product-note svg { flex: 0 0 auto; color: var(--orange); }
+.edit-product-note span { font-size: 12px; line-height: 1.45; }
+
+@media (max-width: 600px) {
+  .edit-product-grid { grid-template-columns: 1fr; }
+  .edit-product-grid .field:first-child { grid-column: auto; }
+}

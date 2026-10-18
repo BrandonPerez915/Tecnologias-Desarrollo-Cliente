@@ -1,0 +1,84 @@
+@if (showAddProduct()) {
+  <app-product-add-view
+    (close)="showAddProduct.set(false)"
+  ></app-product-add-view>
+} @else {
+  <div class="page">
+    <app-page-heading
+      title="Inventario"
+      subtitle="Consulta precios y existencias, e imprime etiquetas."
+    ></app-page-heading>
+
+    <app-inventory-toolbar
+      [inventorySearch]="inventorySearch()"
+      (inventorySearchChange)="inventorySearch.set($event)"
+      [inventorySearchOpen]="inventorySearchOpen()"
+      (inventorySearchOpenChange)="inventorySearchOpen.set($event)"
+      [inventorySuggestions]="inventorySuggestions()"
+      (selectSuggestion)="onSelectSuggestion($event)"
+      (open)="onOpenOverlay($event)"
+      [categories]="categories"
+      [category]="category()"
+      (categoryChange)="category.set($event)"
+      [activeFilterCount]="activeFilterCount()"
+      (openFilters)="showFilters.set(true)"
+    ></app-inventory-toolbar>
+
+    <app-inventory-table
+      [products]="paginatedProducts()"
+      [selectedId]="selected()?.id || 0"
+      [colorFilter]="color()"
+      [currentPage]="currentProductPage()"
+      [totalPages]="totalProductPages()"
+      [totalProductsCount]="visible().length"
+      [productsPerPage]="productsPerPage"
+      (selectProduct)="onSelectProduct($event)"
+      (pageChange)="currentProductPage.set($event)"
+      (resetCategory)="category.set('All')"
+    ></app-inventory-table>
+
+    <div class="inventory-bottom-action">
+      <app-button icon="plus" (clicked)="showAddProduct.set(true)">
+        Agregar producto
+      </app-button>
+    </div>
+
+    @if (showFilters()) {
+      <app-inventory-filters-sheet
+        [colors]="colors()"
+        [color]="color()"
+        (colorChange)="color.set($event)"
+        [minPrice]="minPrice()"
+        (minPriceChange)="minPrice.set($event)"
+        [maxPrice]="maxPrice()"
+        (maxPriceChange)="maxPrice.set($event)"
+        [stockStatus]="stockStatus()"
+        (stockStatusChange)="stockStatus.set($event)"
+        [sortBy]="sortBy()"
+        (sortByChange)="sortBy.set($event)"
+        [activeFilterCount]="activeFilterCount()"
+        [visibleCount]="visible().length"
+        (resetFilters)="resetFilters()"
+        (close)="showFilters.set(false)"
+      ></app-inventory-filters-sheet>
+    }
+
+    @if (showProductDetail() && selected()) {
+      <app-product-detail-modal
+        [product]="selected()!"
+        [detailColor]="detailColor()"
+        (detailColorChange)="detailColor.set($event)"
+        (open)="onOpenOverlay($event)"
+        (edit)="onEditProduct()"
+        (close)="showProductDetail.set(false)"
+      ></app-product-detail-modal>
+    }
+
+    @if (showEditProduct() && selected()) {
+      <app-product-edit-sheet
+        [product]="selected()!"
+        (close)="showEditProduct.set(false)"
+      ></app-product-edit-sheet>
+    }
+  </div>
+}
