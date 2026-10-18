@@ -1,0 +1,124 @@
+<div class="page">
+  <app-page-heading
+    title="Movimientos"
+    subtitle="Todos los movimientos de entrada y salida de tu caja."
+  ></app-page-heading>
+
+  <div class="cash-summary-row">
+    <section class="register-summary">
+      <div class="summary-block summary-balance">
+        <div class="summary-metric">
+          <span>Efectivo en caja</span>
+          <strong>MXN {{ cashService.expectedCash() | number:'1.0-0' }}</strong>
+        </div>
+        <div class="summary-metric">
+          <span>Saldo inicial</span>
+          <strong>MXN {{ cashService.initialBase() | number:'1.0-0' }}</strong>
+        </div>
+      </div>
+      <div class="summary-block summary-flows">
+        <div class="summary-metric in">
+          <span>Entradas</span>
+          <strong>+{{ cashService.totalSalesToday() | number:'1.0-0' }}</strong>
+        </div>
+        <div class="summary-metric out">
+          <span>Salidas</span>
+          <strong>−{{ cashService.totalExpensesToday() | number:'1.0-0' }}</strong>
+        </div>
+      </div>
+    </section>
+    <div class="cash-summary-actions">
+      <app-button
+        icon="plus"
+        className="register-summary-action"
+        (clicked)="openExpenseSheet()"
+      >
+        Registrar gasto
+      </app-button>
+      <app-export-movements-modal></app-export-movements-modal>
+    </div>
+  </div>
+
+  <section class="panel ledger-panel">
+    <div class="ledger-toolbar">
+      <div class="segment-control" aria-label="Filtrar registro">
+        @for (item of filterOptions; track item) {
+          <button
+            type="button"
+            [class.active]="filter() === item"
+            (click)="filter.set(item)"
+          >
+            {{
+              item === 'All'
+                ? 'Todos'
+                : item === 'Money In'
+                  ? 'Entradas'
+                  : 'Salidas'
+            }}
+          </button>
+        }
+      </div>
+      <button
+        type="button"
+        class="date-control"
+        (click)="showCalendar.set(true)"
+      >
+        <app-icon name="calendar" [size]="17"></app-icon>
+        {{ selectedDay() === 18 ? 'Hoy, ' : '' }}
+        {{ selectedDay() }} jun
+        <app-icon name="chevron" [size]="14"></app-icon>
+      </button>
+    </div>
+    <div class="ledger-head">
+      <span>Hora y movimiento</span>
+      <span>Detalles</span>
+      <span>Importe</span>
+    </div>
+    <div class="ledger-list">
+      @for (entry of visibleEntries(); track entry.time + '-' + entry.title) {
+        <div class="ledger-row">
+          <div class="ledger-time">
+            <span [class]="'flow-mark ' + entry.kind">
+              <app-icon
+                [name]="entry.kind === 'in' ? 'arrow-down' : 'arrow-up'"
+                [size]="17"
+              ></app-icon>
+            </span>
+            <span>{{ entry.time }}</span>
+          </div>
+          <div class="ledger-details">
+            <strong>{{ entry.title }}</strong>
+            <span>{{ entry.note }}</span>
+          </div>
+          <strong [class]="'ledger-amount ' + entry.kind">
+            {{ entry.amount }}
+          </strong>
+        </div>
+      }
+
+      @if (visibleEntries().length === 0) {
+        <div class="empty-ledger">
+          <app-icon name="calendar" [size]="28"></app-icon>
+          <p>No hay movimientos registrados para el {{ selectedDay() }} de junio.</p>
+        </div>
+      }
+    </div>
+    <div class="ledger-footer">
+      <span>Mostrando {{ visibleEntries().length }} movimientos</span>
+    </div>
+  </section>
+
+  @if (showCalendar()) {
+    <app-date-picker-sheet
+      [selectedDay]="selectedDay()"
+      (select)="selectDay($event)"
+      (close)="showCalendar.set(false)"
+    ></app-date-picker-sheet>
+  }
+
+  <div class="mobile-page-action">
+    <app-button icon="plus" (clicked)="openExpenseSheet()">
+      Registrar gasto
+    </app-button>
+  </div>
+</div>

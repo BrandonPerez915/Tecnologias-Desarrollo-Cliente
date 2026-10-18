@@ -1,0 +1,42 @@
+<app-sheet
+  title="Seleccionar fecha"
+  subtitle="Elige el día que quieres consultar."
+  (close)="close.emit()"
+>
+  <div class="calendar-modal">
+    <div class="calendar-month">
+      <button type="button" aria-label="Mes anterior">
+        <app-icon name="chevron" [size]="16"></app-icon>
+      </button>
+      <strong>Junio de 2024</strong>
+      <button type="button" aria-label="Mes siguiente">
+        <app-icon name="chevron" [size]="16"></app-icon>
+      </button>
+    </div>
+    <div class="calendar-weekdays">
+      @for (day of weekdays; track day) {
+        <span>{{ day }}</span>
+      }
+    </div>
+    <div class="calendar-days">
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      @for (day of days; track day) {
+        <button
+          type="button"
+          [class.selected]="selectedDay() === day"
+          (click)="select.emit(day)"
+        >
+          {{ day }}
+        </button>
+      }
+    </div>
+    <div class="calendar-footer">
+      <button type="button" (click)="select.emit(18)">Hoy</button>
+      <span>Los datos se actualizarán al elegir una fecha</span>
+    </div>
+  </div>
+</app-sheet>

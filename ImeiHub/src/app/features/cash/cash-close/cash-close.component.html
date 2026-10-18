@@ -1,0 +1,199 @@
+<div class="page cash-close-page">
+  <button type="button" class="back-button" (click)="goToDashboard()">
+    <app-icon name="return" [size]="17"></app-icon> Volver al panel
+  </button>
+  <app-page-heading
+    title="Cierre de caja"
+    subtitle="Revisa el resumen completo y concilia el efectivo físico antes de finalizar la jornada."
+  ></app-page-heading>
+
+  <section class="close-cash-hero">
+    <div>
+      <span>Efectivo esperado en caja</span>
+      <app-amount size="hero">{{ cashService.expectedCash() | number:'1.2-2' }}</app-amount>
+    </div>
+    <span class="live-pill">
+      <span></span> Jornada en curso · {{ todayFormatted }}
+    </span>
+  </section>
+
+  <section class="close-method-grid">
+    <div class="close-method-card">
+      <span class="close-method-icon cash">
+        <app-icon name="cash"></app-icon>
+      </span>
+      <span>
+        <small>Ventas totales registradas</small>
+        <strong>MXN {{ cashService.totalSalesToday() | number:'1.2-2' }}</strong>
+      </span>
+    </div>
+    <div class="close-method-card out">
+      <span class="close-method-icon expense">
+        <app-icon name="arrow-up"></app-icon>
+      </span>
+      <span>
+        <small>Salidas / Gastos del día</small>
+        <strong>− MXN {{ cashService.totalExpensesToday() | number:'1.2-2' }}</strong>
+      </span>
+    </div>
+    <div class="close-method-card">
+      <span class="close-method-icon transfer">
+        <app-icon name="swap"></app-icon>
+      </span>
+      <span>
+        <small>Fondo inicial de apertura</small>
+        <strong>MXN {{ cashService.initialBase() | number:'1.2-2' }}</strong>
+      </span>
+    </div>
+    <div class="close-method-card card">
+      <span class="close-method-icon card">
+        <app-icon name="receipt"></app-icon>
+      </span>
+      <span>
+        <small>Movimientos registrados</small>
+        <strong>{{ cashService.entries().length }} operaciones</strong>
+      </span>
+    </div>
+  </section>
+
+  <div class="close-cash-layout">
+    <!-- Products list -->
+    <section class="panel close-products-panel">
+      <div class="close-section-heading">
+        <div>
+          <h2>Productos vendidos</h2>
+          <p>{{ products.length }} ventas registradas</p>
+        </div>
+        <strong>MXN {{ cashService.totalSalesToday() | number:'1.2-2' }}</strong>
+      </div>
+      <div class="close-products-head">
+        <span>Producto</span>
+        <span>Pago</span>
+        <span>Total</span>
+      </div>
+      @for (item of products; track item.time + '-' + item.product) {
+        <div class="close-product-row">
+          <span>
+            <strong>{{ item.product }}</strong>
+            <small>
+              {{ item.time }} · {{ item.quantity }}
+              {{ item.quantity === 1 ? 'unidad' : 'unidades' }}
+            </small>
+          </span>
+          <app-status-badge tone="neutral">{{ item.method }}</app-status-badge>
+          <strong>MXN {{ item.total }}</strong>
+        </div>
+      }
+    </section>
+
+    <!-- Balance and Physical Count Form -->
+    <section class="panel close-balance-panel">
+      <div class="close-section-heading">
+        <div>
+          <h2>Conciliación física</h2>
+          <p>Conteo y verificación de billetes y monedas</p>
+        </div>
+      </div>
+      <dl>
+        <div>
+          <dt>Saldo inicial</dt>
+          <dd>MXN {{ cashService.initialBase() | number:'1.2-2' }}</dd>
+        </div>
+        <div>
+          <dt>Entradas en efectivo</dt>
+          <dd>+ MXN {{ cashService.totalSalesToday() | number:'1.2-2' }}</dd>
+        </div>
+        <div>
+          <dt>Salidas de caja</dt>
+          <dd>− MXN {{ cashService.totalExpensesToday() | number:'1.2-2' }}</dd>
+        </div>
+        <div class="total">
+          <dt>Efectivo esperado</dt>
+          <dd>MXN {{ cashService.expectedCash() | number:'1.2-2' }}</dd>
+        </div>
+      </dl>
+
+      <!-- Interactive Cash Counting Input -->
+      <div class="counting-form mt-4">
+        <app-field
+          label="Efectivo contado físicamente en caja"
+          placeholder="0.00"
+          type="number"
+          inputMode="decimal"
+          [min]="0"
+          [required]="true"
+          [value]="countedCash()"
+          [error]="countedError()"
+          (valueChange)="onCountedChange($event)"
+          (blur)="validateCounted()"
+        >
+          <span class="field-suffix">MXN</span>
+        </app-field>
+
+        @if (countedCash().trim()) {
+          <div class="difference-box" [class]="diffStatusClass()">
+            <div class="diff-header">
+              <span>Diferencia de arqueo:</span>
+              <strong>{{ diffText() }}</strong>
+            </div>
+            <small>{{ diffExplanation() }}</small>
+          </div>
+        }
+
+        <app-field
+          label="Notas u observaciones de cierre"
+          placeholder="p. ej., Se apartaron 2,000 para el depósito matutino"
+          [value]="notes()"
+          (valueChange)="notes.set($event)"
+        ></app-field>
+      </div>
+
+      <div class="close-shift-data">
+        <span>
+          <small>Apertura</small>
+          <strong>08:32</strong>
+        </span>
+        <span>
+          <small>Responsable</small>
+          <strong>{{ currentUser()?.name || 'Ada Okafor' }}</strong>
+        </span>
+        <span>
+          <small>Puesto</small>
+          <strong>{{ currentUser()?.stallNumber || 'A-18' }}</strong>
+        </span>
+      </div>
+    </section>
+  </div>
+
+  <div class="close-info-message">
+    <app-icon name="bell" [size]="20"></app-icon>
+    <span>
+      <strong>Este resumen quedará registrado en el historial</strong>
+      <small>
+        Puedes consultar el detalle completo de ventas, salidas y movimientos desde
+        <button type="button" (click)="goToCash()">Movimientos de caja</button>.
+      </small>
+    </span>
+  </div>
+
+  <div class="close-cash-actions">
+    <app-button
+      variant="secondary"
+      icon="arrow-down"
+      (clicked)="saveSummary()"
+    >
+      Guardar comprobante JSON
+    </app-button>
+    <app-button
+      icon="check"
+      [disabled]="closing()"
+      (clicked)="finishClose()"
+    >
+      @if (closing()) {
+        Cerrando turno...
+      } @else {
+        Finalizar cierre de caja
+      }
+    </app-button>
+  </div>
+</div>

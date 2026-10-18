@@ -1,0 +1,50 @@
+<app-button
+  variant="secondary"
+  icon="arrow-down"
+  className="export-trigger"
+  (clicked)="showExport.set(true)"
+>
+  Exportar datos
+</app-button>
+
+@if (showExport()) {
+  <app-sheet
+    title="Exportar movimientos"
+    subtitle="Selecciona el formato y dónde quieres guardar el archivo."
+    (close)="showExport.set(false)"
+  >
+    <form (ngSubmit)="exportData()">
+      <label class="field">
+        <span>Formato del archivo</span>
+        <div class="field-control">
+          <select [(ngModel)]="format" name="format">
+            <option value="xlsx">Excel (.xls)</option>
+            <option value="csv">CSV (.csv)</option>
+            <option value="txt">Texto (.txt)</option>
+            <option value="json">JSON (.json)</option>
+          </select>
+        </div>
+      </label>
+      <label class="field">
+        <span>Ubicación de guardado</span>
+        <div class="field-control">
+          <select [(ngModel)]="location" name="location">
+            <option value="choose">Elegir carpeta al guardar</option>
+            <option value="downloads">Descargas del navegador</option>
+          </select>
+        </div>
+      </label>
+      <p class="export-location-note">
+        Si eliges una carpeta, se abrirá el selector del sistema para
+        definir la ruta y el nombre del archivo.
+      </p>
+      <app-button
+        type="submit"
+        icon="arrow-down"
+        className="full-button"
+      >
+        Continuar y exportar
+      </app-button>
+    </form>
+  </app-sheet>
+}
