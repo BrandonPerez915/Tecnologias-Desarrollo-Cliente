@@ -1,0 +1,41 @@
+<div
+  class="profile-popover"
+  (mouseenter)="mouseEnter.emit()"
+  (mouseleave)="mouseLeave.emit()"
+>
+  <div class="profile-popover-user">
+    <span class="avatar">{{ userInitials() }}</span>
+    <span>
+      <strong>{{ user()?.name || 'Ada Okafor' }}</strong>
+      <small>{{ user()?.role || 'Propietaria' }} · Puesto {{ user()?.stallNumber || 'A-18' }}</small>
+    </span>
+  </div>
+  <div class="profile-popover-actions">
+    <button type="button" (click)="notifyInfo('Configuración de perfil abierta')">
+      <app-icon name="user" [size]="17"></app-icon>
+      <span>
+        <strong>Mi perfil</strong>
+        <small>Datos personales y acceso</small>
+      </span>
+    </button>
+    <button type="button" (click)="notifyInfo('Configuración abierta')">
+      <app-icon name="settings" [size]="17"></app-icon>
+      <span>
+        <strong>Configuración</strong>
+        <small>Tienda, caja y preferencias</small>
+      </span>
+    </button>
+
+    <button
+      type="button"
+      class="logout-action"
+      (click)="handleLogout()"
+    >
+      <app-icon name="logout" [size]="17"></app-icon>
+      <span>
+        <strong>Cerrar sesión</strong>
+        <small>Salir del sistema ImeiHub</small>
+      </span>
+    </button>
+  </div>
+</div>

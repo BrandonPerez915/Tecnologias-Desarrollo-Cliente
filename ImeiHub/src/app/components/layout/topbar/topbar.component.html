@@ -1,0 +1,51 @@
+<header class="topbar">
+  <button
+    type="button"
+    class="menu-button"
+    aria-label="Abrir navegación"
+    (click)="openSidebar.emit()"
+  >
+    <app-icon name="menu"></app-icon>
+  </button>
+  <div class="mobile-brand">
+    <strong>{{ title() }}</strong>
+  </div>
+  <div class="topbar-date">
+    <app-icon name="calendar" [size]="17"></app-icon>
+    <span>Martes, 18 de junio</span>
+  </div>
+  <div class="topbar-actions">
+    <button
+      type="button"
+      class="notification-button notification-button-bare"
+      aria-label="Notificaciones"
+    >
+      <app-icon name="bell"></app-icon>
+    </button>
+    <div
+      #profileRef
+      class="header-profile"
+      (mouseenter)="openProfile()"
+      (mouseleave)="scheduleProfileClose()"
+      (focusout)="onFocusOut($event)"
+    >
+      <button
+        type="button"
+        class="header-avatar"
+        aria-label="Abrir menú de perfil"
+        [attr.aria-expanded]="profileOpen()"
+        (click)="toggleProfile()"
+      >
+        {{ userInitials() }}
+      </button>
+      @if (profileOpen()) {
+        <app-profile-popover
+          (mouseEnter)="openProfile()"
+          (mouseLeave)="scheduleProfileClose()"
+          (notify)="notify.emit($event)"
+          (navigate)="navigate.emit($event)"
+        ></app-profile-popover>
+      }
+    </div>
+  </div>
+</header>

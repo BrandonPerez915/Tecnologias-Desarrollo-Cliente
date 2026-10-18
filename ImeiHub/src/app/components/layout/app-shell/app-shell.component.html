@@ -1,0 +1,23 @@
+<div class="app-shell">
+  <app-sidebar
+    [open]="sidebarOpen()"
+    [activeScreen]="currentScreen()"
+    (navigate)="handleNavigate($event)"
+    (close)="sidebarOpen.set(false)"
+  ></app-sidebar>
+  <main class="main-area">
+    <app-topbar
+      [screen]="currentScreen()"
+      (openSidebar)="sidebarOpen.set(true)"
+      (notify)="notify.emit($event)"
+      (navigate)="handleNavigate($event)"
+    ></app-topbar>
+    <router-outlet></router-outlet>
+  </main>
+  <app-bottom-nav
+    [screen]="currentScreen()"
+    (navigate)="handleNavigate($event)"
+  ></app-bottom-nav>
+
+  <app-overlay-manager></app-overlay-manager>
+</div>

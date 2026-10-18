@@ -1,0 +1,53 @@
+<aside [class]="'sidebar ' + (open() ? 'open' : '')">
+  <div class="brand">
+    <app-brand-logo
+      size="sm"
+      theme="dark"
+      badge="POS"
+      [clickable]="true"
+      (clicked)="navigate.emit('home')"
+    ></app-brand-logo>
+    <button
+      type="button"
+      class="sidebar-close"
+      aria-label="Cerrar navegación"
+      (click)="close.emit()"
+    >
+      <app-icon name="close" [size]="18"></app-icon>
+    </button>
+  </div>
+  <nav class="side-nav" aria-label="Navegación principal">
+    <span class="nav-label">Espacio de trabajo</span>
+    @for (item of items; track item.id) {
+      <button
+        type="button"
+        [class.active]="activeScreen() === item.id"
+        (click)="navigate.emit(item.id)"
+      >
+        <app-icon [name]="item.icon"></app-icon>
+        <span>{{ item.label }}</span>
+        @if (item.id === 'loans') { <b>4</b> }
+        @if (item.id === 'orders') { <b>3</b> }
+      </button>
+    }
+  </nav>
+  <div class="sidebar-spacer"></div>
+  <div class="sidebar-footer">
+    <button
+      type="button"
+      class="sidebar-footer-btn logout-link"
+      (click)="logout()"
+    >
+      <app-icon name="logout" [size]="17"></app-icon>
+      <span>Cerrar sesión</span>
+    </button>
+  </div>
+</aside>
+@if (open()) {
+  <button
+    type="button"
+    class="sidebar-backdrop"
+    aria-label="Cerrar navegación"
+    (click)="close.emit()"
+  ></button>
+}
