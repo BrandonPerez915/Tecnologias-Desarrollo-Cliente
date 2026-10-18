@@ -1,0 +1,21 @@
+<div class="overlay" (mousedown)="onBackdrop($event)">
+  <div
+    class="sheet"
+    [class.wide]="wide()"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-labelledby]="titleId"
+  >
+    <div class="handle"></div>
+    <header>
+      <div>
+        <h2 [id]="titleId">{{ title() }}</h2>
+        @if (subtitle()) {
+          <p>{{ subtitle() }}</p>
+        }
+      </div>
+      <button app-icon-button icon="close" label="Cerrar" (click)="closed.emit()"></button>
+    </header>
+    <ng-content />
+  </div>
+</div>
