@@ -1,0 +1,118 @@
+.technical-specs-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.spec-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-container);
+  border: 1px solid var(--color-outline-subtle);
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  &.mini {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .spec-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    .spec-icon-badge {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+
+      &.crimson {
+        background-color: rgba(255, 42, 84, 0.15);
+        color: var(--color-primary-container);
+      }
+
+      &.amber {
+        background-color: rgba(245, 158, 11, 0.15);
+        color: var(--color-secondary);
+      }
+
+      &.emerald {
+        background-color: rgba(101, 220, 171, 0.15);
+        color: var(--color-tertiary);
+      }
+
+      span {
+        font-size: 20px;
+      }
+    }
+
+    .spec-info {
+      display: flex;
+      flex-direction: column;
+
+      .spec-label {
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--color-on-surface-variant);
+        font-weight: 600;
+      }
+
+      .spec-value {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: var(--color-on-surface);
+      }
+    }
+  }
+
+  .spec-tag {
+    font-size: 0.6875rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface-highest);
+    color: var(--color-on-surface);
+    font-weight: 600;
+  }
+
+  .spec-note {
+    font-size: 0.75rem;
+    color: var(--color-on-surface-variant);
+  }
+}
+
+.specs-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.65rem;
+
+  @media (min-width: 600px) {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .spec-label {
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-on-surface-variant);
+    font-weight: 600;
+  }
+
+  .spec-value {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--color-on-surface);
+  }
+}

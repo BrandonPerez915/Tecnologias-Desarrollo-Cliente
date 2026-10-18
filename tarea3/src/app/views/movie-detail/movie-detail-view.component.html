@@ -1,0 +1,187 @@
+<!-- Sticky Navbar with Back Button -->
+<app-navbar
+  [pageTitle]="movie() ? movie()!.title : 'Detalle de Película'"
+  [showBackButton]="true"
+></app-navbar>
+
+<main class="movie-detail-main">
+  @if (movie(); as m) {
+    <!-- Hero Backdrop Section with Layered Vignette Scrim -->
+    <div class="hero-backdrop-container">
+      <div
+        class="backdrop-image"
+        [style.backgroundImage]="'url(' + m.backdropUrl + ')'"
+        role="img"
+        [attr.aria-label]="m.title"
+      ></div>
+      <div class="scrim-vertical"></div>
+      <div class="scrim-horizontal"></div>
+
+      <!-- Floating Nav Overlay within Hero -->
+      <div class="hero-floating-nav container-responsive">
+        <button
+          type="button"
+          class="hero-back-pill"
+          (click)="goBack()"
+          aria-label="Volver al catálogo"
+        >
+          <span class="material-symbols-outlined">arrow_back</span>
+          <span>Volver al catálogo</span>
+        </button>
+
+        <div class="hero-actions-right">
+          <button
+            type="button"
+            class="hero-icon-button"
+            (click)="shareMovie()"
+            aria-label="Compartir"
+          >
+            <span class="material-symbols-outlined">share</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Overlapping Content Container -->
+    <div class="container-responsive detail-content-wrapper">
+      <!-- Floating Poster & Headline Information Row -->
+      <div class="poster-headline-row">
+        <!-- Floating Vertical Poster with Ambient Crimson Glow -->
+        <div class="floating-poster-card">
+          <div class="poster-glow"></div>
+          <img
+            [src]="m.posterUrl"
+            [alt]="'Póster oficial de ' + m.title"
+            class="poster-img"
+          />
+          @if (m.badges.includes('IMAX')) {
+            <span class="poster-imax-tag">IMAX</span>
+          }
+        </div>
+
+        <!-- Essential Metadata beside poster -->
+        <div class="headline-info">
+          <div class="score-pill">
+            <span class="material-symbols-outlined fill star-icon">star</span>
+            <span class="score-number">{{ m.rating }} ★</span>
+            @if (m.ratingCount) {
+              <span class="score-votes">({{ m.ratingCount }})</span>
+            }
+          </div>
+
+          <h2 class="detail-title">{{ m.title }}</h2>
+          <span class="meta-director-year">{{ m.year }} • {{ m.director }}</span>
+        </div>
+      </div>
+
+      <!-- Badges Row -->
+      <div class="badges-row">
+        @for (badge of m.badges; track badge) {
+          <span class="tech-badge">
+            {{ badge }}
+          </span>
+        }
+        <span class="tech-badge duration">{{ m.duration }}</span>
+        @for (g of m.genres; track g) {
+          <span class="tech-badge genre">
+            {{ g }}
+          </span>
+        }
+      </div>
+
+      <!-- Primary Interactive Favorite CTA with Dynamic States -->
+      <div class="cta-favorite-container">
+        <button
+          type="button"
+          class="btn-favorite-cta"
+          [class.favorited]="isFavorite"
+          [class.animate-pulse]="isFavPulse()"
+          (click)="toggleFavorite()"
+        >
+          <span
+            class="material-symbols-outlined fav-icon"
+            [class.fill]="isFavorite"
+          >
+            favorite
+          </span>
+          <span class="fav-label">
+            {{ isFavorite ? 'En tus Favoritos (Quitar)' : 'Añadir a Favoritos' }}
+          </span>
+        </button>
+      </div>
+
+      <!-- Secondary Action Bar: Tráiler & Ficha Técnica -->
+      <div class="secondary-actions-bar">
+        <button
+          type="button"
+          class="btn-secondary-action"
+          (click)="playTrailer()"
+        >
+          <span class="material-symbols-outlined text-crimson">play_circle</span>
+          <span>Ver Tráiler</span>
+        </button>
+
+        <button
+          type="button"
+          class="btn-secondary-action"
+          (click)="downloadSpecs()"
+        >
+          <span class="material-symbols-outlined text-emerald">download</span>
+          <span>Ficha Técnica</span>
+        </button>
+      </div>
+
+      <!-- Synopsis Section -->
+      <section class="synopsis-section">
+        <div class="section-title-row">
+          <span class="pill-marker crimson"></span>
+          <h3 class="section-heading">Sinopsis</h3>
+        </div>
+        <p class="synopsis-body">
+          {{ m.synopsis }}
+        </p>
+      </section>
+
+      <!-- Principal Cast Section -->
+      @if (m.cast.length > 0) {
+        <section class="cast-section">
+          <div class="section-title-row justify-between">
+            <div class="title-with-marker">
+              <span class="pill-marker amber"></span>
+              <h3 class="section-heading">Reparto Principal</h3>
+            </div>
+            <span class="cast-count-label">{{ m.cast.length }} estrellas</span>
+          </div>
+
+          <div class="cast-grid">
+            @for (actor of m.cast; track actor.name) {
+              <app-cast-card
+                [member]="actor"
+              ></app-cast-card>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- Technical Data Section (Ficha Técnica) -->
+      <section class="technical-section">
+        <div class="section-title-row">
+          <span class="pill-marker emerald"></span>
+          <h3 class="section-heading">Ficha Técnica</h3>
+        </div>
+
+        <app-technical-specs [specs]="m.technicalSheet"></app-technical-specs>
+      </section>
+    </div>
+  } @else {
+    <div class="container-responsive py-12">
+      <app-empty-state
+        icon="movie_off"
+        title="Película no encontrada"
+        description="No pudimos encontrar los datos de esta película. Es posible que haya sido retirada o la URL sea incorrecta."
+        actionLabel="Volver al catálogo"
+        (actionClick)="goBack()"
+      ></app-empty-state>
+    </div>
+  }
+</main>

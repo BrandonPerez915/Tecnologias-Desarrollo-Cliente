@@ -1,0 +1,38 @@
+<nav class="bottom-nav-bar pb-safe" aria-label="Navegación inferior">
+  <div class="bottom-nav-container">
+    <a
+      routerLink="/movies"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="bottom-nav-tab"
+    >
+      <span class="material-symbols-outlined tab-icon">movie</span>
+      <span class="tab-label">Películas</span>
+    </a>
+
+    <a
+      routerLink="/favorites"
+      routerLinkActive="active"
+      class="bottom-nav-tab"
+    >
+      <div class="icon-wrapper">
+        <span class="material-symbols-outlined tab-icon">favorite</span>
+        @if (favoritesCount > 0) {
+          <span class="tab-counter-badge">
+          {{ favoritesCount }}
+          </span>
+        }
+      </div>
+      <span class="tab-label">Favoritos</span>
+    </a>
+
+    <a
+      routerLink="/explore"
+      routerLinkActive="active"
+      class="bottom-nav-tab"
+    >
+      <span class="material-symbols-outlined tab-icon">explore</span>
+      <span class="tab-label">Explorar</span>
+    </a>
+  </div>
+</nav>

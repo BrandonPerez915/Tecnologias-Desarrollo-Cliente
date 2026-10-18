@@ -1,0 +1,151 @@
+.hero-spotlight-card {
+  position: relative;
+  width: 100%;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background-color: var(--color-surface-container);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--color-outline-subtle);
+}
+
+.hero-backdrop {
+  width: 100%;
+  height: 320px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+
+  @media (min-width: 768px) {
+    height: 380px;
+  }
+
+  @media (min-width: 1024px) {
+    height: 440px;
+  }
+
+  .scrim-vertical {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top,
+      var(--color-surface-container) 0%,
+      rgba(28, 31, 42, 0.8) 40%,
+      rgba(28, 31, 42, 0.3) 70%,
+      transparent 100%
+    );
+  }
+
+  .scrim-radial {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to right,
+      rgba(28, 31, 42, 0.85) 0%,
+      rgba(28, 31, 42, 0.4) 50%,
+      transparent 100%
+    );
+  }
+}
+
+.hero-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+
+  @media (min-width: 768px) {
+    padding: 2rem;
+    max-width: 720px;
+  }
+
+  .meta-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+
+    .featured-tag {
+      background-color: var(--color-primary-container);
+      color: #ffffff;
+      font-size: 0.6875rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.25rem 0.65rem;
+      border-radius: var(--radius-full);
+      box-shadow: 0 2px 8px rgba(255, 81, 103, 0.3);
+    }
+  }
+
+  .hero-title {
+    font-size: 1.625rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--color-on-surface);
+    margin-bottom: 0.35rem;
+    line-height: 1.2;
+
+    @media (min-width: 768px) {
+      font-size: 2.25rem;
+    }
+  }
+
+  .hero-synopsis {
+    font-size: 0.875rem;
+    color: var(--color-on-surface-variant);
+    margin-bottom: 1rem;
+    line-height: 1.5;
+
+    @media (min-width: 768px) {
+      font-size: 0.95rem;
+      -webkit-line-clamp: 3;
+    }
+  }
+
+  .actions-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    .btn-detail {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      background-color: var(--color-primary-container);
+      color: #ffffff;
+      font-size: 0.9375rem;
+      font-weight: 700;
+      padding: 0.75rem 1.25rem;
+      border-radius: var(--radius-full);
+      box-shadow: 0 4px 16px rgba(255, 42, 84, 0.4);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+      @media (min-width: 768px) {
+        flex: 0 0 auto;
+        padding-left: 2rem;
+        padding-right: 2rem;
+      }
+
+      &:hover {
+        background-color: var(--color-primary);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 42, 84, 0.5);
+      }
+
+      &:active {
+        transform: scale(0.97);
+      }
+
+      .play-icon {
+        font-size: 20px;
+      }
+    }
+  }
+}

@@ -1,0 +1,152 @@
+import { Injectable, computed, signal } from '@angular/core';
+import { Movie } from '../models/movie.model';
+import { SearchCriterion, SortOption } from '../models/filter.model';
+
+import { initialMovies } from '../mocks/initial-movies';
+
+const STORAGE_FAVORITES_KEY = 'streamov_user_favorites';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class MovieService {
+
+  // Core reactive signals
+  public readonly movies = signal<Movie[]>(initialMovies);
+  public readonly favorites = signal<string[]>(this.loadFavoritesFromStorage());
+  public readonly searchQuery = signal<string>('');
+  public readonly searchCriterion = signal<SearchCriterion>('all');
+  public readonly selectedChip = signal<string>('all');
+
+  // Computed signals
+  public readonly featuredMovie = computed(() => {
+    return this.movies().find((m) => m.isFeatured) ?? this.movies()[0];
+  });
+
+  public readonly filteredMovies = computed(() => {
+    const query = this.searchQuery().trim().toLowerCase();
+    const criterion = this.searchCriterion();
+    const chip = this.selectedChip().toLowerCase();
+    const all = this.movies();
+
+    return all.filter((movie) => {
+      // 1. Chip matching
+      let matchesChip = false;
+      if (chip === 'all') {
+        matchesChip = true;
+      } else {
+        matchesChip = movie.genres.some((g) => g.toLowerCase().includes(chip));
+      }
+
+      if (!matchesChip) return false;
+
+      // 2. Query matching
+      if (!query) return true;
+
+      const title = movie.title.toLowerCase();
+      const director = movie.director.toLowerCase();
+      const producer = movie.producer.toLowerCase();
+      const genres = movie.genres.join(' ').toLowerCase();
+      const year = movie.year.toString();
+
+      switch (criterion) {
+        case 'title':
+          return title.includes(query);
+        case 'director':
+          return director.includes(query);
+        case 'producer':
+          return producer.includes(query);
+        case 'genre':
+          return genres.includes(query);
+        case 'year':
+          return year.includes(query);
+        case 'all':
+        default:
+          return (
+            title.includes(query) ||
+            director.includes(query) ||
+            producer.includes(query) ||
+            genres.includes(query) ||
+            year.includes(query)
+          );
+      }
+    });
+  });
+
+  public readonly favoriteMovies = computed(() => {
+    const favIds = new Set(this.favorites());
+    return this.movies().filter((m) => favIds.has(m.id));
+  });
+
+  public readonly favoritesCount = computed(() => this.favorites().length);
+
+  private loadFavoritesFromStorage(): string[] {
+    try {
+      const stored = localStorage.getItem(STORAGE_FAVORITES_KEY);
+      if (stored) {
+        return JSON.parse(stored);
+      }
+    } catch {
+      // Ignore JSON parse errors
+    }
+    // Default initial favorites matching Stitch project
+    return ['dune-2', 'inception', 'interstellar'];
+  }
+
+  private persistFavorites(favs: string[]): void {
+    try {
+      localStorage.setItem(STORAGE_FAVORITES_KEY, JSON.stringify(favs));
+    } catch {
+      // Ignore
+    }
+  }
+
+  public isFavorite(movieId: string): boolean {
+    return this.favorites().includes(movieId);
+  }
+
+  public toggleFavorite(movieId: string): boolean {
+    const current = this.favorites();
+    let updated: string[];
+    let nowActive = false;
+
+    if (current.includes(movieId)) {
+      updated = current.filter((id) => id !== movieId);
+      nowActive = false;
+    } else {
+      updated = [...current, movieId];
+      nowActive = true;
+    }
+
+    this.favorites.set(updated);
+    this.persistFavorites(updated);
+    return nowActive;
+  }
+
+  public clearFavorites(): void {
+    this.favorites.set([]);
+    this.persistFavorites([]);
+  }
+
+  public getMovieById(id: string): Movie | undefined {
+    return this.movies().find((m) => m.id === id);
+  }
+
+  public setSearchQuery(query: string): void {
+    this.searchQuery.set(query);
+  }
+
+  public setSearchCriterion(criterion: SearchCriterion): void {
+    this.searchCriterion.set(criterion);
+  }
+
+  public setSelectedChip(chip: string): void {
+    this.selectedChip.set(chip);
+  }
+
+  public resetFilters(): void {
+    this.searchQuery.set('');
+    this.searchCriterion.set('all');
+    this.selectedChip.set('all');
+  }
+}

@@ -1,0 +1,10 @@
+<div [class]="'rating-badge size-' + size">
+  <span class="material-symbols-outlined star-icon fill">star</span>
+  <span class="rating-number">{{ rating }}</span>
+  @if (votesCount) {
+    <span class="votes-count">({{ votesCount }})</span>
+  }
+  @if (!votesCount) {
+    <span class="votes-count">Sin votos</span>
+  }
+</div>
