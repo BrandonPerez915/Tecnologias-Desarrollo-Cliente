@@ -1,0 +1,100 @@
+/* ==========================================================================
+   Design Tokens: Typography Hierarchy & Utilities
+   ========================================================================== */
+
+:root {
+  --font-family-base: "Manrope", ui-sans-serif, system-ui, sans-serif;
+
+  /* Font Sizes */
+  --font-size-hero: clamp(2rem, 3.2vw, 2.75rem);
+  --font-size-h1: clamp(1.4rem, 2.2vw, 1.85rem);
+  --font-size-h2: 1.25rem;
+  --font-size-h3: 1.05rem;
+  --font-size-body: 0.95rem;
+  --font-size-body-sm: 0.85rem;
+  --font-size-caption: 0.78rem;
+  --font-size-badge: 10px;
+  --font-size-badge-sm: 9px;
+  --font-size-counter: 8px;
+
+  /* Line Heights */
+  --line-height-tight: 1.15;
+  --line-height-heading: 1.25;
+  --line-height-base: 1.5;
+
+  /* Letter Spacing */
+  --letter-spacing-hero: -0.04em;
+  --letter-spacing-heading: -0.02em;
+  --letter-spacing-caps: 0.08em;
+}
+
+/* Typography Hierarchy Classes */
+.type-hero {
+  font-size: var(--font-size-hero);
+  font-weight: 800;
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-hero);
+}
+
+.type-h1 {
+  font-size: var(--font-size-h1);
+  font-weight: 800;
+  line-height: var(--line-height-heading);
+  letter-spacing: var(--letter-spacing-heading);
+  color: var(--color-ink);
+}
+
+.type-h2 {
+  font-size: var(--font-size-h2);
+  font-weight: 700;
+  line-height: var(--line-height-heading);
+  letter-spacing: var(--letter-spacing-heading);
+  color: var(--color-ink);
+}
+
+.type-h3 {
+  font-size: var(--font-size-h3);
+  font-weight: 700;
+  line-height: var(--line-height-heading);
+  color: var(--color-ink);
+}
+
+.type-body {
+  font-size: var(--font-size-body);
+  font-weight: 500;
+  line-height: var(--line-height-base);
+  color: var(--color-ink);
+}
+
+.type-body-sm {
+  font-size: var(--font-size-body-sm);
+  font-weight: 500;
+  line-height: var(--line-height-base);
+  color: var(--color-muted);
+}
+
+.type-caption {
+  font-size: var(--font-size-caption);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--color-muted);
+}
+
+.type-uppercase-label {
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  letter-spacing: var(--letter-spacing-caps);
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.type-badge {
+  font-size: var(--font-size-badge);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.type-badge-sm {
+  font-size: var(--font-size-badge-sm);
+  font-weight: 700;
+}

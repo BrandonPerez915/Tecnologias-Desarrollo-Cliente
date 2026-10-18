@@ -1,0 +1,440 @@
+/* ==========================================================================
+   ImeiHub Shared UI Primitives & Cross-Component Layout Rules
+   ========================================================================== */
+
+/* 1. Custom Element Host Layout Rules */
+app-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+  flex-shrink: 0;
+}
+
+app-field,
+app-password-field {
+  display: block;
+  width: 100%;
+}
+
+app-button {
+  display: inline-flex;
+}
+
+app-button:has(.full-button) {
+  display: flex;
+  width: 100%;
+}
+
+app-quick-actions-grid {
+  grid-column: 1 / -1;
+  display: block;
+}
+
+/* Dashboard Metrics Row Grid Placement */
+.dashboard-metrics-row app-metric-card:first-of-type {
+  grid-column: 1;
+  grid-row: 1;
+  display: block;
+}
+
+.dashboard-metrics-row app-metric-card:last-of-type {
+  grid-column: 2;
+  grid-row: 1;
+  display: block;
+}
+
+/* Grid Spans for Form Fields inside Feature Grids */
+.product-form-grid > app-field:first-child,
+.product-form-grid > .field:first-child {
+  grid-column: 1 / -1;
+}
+
+.edit-product-grid > app-field:first-child,
+.edit-product-grid > .field:first-child,
+.two-col-fields > app-field:first-child,
+.two-col-fields > .field:first-child {
+  grid-column: span 2;
+}
+
+.invoice-fields > app-field:last-child,
+.invoice-fields > .field:last-child {
+  grid-column: span 2;
+}
+
+/* 2. Panel Headers (Fixes missing padding in Loans and other panels) */
+.panel-header {
+  min-height: 76px;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--line, #e4e8ee);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.panel-header h2 {
+  margin: 0 0 3px;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--ink, #172033);
+}
+
+.panel-header p {
+  margin: 0;
+  color: var(--muted, #718096);
+  font-size: 12px;
+}
+
+/* 3. Loan Phone Icon Container */
+.loan-phone {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  color: var(--primary, #2457e6);
+  background: var(--primary-soft, #edf2ff);
+}
+
+/* 4. Shared Product Thumbnail */
+.product-thumb {
+  width: 38px;
+  height: 42px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border: 1px solid #e5e9ee;
+  border-radius: 9px;
+  color: #637087;
+  background: linear-gradient(145deg, #fafbfc, #eef1f5);
+}
+
+/* 5. Shared Search Box */
+.search-box {
+  height: 44px;
+  padding: 0 13px;
+  border: 1px solid var(--line, #e4e8ee);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #96a0b0;
+  background: white;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.search-box:focus-within {
+  border-color: var(--primary, #2457e6);
+  box-shadow: 0 0 0 3px rgba(36, 87, 230, 0.12);
+}
+
+.search-box input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  color: var(--ink, #172033);
+  background: transparent;
+  font-size: 13px;
+}
+
+/* 6. Shared Form Label & Raw Field Controls */
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  color: #3b4861;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.field {
+  display: block;
+  margin-bottom: 15px;
+}
+
+.field > span {
+  display: block;
+  margin-bottom: 6px;
+  color: #3b4861;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.field-control {
+  min-height: 44px;
+  padding: 0 13px;
+  border: 1px solid #d9dfe8;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #8b96a8;
+  background: white;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.field-control:focus-within {
+  border-color: var(--primary, #2457e6);
+  box-shadow: 0 0 0 3px rgba(36, 87, 230, 0.12);
+}
+
+.field-control input,
+.field-control select,
+.field-control textarea {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  color: var(--ink, #172033);
+  background: transparent;
+  font-size: 14px;
+}
+
+.field-suffix {
+  color: #8b96a8;
+  font-size: 12px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+/* 7. Shared Close Button */
+.close-button {
+  flex: 0 0 auto;
+  position: relative;
+  width: 37px;
+  height: 37px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line, #e4e8ee);
+  border-radius: 9px;
+  background: white;
+  color: var(--ink, #172033);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.close-button:hover {
+  background: var(--soft, #f4f6f8);
+}
+
+/* 8. Shared Live Pill & Card Label */
+.card-label {
+  color: #7c8799;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.live-pill {
+  padding: 5px 10px;
+  border: 1px solid rgba(114, 241, 184, 0.25);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #8bf3c3;
+  background: rgba(18, 150, 107, 0.22);
+  font-size: var(--type-badge, 10px);
+  font-weight: 800;
+}
+
+.live-pill i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #3fe09b;
+}
+
+/* 9. Shared Quick Icon Styles */
+.quick-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.quick-icon.primary {
+  color: var(--primary, #2457e6);
+  background: var(--primary-soft, #edf2ff);
+}
+
+.quick-icon.success {
+  color: var(--green, #15966b);
+  background: var(--green-soft, #e9f8f2);
+}
+
+.quick-icon.warning {
+  color: var(--orange, #e66c38);
+  background: var(--orange-soft, #fff0e9);
+}
+
+/* 10. Shared Swatch Colors */
+.color-swatch,
+.color-dot {
+  border: 1px solid rgba(23, 32, 51, 0.16);
+  border-radius: 50%;
+  background: #aeb5bf;
+  flex-shrink: 0;
+}
+
+.swatch-graphite,
+.swatch-black {
+  background: #28303d;
+}
+
+.swatch-sierra-blue,
+.swatch-blue {
+  background: #6b8fb3;
+}
+
+.swatch-gold {
+  background: #c4ae82;
+}
+
+.swatch-midnight {
+  background: #26354c;
+}
+
+.swatch-silver {
+  background: #c8cbd0;
+}
+
+.swatch-starlight {
+  background: #e4d6bd;
+}
+
+.swatch-yellow {
+  background: #e3c95f;
+}
+
+.swatch-lime {
+  background: #b8d58d;
+}
+
+.swatch-violet,
+.swatch-purple {
+  background: #8d73ad;
+}
+
+.swatch-white {
+  background: #ffffff;
+}
+
+.swatch-red {
+  background: #c85b61;
+}
+
+/* 11. Inventory & Page Action Containers */
+.inventory-bottom-action {
+  margin-top: 18px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.inventory-no-suggestions {
+  padding: 13px;
+  color: var(--muted, #718096);
+  font-size: 12px;
+}
+
+.mobile-page-action {
+  display: none;
+}
+
+/* 12. Cross-Component Button, Status, Amount & Icon Selectors */
+.cash-summary-actions app-button,
+.cash-summary-actions .btn {
+  width: 100%;
+}
+
+.order-workspace-header .btn {
+  min-height: 38px;
+  font-size: 12px;
+}
+
+.order-header-actions app-button:first-child .btn,
+.order-header-actions .btn:first-child {
+  position: relative;
+  padding-right: 22px;
+}
+
+.order-header-actions .btn b {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 20px;
+  height: 20px;
+  border: 2px solid white;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: white;
+  background: var(--primary, #2457e6);
+  box-shadow: 0 3px 8px rgba(36, 87, 230, 0.25);
+  font-size: var(--type-counter, 8px);
+}
+
+.order-empty .btn {
+  min-height: 36px;
+  font-size: 12px;
+}
+
+.order-summary .btn {
+  min-height: 40px;
+}
+
+.printer-status svg,
+.action-sheet-list > button svg:last-child,
+.orders-modal-list > button svg,
+.picker-products > button svg,
+.inventory-suggestions button svg {
+  color: #9aa4b4;
+}
+
+.printer-status svg {
+  color: var(--primary, #2457e6);
+}
+
+.sheet-actions app-button,
+.sheet-actions .btn,
+.detail-actions app-button,
+.detail-actions .btn,
+.checkout-actions app-button,
+.checkout-actions .btn,
+.add-product-actions app-button,
+.add-product-actions .btn,
+.confirm-return-actions app-button,
+.confirm-return-actions .btn,
+.loan-detail-actions app-button,
+.loan-detail-actions .btn {
+  width: 100%;
+}
+
+@media (max-width: 600px) {
+  .mobile-page-action {
+    margin-top: 16px;
+    display: flex;
+  }
+
+  .mobile-page-action app-button,
+  .mobile-page-action .btn,
+  .inventory-bottom-action app-button,
+  .inventory-bottom-action .btn,
+  .close-cash-panel-action app-button,
+  .close-cash-panel-action .btn {
+    width: 100%;
+  }
+
+  .order-header-actions app-button:last-child {
+    display: none;
+  }
+
+  .order-summary app-button,
+  .order-summary .btn {
+    grid-column: span 2;
+    width: 100%;
+  }
+}
