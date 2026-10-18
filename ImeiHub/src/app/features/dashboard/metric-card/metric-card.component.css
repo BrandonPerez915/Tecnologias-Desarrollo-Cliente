@@ -1,0 +1,61 @@
+.metric-card {
+  min-height: 116px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  background: var(--surface);
+  box-shadow: 0 3px 15px rgba(31, 44, 72, 0.035);
+}
+
+.metric-icon {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+}
+
+.metric-in .metric-icon {
+  color: var(--green);
+  background: var(--green-soft);
+}
+
+.metric-out .metric-icon {
+  color: var(--orange);
+  background: var(--orange-soft);
+}
+
+.metric-card .card-label {
+  margin-bottom: 3px;
+  font-size: 12px;
+}
+
+.metric-note {
+  margin: 3px 0 0;
+  color: #8c97a8;
+  font-size: 12px;
+}
+
+.metric-note.positive {
+  color: var(--green);
+}
+
+@media (max-width: 600px) {
+  .metric-card {
+    min-height: 112px;
+    padding: 14px;
+    display: grid;
+    gap: 7px;
+  }
+  .metric-card .amount-large {
+    font-size: 19px;
+    gap: 4px;
+  }
+  .metric-card .currency {
+    font-size: 12px;
+  }
+}

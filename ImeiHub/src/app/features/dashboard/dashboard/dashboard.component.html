@@ -1,0 +1,50 @@
+<div class="page">
+  <app-page-heading
+    [title]="'Buenas tardes, ' + (user()?.name?.split(' ')?.[0] || 'Ada')"
+    [subtitle]="'Esto es lo que está pasando hoy en el puesto ' + (user()?.stallNumber || 'A-18') + ' · ' + (user()?.storeName || 'SmartFix') + '.'"
+  ></app-page-heading>
+
+  <section class="dashboard-overview">
+    <app-cash-hero-card (navigate)="onNavigate($event)"></app-cash-hero-card>
+  </section>
+
+  <section class="dashboard-grid">
+    <div class="dashboard-metrics-row">
+      <app-metric-card
+        label="Ventas de hoy"
+        [amount]="cashService.totalSalesToday().toLocaleString('es-MX')"
+        note="Cobros registrados hoy"
+        icon="arrow-down"
+        variant="in"
+        [positive]="true"
+      ></app-metric-card>
+
+      <button type="button" class="movements-link" (click)="onNavigate('cash')">
+        Ver movimientos <app-icon name="chevron" [size]="15"></app-icon>
+      </button>
+
+      <app-metric-card
+        label="Gastos de hoy"
+        [amount]="cashService.totalExpensesToday().toLocaleString('es-MX')"
+        note="Salidas de efectivo"
+        icon="arrow-up"
+        variant="out"
+      ></app-metric-card>
+    </div>
+
+    <app-quick-actions-grid
+      (open)="onOpenOverlay($event)"
+      (navigate)="onNavigate($event)"
+    ></app-quick-actions-grid>
+  </section>
+
+  <div class="close-cash-panel-action">
+    <app-button
+      variant="danger"
+      icon="logout"
+      (clicked)="onNavigate('close')"
+    >
+      Cerrar caja
+    </app-button>
+  </div>
+</div>

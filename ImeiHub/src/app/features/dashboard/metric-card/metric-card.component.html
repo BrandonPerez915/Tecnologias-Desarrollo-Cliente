@@ -1,0 +1,10 @@
+<div [class]="'metric-card metric-' + variant()">
+  <div class="metric-icon">
+    <app-icon [name]="icon()"></app-icon>
+  </div>
+  <div>
+    <p class="card-label">{{ label() }}</p>
+    <app-amount size="large">{{ amount() }}</app-amount>
+    <p class="metric-note" [class.positive]="positive()">{{ note() }}</p>
+  </div>
+</div>

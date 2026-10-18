@@ -1,0 +1,65 @@
+<div class="dashboard-quick-panel">
+  <div class="quick-panel-title">
+    <strong>Acciones rápidas</strong>
+  </div>
+  <div class="quick-panel-actions">
+    <button type="button" (click)="open.emit('scanner')" aria-label="Escaneo rápido">
+      <span class="quick-icon primary">
+        <app-icon name="scan"></app-icon>
+      </span>
+      <small>Escanear</small>
+    </button>
+    <button type="button" (click)="open.emit('sale')" aria-label="Registrar venta">
+      <span class="quick-icon success">
+        <app-icon name="plus"></app-icon>
+      </span>
+      <small>Registrar venta</small>
+    </button>
+    <button type="button" (click)="open.emit('expense')" aria-label="Registrar gasto">
+      <span class="quick-icon warning">
+        <app-icon name="arrow-up"></app-icon>
+      </span>
+      <small>Registrar gasto</small>
+    </button>
+    <button
+      type="button"
+      (click)="navigate.emit('inventory')"
+      aria-label="Registrar nuevo producto"
+    >
+      <span class="quick-icon primary">
+        <app-icon name="box"></app-icon>
+      </span>
+      <small>Nuevo producto</small>
+    </button>
+    <button type="button" (click)="open.emit('print')" aria-label="Imprimir etiquetas">
+      <span class="quick-icon success">
+        <app-icon name="printer"></app-icon>
+      </span>
+      <small>Imprimir etiquetas</small>
+    </button>
+    <button type="button" (click)="open.emit('loan')" aria-label="Registrar nuevo préstamo">
+      <span class="quick-icon warning">
+        <app-icon name="swap"></app-icon>
+      </span>
+      <small>Nuevo préstamo</small>
+    </button>
+    <button type="button" (click)="navigate.emit('orders')" aria-label="Crear nueva orden">
+      <span class="quick-icon primary">
+        <app-icon name="receipt"></app-icon>
+      </span>
+      <small>Nueva orden</small>
+    </button>
+    <button type="button" (click)="navigate.emit('cash')" aria-label="Ver movimientos">
+      <span class="quick-icon success">
+        <app-icon name="cash"></app-icon>
+      </span>
+      <small>Movimientos</small>
+    </button>
+    <button type="button" (click)="navigate.emit('loans')" aria-label="Ver préstamos">
+      <span class="quick-icon warning">
+        <app-icon name="clock"></app-icon>
+      </span>
+      <small>Ver préstamos</small>
+    </button>
+  </div>
+</div>

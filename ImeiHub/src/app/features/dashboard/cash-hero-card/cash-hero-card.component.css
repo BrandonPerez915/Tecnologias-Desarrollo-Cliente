@@ -1,0 +1,132 @@
+.cash-hero {
+  position: relative;
+  min-height: 204px;
+  overflow: hidden;
+  padding: 27px 29px 23px;
+  border-radius: 17px;
+  color: white;
+  background: linear-gradient(135deg, #183eae 0%, #235ceb 72%, #3c70f3 100%);
+  box-shadow: 0 13px 30px rgba(36, 87, 230, 0.19);
+}
+
+.cash-hero-top {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.cash-hero-shape {
+  position: absolute;
+  right: -35px;
+  bottom: -85px;
+  width: 220px;
+  height: 220px;
+  border: 35px solid rgba(255, 255, 255, 0.06);
+  border-radius: 50%;
+}
+
+.card-label {
+  margin: 0 0 10px;
+  color: #7a879a;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.35px;
+  text-transform: uppercase;
+}
+
+.light-label {
+  color: #c9d8ff;
+}
+
+.live-pill {
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #ecf2ff;
+  background: rgba(13, 34, 92, 0.22);
+  font-size: var(--type-badge, 10px);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.live-pill span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #65e3b4;
+  box-shadow: 0 0 0 3px rgba(101, 227, 180, 0.13);
+}
+
+.cash-meta {
+  position: absolute;
+  z-index: 2;
+  right: 29px;
+  bottom: 23px;
+  left: 29px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.17);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  align-items: end;
+  gap: 20px;
+  color: #bfd0fa;
+  font-size: 12px;
+}
+
+.cash-meta > span {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.cash-meta small {
+  color: #aebff0;
+  font-size: 12px;
+}
+
+.cash-meta strong {
+  overflow: hidden;
+  color: white;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cash-meta button {
+  border: 0;
+  padding: 5px 0;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  color: white;
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+@media (max-width: 600px) {
+  .cash-hero {
+    min-height: 238px;
+    padding: 22px 20px 19px;
+  }
+  .cash-meta {
+    right: 20px;
+    bottom: 19px;
+    left: 20px;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 18px;
+  }
+  .cash-meta button {
+    justify-self: start;
+  }
+  .cash-hero .live-pill {
+    padding: 6px 8px;
+  }
+}

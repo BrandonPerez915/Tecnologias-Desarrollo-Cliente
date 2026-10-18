@@ -1,0 +1,29 @@
+<div class="cash-hero">
+  <div class="cash-hero-top">
+    <div>
+      <p class="card-label light-label">Efectivo actual en caja</p>
+      <app-amount size="hero">{{ cashService.expectedCash() | number:'1.0-0' }}</app-amount>
+    </div>
+    <span class="live-pill">
+      <span></span> Caja abierta
+    </span>
+  </div>
+  <div class="cash-meta">
+    <span>
+      <small>Puesto</small>
+      <strong>{{ user()?.stallNumber || 'A-18' }} · {{ user()?.storeName || 'SmartFix' }}</strong>
+    </span>
+    <span>
+      <small>Apertura</small>
+      <strong>8:32 por {{ user()?.name?.split(' ')?.[0] || 'Ada' }}</strong>
+    </span>
+    <span>
+      <small>Saldo inicial</small>
+      <strong>MXN {{ cashService.initialBase() | number:'1.0-0' }}</strong>
+    </span>
+    <button type="button" (click)="goToCash()">
+      Ver caja <app-icon name="chevron" [size]="14"></app-icon>
+    </button>
+  </div>
+  <div class="cash-hero-shape"></div>
+</div>
