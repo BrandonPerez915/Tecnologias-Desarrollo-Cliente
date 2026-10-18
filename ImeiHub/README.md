@@ -1,4 +1,7 @@
 # ImeiHub · Sistema de Punto de Venta y Trazabilidad por IMEI
+**Integrantes del equipo**:
+Brandon Michelle Pérez Saldaña
+Yair Emmanuel Arias Madera
 
 <p align="center">
   <img src="public/imeihub-logo.jpeg" alt="ImeiHub Logo" width="130" style="border-radius: 20px; box-shadow: 0 4px 14px rgba(0,0,0,0.15);" />
