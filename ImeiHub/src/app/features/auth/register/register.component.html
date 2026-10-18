@@ -1,0 +1,172 @@
+<app-auth-layout
+  title="Crear cuenta"
+  subtitle="Comienza a gestionar tus dispositivos, órdenes e inventario en minutos"
+  maxWidth="540px"
+  [showBackButton]="false"
+>
+  <form (ngSubmit)="handleSubmit($event)" class="register-form" novalidate>
+    <!-- General error banner if any -->
+    @if (generalError()) {
+      <div class="auth-alert alert-danger" role="alert">
+        <app-icon name="warning" [size]="17"></app-icon>
+        <span>{{ generalError() }}</span>
+      </div>
+    }
+
+    <!-- Personal Info & Store Info in a clean grid -->
+    <div class="form-grid-2">
+      <!-- Full Name -->
+      <app-field
+        label="Nombre y apellido"
+        placeholder="Ada Okafor"
+        icon="user"
+        autocomplete="name"
+        [required]="true"
+        [value]="name()"
+        [error]="nameError()"
+        (valueChange)="onNameChange($event)"
+        (blur)="validateName()"
+      ></app-field>
+
+      <!-- Store / Business Name -->
+      <app-field
+        label="Nombre de tu tienda / taller"
+        placeholder="SmartFix Celulares"
+        icon="store"
+        [required]="true"
+        [value]="storeName()"
+        [error]="storeError()"
+        (valueChange)="onStoreChange($event)"
+        (blur)="validateStore()"
+      ></app-field>
+    </div>
+
+    <div class="form-grid-2">
+      <!-- Email -->
+      <app-field
+        label="Correo electrónico"
+        placeholder="ada@smartfix.com"
+        type="email"
+        icon="mail"
+        autocomplete="email"
+        [required]="true"
+        [value]="email()"
+        [error]="emailError()"
+        (valueChange)="onEmailChange($event)"
+        (blur)="validateEmail()"
+      ></app-field>
+
+      <!-- Phone / WhatsApp -->
+      <app-field
+        label="Teléfono o WhatsApp"
+        placeholder="+52 55 1234 5678"
+        type="tel"
+        icon="phone"
+        inputMode="tel"
+        autocomplete="tel"
+        [required]="false"
+        [value]="phone()"
+        (valueChange)="phone.set($event)"
+      ></app-field>
+    </div>
+
+    <!-- Password Field -->
+    <app-password-field
+      id="register-password"
+      label="Contraseña"
+      placeholder="Crea una contraseña segura"
+      autocomplete="new-password"
+      [required]="true"
+      [value]="password()"
+      [error]="passwordError()"
+      (valueChange)="onPasswordChange($event)"
+      (blur)="validatePassword()"
+    ></app-password-field>
+
+    <!-- Password Strength Meter -->
+    @if (password().length > 0) {
+      <div class="password-meter">
+        <div class="meter-bar-track">
+          <div
+            class="meter-bar-fill"
+            [class.strength-weak]="strengthLevel() === 1"
+            [class.strength-medium]="strengthLevel() === 2"
+            [class.strength-strong]="strengthLevel() === 3"
+          ></div>
+        </div>
+        <div class="meter-labels">
+          <span class="type-caption">
+            Seguridad:
+            <strong [class]="strengthColorClass()">{{ strengthText() }}</strong>
+          </span>
+          <span class="type-caption text-muted">Mínimo 8 caracteres</span>
+        </div>
+      </div>
+    }
+
+    <!-- Confirm Password Field -->
+    <app-password-field
+      id="register-confirm-password"
+      label="Confirmar contraseña"
+      placeholder="Repite la misma contraseña"
+      autocomplete="new-password"
+      [required]="true"
+      [value]="confirmPassword()"
+      [error]="confirmPasswordError()"
+      (valueChange)="onConfirmPasswordChange($event)"
+      (blur)="validateConfirmPassword()"
+    ></app-password-field>
+
+    <!-- Terms and Conditions Agreement -->
+    <div class="terms-row">
+      <label class="custom-checkbox-label">
+        <input
+          type="checkbox"
+          [(ngModel)]="acceptTerms"
+          name="acceptTerms"
+          class="custom-checkbox"
+        />
+        <span class="type-caption">
+          Acepto los
+          <a href="javascript:void(0)" class="terms-link">Términos de Servicio</a>
+          y la
+          <a href="javascript:void(0)" class="terms-link">Política de Privacidad</a>
+          de ImeiHub.
+        </span>
+      </label>
+      @if (termsError()) {
+        <small class="terms-error">{{ termsError() }}</small>
+      }
+    </div>
+
+    <!-- Submit Button -->
+    <div class="form-actions">
+      <app-button
+        variant="primary"
+        type="submit"
+        className="full-button register-btn"
+        [disabled]="loading()"
+      >
+        @if (loading()) {
+          <div class="spinner"></div>
+          <span>Creando tu cuenta...</span>
+        } @else {
+          <app-icon name="check" [size]="17"></app-icon>
+          <span>Crear cuenta y comenzar</span>
+        }
+      </app-button>
+    </div>
+
+    <!-- Switch to Login prompt -->
+    <div class="switch-auth-prompt">
+      <span class="type-body-sm">¿Ya tienes una cuenta para tu negocio?</span>
+      <button
+        type="button"
+        class="switch-link-btn"
+        (click)="goToLogin()"
+      >
+        Inicia sesión
+      </button>
+    </div>
+  </form>
+</app-auth-layout>

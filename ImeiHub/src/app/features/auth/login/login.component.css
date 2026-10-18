@@ -1,0 +1,154 @@
+.login-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  font-size: var(--font-size-caption, 0.78rem);
+  font-weight: 600;
+}
+
+.alert-danger {
+  background: var(--color-danger-soft, #fff0f0);
+  color: var(--color-danger, #d94a4a);
+  border: 1px solid rgba(217, 74, 74, 0.2);
+}
+
+.forgot-password-link {
+  border: 0;
+  background: transparent;
+  color: var(--color-primary, #2457e6);
+  font-size: var(--font-size-caption, 0.78rem);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s ease;
+}
+
+.forgot-password-link:hover {
+  color: var(--color-primary-dark, #173ca8);
+  text-decoration: underline;
+}
+
+.form-row-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.custom-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  color: var(--color-ink-secondary, #3b4861);
+}
+
+.custom-checkbox {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--color-primary, #2457e6);
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.form-actions {
+  margin-bottom: 20px;
+}
+
+:host ::ng-deep .login-btn {
+  height: 48px;
+  font-size: 15px;
+}
+
+/* Spinner */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Switch link prompt */
+.switch-auth-prompt {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding-top: 6px;
+  color: var(--color-muted, #718096);
+  flex-wrap: wrap;
+}
+
+.switch-link-btn {
+  border: 0;
+  background: transparent;
+  color: var(--color-primary, #2457e6);
+  font-weight: 700;
+  font-size: var(--font-size-body-sm, 0.85rem);
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s ease;
+}
+
+.switch-link-btn:hover {
+  color: var(--color-primary-dark, #173ca8);
+  text-decoration: underline;
+}
+
+/* Recovery Modal */
+.recovery-overlay {
+  z-index: 1100;
+}
+
+.recovery-card {
+  width: 100%;
+  max-width: 440px;
+  padding: 28px;
+  animation: page-in 0.2s ease-out;
+}
+
+.recovery-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.recovery-icon-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.recovery-header h3 {
+  margin-bottom: 8px;
+}
+
+.recovery-body {
+  margin-bottom: 22px;
+}
+
+.recovery-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}

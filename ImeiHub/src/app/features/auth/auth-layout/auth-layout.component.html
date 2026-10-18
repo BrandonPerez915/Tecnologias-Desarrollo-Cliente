@@ -1,0 +1,55 @@
+<div class="auth-page">
+  <!-- Background Ambient Glow -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <div class="auth-container" [style.max-width]="maxWidth()">
+    <!-- Centered Form Panel -->
+    <main class="auth-main-panel panel">
+      <header class="auth-header">
+        <div class="brand-bar">
+          <app-brand-logo
+            size="md"
+            badge="v1.0 Pro"
+            [clickable]="true"
+            (clicked)="backClicked.emit()"
+          ></app-brand-logo>
+
+          @if (showBackButton()) {
+            <button
+              type="button"
+              class="back-to-app-btn"
+              (click)="backClicked.emit()"
+              [title]="backLabel()"
+            >
+              <app-icon name="return" [size]="14"></app-icon>
+              <span>{{ backLabel() }}</span>
+            </button>
+          }
+        </div>
+
+        <div class="auth-headings">
+          <h1 class="type-h1 auth-title">{{ title() }}</h1>
+          <p class="type-body-sm auth-subtitle">{{ subtitle() }}</p>
+        </div>
+      </header>
+
+      <div class="auth-content-body">
+        <ng-content></ng-content>
+      </div>
+
+      <footer class="auth-footer">
+        <div class="auth-footer-links">
+          <a href="javascript:void(0)" class="type-caption">Términos de servicio</a>
+          <span class="dot-separator">•</span>
+          <a href="javascript:void(0)" class="type-caption">Privacidad</a>
+          <span class="dot-separator">•</span>
+          <a href="javascript:void(0)" class="type-caption">Soporte técnico</a>
+        </div>
+        <p class="type-caption auth-copyright">
+          © 2026 ImeiHub. Todos los derechos reservados.
+        </p>
+      </footer>
+    </main>
+  </div>
+</div>

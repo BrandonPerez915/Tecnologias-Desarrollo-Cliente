@@ -1,0 +1,138 @@
+<app-auth-layout
+  title="Iniciar sesión"
+  subtitle="Ingresa tus credenciales para administrar tu inventario y caja"
+  maxWidth="460px"
+  [showBackButton]="false"
+>
+  <form (ngSubmit)="handleSubmit($event)" class="login-form" novalidate>
+    <!-- General error banner if any -->
+    @if (generalError()) {
+      <div class="auth-alert alert-danger" role="alert">
+        <app-icon name="warning" [size]="17"></app-icon>
+        <span>{{ generalError() }}</span>
+      </div>
+    }
+
+    <!-- Email Field -->
+    <app-field
+      label="Correo electrónico o usuario"
+      placeholder="ejemplo@imeihub.com"
+      type="email"
+      icon="mail"
+      autocomplete="email"
+      [required]="true"
+      [value]="email()"
+      [error]="emailError()"
+      (valueChange)="onEmailChange($event)"
+      (blur)="validateEmail()"
+    ></app-field>
+
+    <!-- Password Field with Forgot Password action -->
+    <app-password-field
+      id="login-password"
+      label="Contraseña"
+      placeholder="Tu contraseña secreta"
+      autocomplete="current-password"
+      [required]="true"
+      [value]="password()"
+      [error]="passwordError()"
+      (valueChange)="onPasswordChange($event)"
+      (blur)="validatePassword()"
+    >
+      <button
+        label-extra
+        type="button"
+        class="forgot-password-link"
+        (click)="handleForgotPassword()"
+      >
+        ¿Olvidaste tu contraseña?
+      </button>
+    </app-password-field>
+
+    <!-- Remember Me Checkbox -->
+    <div class="form-row-options">
+      <label class="custom-checkbox-label">
+        <input
+          type="checkbox"
+          [(ngModel)]="rememberMe"
+          name="rememberMe"
+          class="custom-checkbox"
+        />
+        <span class="type-body-sm">Recordarme en este dispositivo</span>
+      </label>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="form-actions">
+      <app-button
+        variant="primary"
+        type="submit"
+        className="full-button login-btn"
+        [disabled]="loading()"
+      >
+        @if (loading()) {
+          <div class="spinner"></div>
+          <span>Verificando credenciales...</span>
+        } @else {
+          <app-icon name="check" [size]="17"></app-icon>
+          <span>Acceder al sistema</span>
+        }
+      </app-button>
+    </div>
+
+    <!-- Switch to Register view -->
+    <div class="switch-auth-prompt">
+      <span class="type-body-sm">¿Aún no tienes cuenta para tu tienda?</span>
+      <button
+        type="button"
+        class="switch-link-btn"
+        (click)="goToRegister()"
+      >
+        Regístrate aquí
+      </button>
+    </div>
+  </form>
+
+  <!-- Password recovery modal / dialog -->
+  @if (showRecoveryModal()) {
+    <div class="recovery-overlay overlay">
+      <div class="recovery-card panel">
+        <div class="recovery-header">
+          <div class="recovery-icon-circle bg-primary-soft text-primary">
+            <app-icon name="mail" [size]="20"></app-icon>
+          </div>
+          <h3 class="type-h2">Recuperar contraseña</h3>
+          <p class="type-body-sm text-muted">
+            Ingresa el correo registrado con tu cuenta de ImeiHub para recibir las instrucciones de restablecimiento.
+          </p>
+        </div>
+
+        <div class="recovery-body">
+          <app-field
+            label="Correo de tu cuenta"
+            placeholder="ejemplo@imeihub.com"
+            type="email"
+            icon="mail"
+            [value]="recoveryEmail()"
+            (valueChange)="recoveryEmail.set($event)"
+          ></app-field>
+        </div>
+
+        <div class="recovery-actions">
+          <app-button
+            variant="secondary"
+            (clicked)="showRecoveryModal.set(false)"
+          >
+            Cancelar
+          </app-button>
+          <app-button
+            variant="primary"
+            (clicked)="sendPasswordReset()"
+          >
+            Enviar enlace
+          </app-button>
+        </div>
+      </div>
+    </div>
+  }
+</app-auth-layout>
