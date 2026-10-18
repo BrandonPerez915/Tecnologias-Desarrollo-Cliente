@@ -1,0 +1,24 @@
+<nav class="bottom-nav" aria-label="Navegación móvil">
+  @for (item of items; track item.id) {
+    <button
+      type="button"
+      [class.active]="screen() === item.id"
+      (click)="navigate.emit(item.id)"
+    >
+      <span>
+        <app-icon [name]="item.icon"></app-icon>
+        @if (item.id === 'loans') { <i>4</i> }
+        @if (item.id === 'orders') { <i>3</i> }
+      </span>
+      <small>
+        {{
+          item.id === 'cash'
+            ? 'Movim.'
+            : item.id === 'loans'
+              ? 'Prést.'
+              : item.label
+        }}
+      </small>
+    </button>
+  }
+</nav>

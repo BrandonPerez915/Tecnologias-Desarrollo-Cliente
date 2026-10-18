@@ -1,0 +1,50 @@
+<div
+  [class]="'brand-logo-root size-' + size() + ' theme-' + theme() + (clickable() ? ' is-clickable' : '')"
+  [attr.role]="clickable() ? 'button' : null"
+  [attr.tabindex]="clickable() ? 0 : null"
+  (click)="handleClick()"
+  (keydown.enter)="handleClick()"
+>
+  <div class="brand-mark-frame">
+    @if (!imgError()) {
+      <img
+        src="assets/imeihub-logo.jpeg"
+        [alt]="'Logo de ' + brandName()"
+        class="brand-mark-img"
+        (error)="imgError.set(true)"
+      />
+    } @else {
+      <svg
+        viewBox="0 0 32 32"
+        fill="none"
+        class="brand-mark-fallback"
+        aria-hidden="true"
+      >
+        <path
+          d="M16 4L26.3923 10V22L16 28L5.6077 22V10L16 4Z"
+          stroke="currentColor"
+          stroke-width="2.4"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M16 11L21.1962 14V20L16 23L10.8038 20V14L16 11Z"
+          fill="currentColor"
+        />
+      </svg>
+    }
+  </div>
+
+  @if (showText()) {
+    <div class="brand-text-group">
+      <div class="brand-title-row">
+        <strong class="brand-name">{{ brandName() }}</strong>
+        @if (badge()) {
+          <span class="type-badge-sm brand-badge">{{ badge() }}</span>
+        }
+      </div>
+      @if (subtitle()) {
+        <span class="type-caption brand-subtitle">{{ subtitle() }}</span>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,30 @@
+<label class="field">
+  <span class="field-label-text">
+    {{ label() }}
+    @if (required()) {
+      <span class="field-required">*</span>
+    }
+  </span>
+  <div class="field-control" [class.error]="!!error()" [class.disabled]="disabled()">
+    @if (icon()) {
+      <app-icon [name]="icon()!" [size]="17" className="field-icon"></app-icon>
+    }
+    <input
+      [type]="type()"
+      [placeholder]="placeholder()"
+      [inputMode]="inputMode()"
+      [min]="min() !== undefined ? min() : null"
+      [attr.autocomplete]="autocomplete() || null"
+      [disabled]="disabled()"
+      [ngModel]="value()"
+      (ngModelChange)="onValueChange($event)"
+      (blur)="blur.emit()"
+    />
+    <ng-content></ng-content>
+  </div>
+  @if (error()) {
+    <small class="field-error">{{ error() }}</small>
+  } @else if (hint()) {
+    <small class="field-hint">{{ hint() }}</small>
+  }
+</label>

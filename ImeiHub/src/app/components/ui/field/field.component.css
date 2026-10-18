@@ -1,0 +1,85 @@
+.field {
+  margin-bottom: 16px;
+  display: block;
+}
+
+.field-label-text {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 6px;
+  font-size: var(--font-size-caption, 0.78rem);
+  font-weight: 700;
+  color: var(--color-ink, #172033);
+  letter-spacing: -0.01em;
+}
+
+.field-required {
+  color: var(--color-danger, #d94a4a);
+}
+
+.field-control {
+  min-height: 46px;
+  padding: 0 13px;
+  border: 1px solid var(--color-line, #e4e8ee);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-muted, #718096);
+  background: var(--color-surface, #ffffff);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.field-control:focus-within {
+  border-color: var(--color-primary, #2457e6);
+  box-shadow: 0 0 0 3px rgba(36, 87, 230, 0.15);
+}
+
+.field-control.disabled {
+  background: var(--color-soft, #f4f6f8);
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.field-control input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  color: var(--color-ink, #172033);
+  background: transparent;
+  font: inherit;
+  font-size: var(--font-size-body, 0.95rem);
+}
+
+.field-control input::placeholder {
+  color: var(--color-muted-light, #9ba7bc);
+}
+
+.field-control.error {
+  border-color: var(--color-danger, #d94a4a);
+  box-shadow: 0 0 0 3px rgba(217, 74, 74, 0.12);
+}
+
+.field-error {
+  display: block;
+  margin-top: 6px;
+  color: var(--color-danger, #d94a4a);
+  font-size: var(--font-size-caption, 0.78rem);
+  font-weight: 600;
+}
+
+.field-hint {
+  display: block;
+  margin-top: 5px;
+  color: var(--color-muted, #718096);
+  font-size: var(--font-size-caption, 0.78rem);
+  font-weight: 500;
+}
+
+.field-suffix {
+  color: var(--color-muted, #718096);
+  font-size: 12px;
+  font-weight: 700;
+}
