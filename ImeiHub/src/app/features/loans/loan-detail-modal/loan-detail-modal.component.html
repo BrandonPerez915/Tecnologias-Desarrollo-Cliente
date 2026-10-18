@@ -1,0 +1,62 @@
+<app-sheet
+  title="Detalle del préstamo"
+  [subtitle]="loan().item + ' · Puesto ' + loan().stall"
+  (close)="close.emit()"
+  [wide]="true"
+>
+  <div class="loan-detail-hero">
+    <span class="loan-detail-icon">
+      <app-icon name="box" [size]="28"></app-icon>
+    </span>
+    <span>
+      <strong>{{ loan().item }}</strong>
+      <small>{{ loan().serial }}</small>
+    </span>
+    <app-status-badge [tone]="loan().tone">{{ loan().status }}</app-status-badge>
+  </div>
+  <dl class="loan-detail-grid">
+    <div>
+      <dt>IMEI / Número de serie</dt>
+      <dd>{{ loan().fullSerial }}</dd>
+    </div>
+    <div>
+      <dt>Precio acordado</dt>
+      <dd>{{ loan().agreedPrice }}</dd>
+    </div>
+    <div>
+      <dt>Persona responsable</dt>
+      <dd>{{ loan().person }}</dd>
+    </div>
+    <div>
+      <dt>Número de local</dt>
+      <dd>Puesto {{ loan().stall }}</dd>
+    </div>
+    <div>
+      <dt>Hora del préstamo</dt>
+      <dd>{{ loan().loanedAt }}</dd>
+    </div>
+    <div>
+      <dt>Regreso configurado</dt>
+      <dd>{{ loan().dueAt }}</dd>
+    </div>
+    <div>
+      <dt>Tiempo fuera</dt>
+      <dd>{{ loan().age }}</dd>
+    </div>
+    <div>
+      <dt>Estado del equipo</dt>
+      <dd>{{ loan().condition }}</dd>
+    </div>
+    <div class="wide">
+      <dt>Notas</dt>
+      <dd>{{ loan().notes }}</dd>
+    </div>
+  </dl>
+  <app-button
+    icon="return"
+    className="full-button"
+    (clicked)="confirmReturn.emit(loan())"
+  >
+    Marcar devolución
+  </app-button>
+</app-sheet>

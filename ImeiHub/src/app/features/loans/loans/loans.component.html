@@ -1,0 +1,109 @@
+<div class="page">
+  <app-page-heading
+    title="Préstamos entre puestos"
+    subtitle="Controla cada artículo compartido con los puestos vecinos."
+  >
+    <div heading-actions>
+      <app-button icon="plus" (clicked)="openLoanSheet()">
+        Registrar préstamo
+      </app-button>
+    </div>
+  </app-page-heading>
+  <section class="loan-metrics">
+    <div class="loan-metric">
+      <span class="loan-metric-icon blue">
+        <app-icon name="swap"></app-icon>
+      </span>
+      <div>
+        <span>Préstamos activos</span>
+        <strong>{{ loansService.activeLoansCount() }}</strong>
+      </div>
+    </div>
+    <div class="loan-metric">
+      <span class="loan-metric-icon red">
+        <app-icon name="warning"></app-icon>
+      </span>
+      <div>
+        <span>Atrasados</span>
+        <strong>{{ loansService.overdueLoansCount() }}</strong>
+      </div>
+    </div>
+    <div class="loan-metric">
+      <span class="loan-metric-icon green">
+        <app-icon name="check"></app-icon>
+      </span>
+      <div>
+        <span>Devueltos hoy</span>
+        <strong>{{ loansService.returnedTodayCount() }}</strong>
+      </div>
+    </div>
+  </section>
+  <section class="panel loan-table">
+    <div class="panel-header loan-header">
+      <div>
+        <h2>Préstamos registrados</h2>
+        <p>Artículos que están fuera de tu puesto o devueltos</p>
+      </div>
+    </div>
+    <div class="loan-table-head">
+      <span>Artículo y serie</span>
+      <span>Solicitante</span>
+      <span>Tiempo fuera</span>
+      <span>Estado</span>
+    </div>
+    <div class="loan-list">
+      @for (loan of loansService.loans(); track loan.serial + '-' + loan.stall) {
+        <div
+          class="loan-row"
+          role="button"
+          tabIndex="0"
+          (click)="selectedLoan.set(loan)"
+          (keydown)="onRowKeyDown($event, loan)"
+        >
+          <div class="loan-item">
+            <span class="loan-phone">
+              <app-icon name="box" [size]="21"></app-icon>
+            </span>
+            <span>
+              <strong>{{ loan.item }}</strong>
+              <small>{{ loan.serial }}</small>
+            </span>
+          </div>
+          <div class="borrower">
+            <strong>Puesto {{ loan.stall }}</strong>
+            <span>{{ loan.person }}</span>
+          </div>
+          <div class="loan-age">
+            <strong>{{ loan.age }}</strong>
+            <span>{{ loan.loanedAt || 'Hoy' }}</span>
+          </div>
+          <div>
+            <app-status-badge [tone]="loan.tone">{{ loan.status }}</app-status-badge>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  @if (selectedLoan() && !confirmReturnLoan()) {
+    <app-loan-detail-modal
+      [loan]="selectedLoan()!"
+      (confirmReturn)="confirmReturnLoan.set($event)"
+      (close)="selectedLoan.set(null)"
+    ></app-loan-detail-modal>
+  }
+
+  @if (confirmReturnLoan()) {
+    <app-confirm-return-modal
+      [loan]="confirmReturnLoan()!"
+      (success)="handleReturnSuccess($event)"
+      (close)="confirmReturnLoan.set(null)"
+    ></app-confirm-return-modal>
+  }
+
+  <div class="mobile-page-action">
+    <app-button icon="plus" (clicked)="openLoanSheet()">
+      Registrar préstamo
+    </app-button>
+  </div>
+</div>

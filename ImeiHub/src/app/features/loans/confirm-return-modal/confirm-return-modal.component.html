@@ -1,0 +1,41 @@
+<app-sheet
+  title="Confirmar devolución"
+  subtitle="Verifica la identidad del equipo antes de cerrar el préstamo."
+  (close)="close.emit()"
+>
+  <div class="return-verification-warning">
+    <app-icon name="warning" [size]="22"></app-icon>
+    <span>
+      <strong>Comprueba el IMEI o número de serie</strong>
+      <small>
+        Confirma que el identificador físico del equipo coincide
+        exactamente. Esto evita aceptar un artículo distinto o defectuoso.
+      </small>
+    </span>
+  </div>
+  <div class="return-verification-device">
+    <span>
+      <small>Equipo esperado</small>
+      <strong>{{ loan().item }}</strong>
+    </span>
+    <span>
+      <small>IMEI / Número de serie</small>
+      <strong>{{ loan().fullSerial }}</strong>
+    </span>
+    <span>
+      <small>Estado al prestar</small>
+      <strong>{{ loan().condition }}</strong>
+    </span>
+  </div>
+  <div class="return-verification-actions">
+    <app-button variant="secondary" (clicked)="close.emit()">
+      Cancelar
+    </app-button>
+    <app-button
+      icon="check"
+      (clicked)="success.emit(loan())"
+    >
+      Coincide, marcar devolución
+    </app-button>
+  </div>
+</app-sheet>
