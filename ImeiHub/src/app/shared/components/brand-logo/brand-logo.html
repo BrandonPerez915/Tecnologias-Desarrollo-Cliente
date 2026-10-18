@@ -1,0 +1,40 @@
+<ng-template #content>
+  <span class="mark">
+    @if (!imgError()) {
+      <img src="imeihub-logo.jpeg" [alt]="'Logo de ' + name()" (error)="imgError.set(true)" />
+    } @else {
+      <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <path
+          d="M16 4L26.39 10V22L16 28L5.61 22V10L16 4Z"
+          stroke="currentColor"
+          stroke-width="2.4"
+          stroke-linejoin="round"
+        />
+        <path d="M16 11L21.2 14V20L16 23L10.8 20V14L16 11Z" fill="currentColor" />
+      </svg>
+    }
+  </span>
+  @if (showText()) {
+    <span class="text">
+      <span class="title-row">
+        <strong class="name">{{ name() }}</strong>
+        @if (badge()) {
+          <span class="badge">{{ badge() }}</span>
+        }
+      </span>
+      @if (subtitle()) {
+        <span class="subtitle">{{ subtitle() }}</span>
+      }
+    </span>
+  }
+</ng-template>
+
+@if (clickable()) {
+  <button type="button" class="root" (click)="clicked.emit()">
+    <ng-container [ngTemplateOutlet]="content" />
+  </button>
+} @else {
+  <span class="root">
+    <ng-container [ngTemplateOutlet]="content" />
+  </span>
+}

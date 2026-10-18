@@ -1,0 +1,247 @@
+<main class="page">
+  <header class="page-header">
+    <div>
+      <h1>Componentes</h1>
+      <p>Botones del design system de ImeiHub</p>
+    </div>
+    <a class="proto-link" [href]="prototypeUrl" target="_blank" rel="noopener">Ver prototipo</a>
+  </header>
+
+  <section class="card">
+    <h2>Button</h2>
+    <p class="hint">variant: primary | secondary | danger | ghost</p>
+
+    <div class="grid">
+      <span class="col-label"></span>
+      <span class="col-label">Normal</span>
+      <span class="col-label">Con icono</span>
+      <span class="col-label">Disabled</span>
+
+      @for (v of variants; track v) {
+        <span class="row-label">{{ v }}</span>
+        <div><button app-button [variant]="v" (click)="onClick()">Guardar</button></div>
+        <div>
+          <button app-button [variant]="v" icon="plus" (click)="onClick()">Agregar producto</button>
+        </div>
+        <div><button app-button [variant]="v" icon="check" disabled>Confirmar</button></div>
+      }
+    </div>
+    <p class="hint">clicks: {{ clicks() }}</p>
+  </section>
+
+  <section class="card">
+    <h2>Como se usan en el prototipo</h2>
+    <div class="row">
+      <button app-button icon="plus">Nueva orden</button>
+      <button app-button variant="secondary" icon="arrow-down">Exportar datos</button>
+      <button app-button variant="secondary" icon="scan">Escaneo con cámara</button>
+      <button app-button variant="danger" icon="logout">Cerrar caja</button>
+      <button app-button variant="secondary">Cancelar</button>
+      <button app-button variant="secondary" icon="receipt" [badge]="3">Cambiar orden</button>
+    </div>
+
+    <h3>fullWidth</h3>
+    <div class="stack">
+      <button app-button fullWidth icon="printer">Imprimir etiqueta de precio</button>
+      <button app-button fullWidth icon="return">Marcar devolución</button>
+      <button app-button fullWidth type="submit" icon="check">Confirmar pago de MXN 12,499</button>
+      <button app-button fullWidth disabled>Continuar al cobro</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>IconButton</h2>
+    <p class="hint">
+      variant: outline | soft | bare · dot para notificaciones · label obligatorio (aria-label)
+    </p>
+    <div class="row">
+      <figure>
+        <button app-icon-button icon="close" label="Cerrar"></button>
+        <figcaption>outline</figcaption>
+      </figure>
+      <figure>
+        <button app-icon-button icon="bell" label="Notificaciones" dot></button>
+        <figcaption>outline + dot</figcaption>
+      </figure>
+      <figure>
+        <button app-icon-button icon="bell" label="Notificaciones" variant="soft" dot></button>
+        <figcaption>soft + dot</figcaption>
+      </figure>
+      <figure>
+        <button app-icon-button icon="bell" label="Notificaciones" variant="bare"></button>
+        <figcaption>bare</figcaption>
+      </figure>
+      <figure>
+        <button app-icon-button icon="menu" label="Menú" variant="bare"></button>
+        <figcaption>menu</figcaption>
+      </figure>
+      <figure>
+        <button app-icon-button icon="filter" label="Filtros"></button>
+        <figcaption>filter</figcaption>
+      </figure>
+      <figure>
+        <button app-icon-button icon="settings" label="Ajustes" disabled></button>
+        <figcaption>disabled</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>BackButton</h2>
+    <div class="row">
+      <button app-back-button>Volver al panel</button>
+      <button app-back-button>Volver al inventario</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Field</h2>
+    <p class="hint">
+      label, icon, hint, error, required, disabled · [(value)] para two-way binding
+    </p>
+    <div class="form-grid">
+      <app-field
+        label="Correo electrónico"
+        icon="mail"
+        type="email"
+        placeholder="tu@negocio.com"
+        autocomplete="email"
+        hint="Lo usas para iniciar sesión"
+        required
+        [(value)]="email"
+      />
+      <app-field
+        label="Teléfono"
+        icon="phone"
+        type="tel"
+        inputMode="tel"
+        placeholder="33 1234 5678"
+      />
+      <app-field
+        label="IMEI"
+        icon="scan"
+        inputMode="numeric"
+        value="35209"
+        error="El IMEI debe tener 15 dígitos"
+      />
+      <app-field label="Nombre del puesto" icon="store" value="SmartFix Celulares" disabled />
+      <app-field label="Precio" inputMode="decimal" placeholder="0.00">
+        <span class="suffix">MXN</span>
+      </app-field>
+    </div>
+    <p class="hint">valor: {{ email() || '-' }}</p>
+  </section>
+
+  <section class="card">
+    <h2>PasswordField</h2>
+    <div class="form-grid">
+      <app-password-field required [(value)]="password">
+        <a labelExtra class="small-link" href="#">¿Olvidaste tu contraseña?</a>
+      </app-password-field>
+      <app-password-field
+        label="Confirmar contraseña"
+        autocomplete="new-password"
+        error="Las contraseñas no coinciden"
+      />
+      <app-password-field label="Contraseña actual" hint="Mínimo 8 caracteres" />
+      <app-password-field label="Bloqueada" disabled />
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>PageHeading</h2>
+    <p class="hint">eyebrow, title, subtitle · slot headingActions</p>
+    <div class="frame">
+      <app-page-heading
+        eyebrow="Martes, 18 de junio"
+        title="Inventario"
+        subtitle="Equipos, series e IMEI registrados en tu puesto"
+      >
+        <button headingActions app-button variant="secondary" icon="arrow-down">Exportar</button>
+        <button headingActions app-button icon="plus">Agregar producto</button>
+      </app-page-heading>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Amount</h2>
+    <p class="hint">size: normal | large | hero · currency</p>
+    <div class="row">
+      <app-amount>1,250</app-amount>
+      <app-amount size="large">48,920</app-amount>
+      <app-amount currency="USD">320</app-amount>
+    </div>
+    <div class="hero-box">
+      <app-amount size="hero">18,450</app-amount>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>StatusBadge</h2>
+    <p class="hint">
+      tone: success | warning | danger | neutral · [dot]="false" para quitar el punto
+    </p>
+    <div class="row">
+      <app-status-badge tone="success">Pagado</app-status-badge>
+      <app-status-badge tone="warning">Pendiente</app-status-badge>
+      <app-status-badge tone="danger">Vencido</app-status-badge>
+      <app-status-badge>Borrador</app-status-badge>
+      <app-status-badge tone="success" [dot]="false">Disponible</app-status-badge>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>BrandLogo</h2>
+    <p class="hint">size: sm | md | lg · theme: light | dark · badge, subtitle, clickable</p>
+    <div class="row">
+      <app-brand-logo size="sm" />
+      <app-brand-logo badge="POS" />
+      <app-brand-logo size="lg" subtitle="TPV e inventario" />
+      <app-brand-logo [showText]="false" />
+    </div>
+    <div class="dark-box">
+      <app-brand-logo size="sm" theme="dark" badge="POS" clickable />
+      <app-brand-logo theme="dark" subtitle="SmartFix Celulares" />
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Sheet</h2>
+    <p class="hint">modal en desktop, bottom sheet en móvil · cierra con Esc, backdrop o la X</p>
+    <div class="row">
+      <button app-button variant="secondary" (click)="sheetOpen.set('normal')">Abrir sheet</button>
+      <button app-button variant="secondary" (click)="sheetOpen.set('wide')">
+        Abrir sheet wide
+      </button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Toast</h2>
+    <p class="hint">
+      se dispara con el service Notifications · tone: success | warning | danger | neutral
+    </p>
+    <div class="row">
+      @for (tone of tones; track tone) {
+        <button app-button variant="secondary" (click)="notify(tone)">{{ tone }}</button>
+      }
+    </div>
+  </section>
+</main>
+
+@if (sheetOpen(); as mode) {
+  <app-sheet
+    title="Registrar gasto"
+    subtitle="El monto se descuenta de la caja actual"
+    [wide]="mode === 'wide'"
+    (closed)="sheetOpen.set(null)"
+  >
+    <app-field label="Concepto" placeholder="Ej. Mica templada" required />
+    <app-field label="Monto" inputMode="decimal" placeholder="0.00">
+      <span class="suffix">MXN</span>
+    </app-field>
+    <button app-button fullWidth icon="check" (click)="sheetOpen.set(null); notify('success')">
+      Guardar gasto
+    </button>
+  </app-sheet>
+}

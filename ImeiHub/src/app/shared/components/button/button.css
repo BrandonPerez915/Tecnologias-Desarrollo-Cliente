@@ -1,0 +1,88 @@
+:host {
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  padding: 0 17px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.15s,
+    background 0.15s;
+}
+
+:host(:active) {
+  transform: translateY(1px);
+}
+
+:host(:disabled) {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+:host(.full) {
+  width: 100%;
+}
+
+:host(.has-badge) {
+  padding-right: 22px;
+}
+
+:host(.btn-primary) {
+  color: #fff;
+  background: var(--primary);
+  box-shadow: 0 5px 13px #2457e633;
+}
+
+:host(.btn-primary:hover:enabled) {
+  background: var(--primary-dark);
+}
+
+:host(.btn-secondary) {
+  color: #33415a;
+  background: #fff;
+  border-color: var(--line);
+  box-shadow: 0 1px 2px #141f3308;
+}
+
+:host(.btn-secondary:hover:enabled) {
+  background: #f7f8fa;
+}
+
+:host(.btn-danger) {
+  color: #fff;
+  background: var(--red);
+  box-shadow: 0 5px 13px #d94a4a33;
+}
+
+:host(.btn-danger:hover:enabled) {
+  background: #bd3d3d;
+}
+
+:host(.btn-ghost) {
+  color: var(--primary);
+  background: transparent;
+}
+
+.badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  color: #fff;
+  background: var(--primary);
+  border: 2px solid #fff;
+  border-radius: 50%;
+  font-size: var(--type-counter);
+  box-shadow: 0 3px 8px #2457e640;
+}
