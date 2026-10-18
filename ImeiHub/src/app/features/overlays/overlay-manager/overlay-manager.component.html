@@ -1,0 +1,40 @@
+@if (activeOverlay() === 'scanner') {
+  <app-scanner-modal
+    (close)="handleClose()"
+    (notify)="handleNotify($event)"
+  ></app-scanner-modal>
+}
+
+@if (activeOverlay() === 'actions') {
+  <app-quick-actions-sheet
+    (open)="handleOpen($event)"
+    (close)="handleClose()"
+  ></app-quick-actions-sheet>
+}
+
+@if (activeOverlay() === 'expense') {
+  <app-expense-sheet
+    (close)="handleClose()"
+  ></app-expense-sheet>
+}
+
+@if (activeOverlay() === 'sale') {
+  <app-sale-sheet
+    (open)="handleOpen($event)"
+    (close)="handleClose()"
+  ></app-sale-sheet>
+}
+
+@if (activeOverlay() === 'print') {
+  <app-print-label-sheet
+    (close)="handleClose()"
+    (notify)="handleNotify($event)"
+  ></app-print-label-sheet>
+}
+
+@if (activeOverlay() === 'loan') {
+  <app-loan-sheet
+    (open)="handleOpen($event)"
+    (close)="handleClose()"
+  ></app-loan-sheet>
+}

@@ -1,0 +1,26 @@
+.printer-status { margin-bottom: 18px; padding: 11px; border: 1px solid #dcece5; border-radius: 11px; display: grid; grid-template-columns: 36px 1fr 20px; align-items: center; gap: 10px; background: #f5fbf8; }
+.printer-icon { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 9px; color: var(--green); background: var(--green-soft); }
+.printer-status > span:nth-child(2) { display: grid; gap: 3px; }
+.printer-status strong { font-size: 12px; }
+.printer-status small { color: #72837b; font-size: 12px; }
+.printer-status small i { display: inline-block; width: 5px; height: 5px; margin-right: 5px; border-radius: 50%; background: var(--green); }
+.printer-status > svg { color: var(--primary); }
+.label-preview { width: 260px; margin: 0 auto 19px; padding: 18px 20px; border: 1px dashed #b8c0cb; display: grid; place-items: center; color: #172033; background: #fdfdfb; box-shadow: 0 7px 20px rgba(34,46,64,.07); text-align: center; }
+.label-preview > span { font-size: 12px; font-weight: 800; letter-spacing: .6px; }
+.label-preview > strong { margin-top: 9px; font-size: 14px; }
+.label-preview > small { margin-top: 2px; font-size: 12px; }
+.label-preview > b { margin: 9px 0 7px; font-size: 24px; letter-spacing: -.8px; }
+.label-preview > em { margin-top: 4px; font-size: 12px; font-style: normal; letter-spacing: 1px; }
+.barcode { width: 130px; height: 28px; background: repeating-linear-gradient(90deg, #172033 0 1px, transparent 1px 3px, #172033 3px 5px, transparent 5px 7px); }
+.print-options { margin-bottom: 18px; padding: 13px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 1fr 1fr; }
+.print-options > span { display: grid; gap: 5px; }
+.print-options > span + span { padding-left: 20px; border-left: 1px solid var(--line); }
+.print-options small { color: #8994a5; font-size: 12px; }
+.print-options strong { font-size: 12px; }
+.stepper { display: flex !important; align-items: center; gap: 10px !important; }
+.stepper button { width: 25px; height: 25px; border: 1px solid var(--line); border-radius: 7px; display: grid; place-items: center; background: white; cursor: pointer; }
+.stepper button:disabled { color: #b5bdc8; background: #f0f2f5; cursor: not-allowed; }
+.product-selector-field { margin-bottom: 14px; display: flex; flex-direction: column; gap: 6px; }
+.product-selector-field label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); }
+.product-select { width: 100%; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--foreground); background: white; font-family: inherit; outline: none; }
+.product-select:focus { border-color: var(--primary); }

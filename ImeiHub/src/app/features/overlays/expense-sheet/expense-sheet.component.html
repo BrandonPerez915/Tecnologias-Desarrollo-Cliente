@@ -1,0 +1,86 @@
+<app-sheet
+  title="Registrar un gasto"
+  subtitle="Anota el dinero que sale de caja."
+  (close)="close.emit()"
+>
+  <form (ngSubmit)="submitForm($event)" novalidate>
+    <div class="form-section">
+      <span class="form-label">Elige una categoría</span>
+      <div class="category-grid">
+        <button
+          type="button"
+          [class.selected]="selectedCategory() === 'merchandise'"
+          (click)="selectedCategory.set('merchandise')"
+        >
+          <app-icon name="box"></app-icon>
+          <span>
+            Compra de<br />mercancía
+          </span>
+        </button>
+        <button
+          type="button"
+          [class.selected]="selectedCategory() === 'food'"
+          (click)="selectedCategory.set('food')"
+        >
+          <app-icon name="cash"></app-icon>
+          <span>
+            Comida /<br />aperitivos
+          </span>
+        </button>
+        <button
+          type="button"
+          [class.selected]="selectedCategory() === 'transport'"
+          (click)="selectedCategory.set('transport')"
+        >
+          <app-icon name="swap"></app-icon>
+          <span>Transporte</span>
+        </button>
+        <button
+          type="button"
+          [class.selected]="selectedCategory() === 'other'"
+          (click)="selectedCategory.set('other')"
+        >
+          <app-icon name="more"></app-icon>
+          <span>Otros</span>
+        </button>
+      </div>
+    </div>
+
+    <app-field
+      label="Importe"
+      placeholder="0.00"
+      type="number"
+      inputMode="decimal"
+      [required]="true"
+      [value]="amount()"
+      [error]="amountError()"
+      (valueChange)="onAmountChange($event)"
+      (blur)="validateAmount()"
+    >
+      <span class="field-suffix">MXN</span>
+    </app-field>
+
+    <app-field
+      label="Nota o justificación"
+      placeholder="¿Para qué fue este gasto?"
+      [required]="true"
+      [value]="note()"
+      [error]="noteError()"
+      (valueChange)="onNoteChange($event)"
+      (blur)="validateNote()"
+    ></app-field>
+
+    <div class="form-total">
+      <span>Efectivo en caja después del gasto</span>
+      <strong>MXN {{ projectedCash() | number:'1.2-2' }}</strong>
+    </div>
+
+    <app-button type="submit" className="full-button" [disabled]="submitting()">
+      @if (submitting()) {
+        Guardando...
+      } @else {
+        Guardar gasto
+      }
+    </app-button>
+  </form>
+</app-sheet>

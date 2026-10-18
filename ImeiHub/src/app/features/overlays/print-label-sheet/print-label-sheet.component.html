@@ -1,0 +1,79 @@
+<app-sheet
+  title="Imprimir etiqueta de precio"
+  subtitle="Selecciona un producto y revisa la etiqueta antes de imprimir."
+  (close)="close.emit()"
+>
+  <div class="printer-status">
+    <span class="printer-icon">
+      <app-icon name="printer"></app-icon>
+    </span>
+    <span>
+      <strong>Etiquetadora térmica T8</strong>
+      <small>
+        <i></i> Conectada por Bluetooth
+      </small>
+    </span>
+    <app-icon name="bluetooth"></app-icon>
+  </div>
+
+  <div class="product-selector-field">
+    <label for="productSelect">Producto a etiquetar</label>
+    <select
+      id="productSelect"
+      class="product-select"
+      [ngModel]="selectedProductId()"
+      (ngModelChange)="onSelectProduct($event)"
+    >
+      @for (prod of products(); track prod.id) {
+        <option [value]="prod.id">
+          {{ prod.name }} ({{ prod.sku }}) — MXN {{ prod.price }}
+        </option>
+      }
+    </select>
+  </div>
+
+  @if (selectedProduct(); as p) {
+    <div class="label-preview">
+      <span>IMEIHUB · PUESTO A-18</span>
+      <strong>{{ p.name }}</strong>
+      <small>{{ p.category }} · {{ p.type }}</small>
+      <b>MXN {{ p.price }}</b>
+      <div class="barcode"></div>
+      <em>{{ p.sku }}</em>
+    </div>
+  }
+
+  <div class="print-options">
+    <span>
+      <small>Tamaño de etiqueta</small>
+      <strong>40 × 30 mm</strong>
+    </span>
+    <span>
+      <small>Copias</small>
+      <span class="stepper">
+        <button
+          type="button"
+          [disabled]="printCopies <= 1"
+          (click)="printCopies = Math.max(1, printCopies - 1)"
+        >
+          −
+        </button>
+        <strong>{{ printCopies }}</strong>
+        <button
+          type="button"
+          (click)="printCopies = Math.min(99, printCopies + 1)"
+        >
+          +
+        </button>
+      </span>
+    </span>
+  </div>
+
+  <app-button
+    icon="printer"
+    className="full-button"
+    (clicked)="handlePrint()"
+  >
+    Imprimir {{ printCopies }} {{ printCopies === 1 ? 'copia' : 'copias' }}
+  </app-button>
+</app-sheet>

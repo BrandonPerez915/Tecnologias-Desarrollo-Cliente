@@ -1,0 +1,122 @@
+<app-sheet
+  title="Añadir una venta"
+  subtitle="Cobro rápido para clientes en tienda."
+  (close)="close.emit()"
+>
+  <form (ngSubmit)="submitForm($event)">
+    <!-- Search bar to pick product -->
+    <label class="search-box sale-search">
+      <app-icon name="search"></app-icon>
+      <input
+        [(ngModel)]="searchQuery"
+        name="searchQuery"
+        placeholder="Buscar o escanear un artículo..."
+        (input)="onSearchChange()"
+      />
+      <button type="button" (click)="open.emit('scanner')" title="Abrir escáner">
+        <app-icon name="scan"></app-icon>
+      </button>
+    </label>
+
+    <!-- Product Search Results Dropdown if searching -->
+    @if (searchResults().length > 0 && isSearching()) {
+      <div class="search-dropdown panel mb-3">
+        @for (item of searchResults(); track item.id) {
+          <div class="search-item" (click)="selectProduct(item)">
+            <div class="search-item-info">
+              <strong>{{ item.name }}</strong>
+              <small class="text-muted">Stock: {{ item.stock }} · MXN {{ item.price }}</small>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm">Elegir</button>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Selected Product Card -->
+    @if (selectedProduct()) {
+      <div class="sale-item">
+        <span class="product-thumb">
+          <app-icon name="box"></app-icon>
+        </span>
+        <span>
+          <strong>{{ selectedProduct()!.name }}</strong>
+          <small>MXN {{ parsePrice(selectedProduct()!.price) | number:'1.2-2' }} · Stock: {{ selectedProduct()!.stock }}</small>
+        </span>
+        <button type="button" aria-label="Eliminar artículo" (click)="clearProduct()">
+          <app-icon name="close" [size]="17"></app-icon>
+        </button>
+      </div>
+
+      <!-- Quantity Selector -->
+      <div class="quantity-row mt-3">
+        <span class="form-label mb-0">Cantidad</span>
+        <div class="quantity-controls">
+          <button
+            type="button"
+            class="qty-btn"
+            (click)="decrementQty()"
+            [disabled]="quantity() <= 1"
+          >-</button>
+          <span class="qty-display">{{ quantity() }}</span>
+          <button
+            type="button"
+            class="qty-btn"
+            (click)="incrementQty()"
+            [disabled]="quantity() >= selectedProduct()!.stock"
+          >+</button>
+        </div>
+      </div>
+    } @else {
+      <div class="empty-product-warning" [class.has-error]="itemError()">
+        <app-icon name="warning" [size]="18"></app-icon>
+        <span>Selecciona un producto del catálogo para continuar</span>
+      </div>
+    }
+
+    <!-- Payment Options -->
+    <div class="payment-options">
+      <span class="form-label">Método de pago</span>
+      <div>
+        <button
+          type="button"
+          [class.selected]="selectedPayment() === 'cash'"
+          (click)="selectedPayment.set('cash')"
+        >
+          Efectivo
+        </button>
+        <button
+          type="button"
+          [class.selected]="selectedPayment() === 'transfer'"
+          (click)="selectedPayment.set('transfer')"
+        >
+          Transferencia
+        </button>
+        <button
+          type="button"
+          [class.selected]="selectedPayment() === 'card'"
+          (click)="selectedPayment.set('card')"
+        >
+          Tarjeta
+        </button>
+      </div>
+    </div>
+
+    <div class="checkout-total">
+      <span>Total a cobrar</span>
+      <app-amount size="large">{{ totalAmount() | number:'1.2-2' }}</app-amount>
+    </div>
+
+    <app-button
+      type="submit"
+      className="full-button"
+      [disabled]="!selectedProduct() || submitting()"
+    >
+      @if (submitting()) {
+        Registrando venta...
+      } @else {
+        Completar venta (MXN {{ totalAmount() | number:'1.2-2' }})
+      }
+    </app-button>
+  </form>
+</app-sheet>

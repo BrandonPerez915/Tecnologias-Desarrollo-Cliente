@@ -1,0 +1,6 @@
+.action-sheet-list { display: grid; gap: 8px; }
+.action-sheet-list > button { min-height: 61px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 11px; display: grid; grid-template-columns: 38px 1fr 20px; align-items: center; gap: 11px; background: white; cursor: pointer; text-align: left; }
+.action-sheet-list > button > span:nth-child(2) { display: grid; gap: 2px; }
+.action-sheet-list strong { font-size: 12px; }
+.action-sheet-list small { color: #8792a4; font-size: 12px; }
+.action-sheet-list > button > svg { color: #9ba5b3; }

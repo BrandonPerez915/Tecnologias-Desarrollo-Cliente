@@ -1,0 +1,120 @@
+<app-sheet
+  title="Registrar un préstamo"
+  subtitle="Anota quién tiene el artículo y a qué puesto fue."
+  (close)="close.emit()"
+  [wide]="true"
+>
+  <form (ngSubmit)="submitForm($event)" novalidate>
+    <div class="two-col-fields">
+      <div class="loan-product-search">
+        <label class="field">
+          <span class="field-label-text">
+            Nombre del artículo
+            <span class="field-required">*</span>
+          </span>
+          <div class="field-control" [class.error]="!!productError()">
+            <app-icon name="box" [size]="18"></app-icon>
+            <input
+              placeholder="Buscar en el inventario o escribir nombre"
+              [ngModel]="loanProductSearch()"
+              (ngModelChange)="onSearchChange($event)"
+              (focus)="loanProductSearchOpen.set(true)"
+              (blur)="onBlur()"
+              name="loanProductSearch"
+            />
+            <button
+              type="button"
+              class="field-action"
+              (click)="open.emit('scanner')"
+            >
+              <app-icon name="scan" [size]="17"></app-icon> Escanear
+            </button>
+          </div>
+          @if (productError()) {
+            <small class="field-error">{{ productError() }}</small>
+          }
+        </label>
+        @if (loanProductSearchOpen() && loanProductSearch().trim()) {
+          <div class="loan-product-suggestions">
+            @if (loanProductSuggestions().length > 0) {
+              @for (product of loanProductSuggestions(); track product.id) {
+                <button
+                  type="button"
+                  (mousedown)="$event.preventDefault()"
+                  (click)="selectProduct(product)"
+                >
+                  <span class="product-thumb">
+                    <app-icon
+                      [name]="product.type === 'Smartphones' ? 'scan' : 'box'"
+                      [size]="18"
+                    ></app-icon>
+                  </span>
+                  <span>
+                    <strong>{{ product.name }}</strong>
+                    <small>
+                      {{ product.sku }} · {{ product.stock }} disponibles
+                    </small>
+                  </span>
+                </button>
+              }
+            } @else {
+              <span class="inventory-no-suggestions">
+                No hay productos coincidentes en el catálogo. Se registrará como producto personalizado.
+              </span>
+            }
+          </div>
+        }
+      </div>
+
+      <app-field
+        label="IMEI / Número de serie"
+        placeholder="Introducir o escanear serie"
+        icon="tag"
+        [required]="true"
+        [value]="serialNumber()"
+        [error]="serialError()"
+        (valueChange)="onSerialChange($event)"
+        (blur)="validateSerial()"
+      ></app-field>
+
+      <app-field
+        label="Número del puesto solicitante"
+        placeholder="p. ej., B-14, C-02"
+        [required]="true"
+        [value]="stallNumber()"
+        [error]="stallError()"
+        (valueChange)="onStallChange($event)"
+        (blur)="validateStall()"
+      ></app-field>
+
+      <app-field
+        label="Nombre de la persona"
+        placeholder="Nombre de quien recibe el artículo"
+        icon="user"
+        [required]="true"
+        [value]="personName()"
+        [error]="personError()"
+        (valueChange)="onPersonChange($event)"
+        (blur)="validatePerson()"
+      ></app-field>
+    </div>
+
+    <div class="loan-reminder">
+      <app-icon name="bell"></app-icon>
+      <span>
+        <strong>Recordatorio activado</strong>
+        <small>
+          Marcaremos el artículo como atrasado si no se devuelve en 2 horas.
+        </small>
+      </span>
+    </div>
+
+    <app-button type="submit" className="full-button" [disabled]="submitting()">
+      @if (submitting()) {
+        Registrando préstamo...
+      } @else {
+        Registrar artículo prestado
+      }
+    </app-button>
+  </form>
+</app-sheet>
