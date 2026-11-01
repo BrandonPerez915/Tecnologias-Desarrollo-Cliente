@@ -6,7 +6,7 @@
   <div class="page">
     <app-page-heading
       title="Inventario"
-      subtitle="Consulta precios y existencias, e imprime etiquetas."
+      subtitle="Consulta precios y existencias en tiempo real desde la API, e imprime etiquetas."
     ></app-page-heading>
 
     <app-inventory-toolbar
@@ -24,18 +24,53 @@
       (openFilters)="showFilters.set(true)"
     ></app-inventory-toolbar>
 
-    <app-inventory-table
-      [products]="paginatedProducts()"
-      [selectedId]="selected()?.id || 0"
-      [colorFilter]="color()"
-      [currentPage]="currentProductPage()"
-      [totalPages]="totalProductPages()"
-      [totalProductsCount]="visible().length"
-      [productsPerPage]="productsPerPage"
-      (selectProduct)="onSelectProduct($event)"
-      (pageChange)="currentProductPage.set($event)"
-      (resetCategory)="category.set('All')"
-    ></app-inventory-table>
+    <!-- ESTADO: CARGANDO -->
+    @if (inventoryService.loading()) {
+      <div class="state-container state-loading">
+        <div class="spinner"></div>
+        <p><strong>Cargando inventario...</strong></p>
+        <small>Conectando con la API REST de ImeiHub</small>
+      </div>
+    }
+
+    <!-- ESTADO: ERROR -->
+    @else if (inventoryService.error()) {
+      <div class="state-container state-error">
+        <div class="state-icon">⚠️</div>
+        <h3>No se pudo cargar el inventario</h3>
+        <p>{{ inventoryService.error() }}</p>
+        <app-button icon="swap" (clicked)="retryFetch()">Reintentar conexión</app-button>
+      </div>
+    }
+
+    <!-- ESTADO: VACÍO -->
+    @else if (visible().length === 0) {
+      <div class="state-container state-empty">
+        <div class="state-icon">📦</div>
+        <h3>No se encontraron productos</h3>
+        <p>No hay artículos que coincidan con los filtros seleccionados o el catálogo está vacío.</p>
+        <div class="state-actions">
+          <app-button variant="secondary" (clicked)="resetFilters()">Restablecer filtros</app-button>
+          <app-button icon="plus" (clicked)="showAddProduct.set(true)">Agregar nuevo producto</app-button>
+        </div>
+      </div>
+    }
+
+    <!-- ESTADO: DATOS LISTOS -->
+    @else {
+      <app-inventory-table
+        [products]="paginatedProducts()"
+        [selectedId]="selected()?.id || 0"
+        [colorFilter]="color()"
+        [currentPage]="currentProductPage()"
+        [totalPages]="totalProductPages()"
+        [totalProductsCount]="visible().length"
+        [productsPerPage]="productsPerPage"
+        (selectProduct)="onSelectProduct($event)"
+        (pageChange)="currentProductPage.set($event)"
+        (resetCategory)="category.set('All')"
+      ></app-inventory-table>
+    }
 
     <div class="inventory-bottom-action">
       <app-button icon="plus" (clicked)="showAddProduct.set(true)">

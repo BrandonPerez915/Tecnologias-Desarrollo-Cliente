@@ -7,8 +7,6 @@ import { AmountComponent } from '../../../components/ui/amount/amount.component'
 import {
   categoryLabels,
   colorLabels,
-  minimumPrices,
-  productIdentifiers,
   typeLabels,
 } from '../../../data/mockData';
 import { Product } from '../../../types/inventory';

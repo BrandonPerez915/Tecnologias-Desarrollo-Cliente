@@ -31,7 +31,7 @@ import { OverlayService } from '../../../core/services/overlay.service';
   styleUrls: ['./inventory.component.css']
 })
 export class InventoryComponent {
-  private inventoryService = inject(InventoryService);
+  inventoryService = inject(InventoryService);
   private overlayService = inject(OverlayService);
 
   open = output<Overlay>();
@@ -152,13 +152,15 @@ export class InventoryComponent {
   });
 
   constructor() {
-    const prods = this.inventoryService.products();
-    if (prods.length > 0) {
-      this.selected.set(prods[0]);
-      if (prods[0].variants.length > 0) {
-        this.detailColor.set(prods[0].variants[0].color);
+    effect(() => {
+      const prods = this.inventoryService.products();
+      if (prods.length > 0 && !this.selected()) {
+        this.selected.set(prods[0]);
+        if (prods[0].variants.length > 0) {
+          this.detailColor.set(prods[0].variants[0].color);
+        }
       }
-    }
+    });
 
     effect(() => {
       this.category();
@@ -172,12 +174,17 @@ export class InventoryComponent {
     });
   }
 
+  retryFetch() {
+    this.inventoryService.fetchProducts();
+  }
+
   onOpenOverlay(overlay: Overlay) {
     this.open.emit(overlay);
     this.overlayService.open(overlay);
   }
 
   resetFilters() {
+    this.category.set('All');
     this.productType.set('All types');
     this.color.set('All variants');
     this.stockStatus.set('Any stock');
