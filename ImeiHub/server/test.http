@@ -1,0 +1,322 @@
+### ==============================================================================
+### IMEIHUB REST API - ARCHIVO DE PRUEBAS HTTP (test.http)
+### ==============================================================================
+### Este archivo permite probar todos los endpoints del servidor API de ImeiHub.
+### Compatible con la extensión "REST Client" de VS Code, IntelliJ HTTP Client y similares.
+###
+### Instrucciones de uso:
+### 1. Inicia el servidor backend en la terminal:
+###    npm run api
+### 2. Instala la extensión "REST Client" en VS Code
+### 3. Probar las peticiones haciendo clic en "Send Request" encima de cada petición..
+### ==============================================================================
+
+@baseUrl = http://localhost:3000
+@contentType = application/json
+
+# Token de respaldo generado para el usuario demo (Ada Okafor - usr_1)
+@demoToken = imeihub-jwt-eyJpZCI6InVzcl8xIiwiZW1haWwiOiJhZGEub2thZm9yQGltZWlodWIuY29tIn0=
+# Token dinámico (se sobreescribe con el resultado del Login)
+@authToken = {{demoToken}}
+
+
+# ==============================================================================
+# 1. ESTADO DEL SERVIDOR (HEALTH CHECK)
+# ==============================================================================
+
+### Verificar estado del servidor y conectividad
+GET {{baseUrl}}/api/health HTTP/1.1
+
+
+# ==============================================================================
+# 2. AUTENTICACIÓN Y CUENTAS (AUTH)
+# ==============================================================================
+
+### 2.1 Iniciar sesión exitosamente (guarda token en variable @authToken)
+# @name login
+POST {{baseUrl}}/api/auth/login HTTP/1.1
+Content-Type: {{contentType}}
+
+{
+  "email": "ada.okafor@imeihub.com",
+  "password": "Password123!"
+}
+
+### Extraer token de la respuesta del login anterior
+@authToken = {{login.response.body.token}}
+
+### 2.2 Intentar login con credenciales incorrectas (Debe responder 401)
+POST {{baseUrl}}/api/auth/login HTTP/1.1
+Content-Type: {{contentType}}
+
+{
+  "email": "usuario.inexistente@correo.com",
+  "password": "PasswordErroneo"
+}
+
+### 2.3 Obtener perfil del usuario autenticado (requiere Authorization Header)
+GET {{baseUrl}}/api/auth/me HTTP/1.1
+Authorization: Bearer {{authToken}}
+
+### 2.4 Intentar obtener perfil sin token (Debe responder 401)
+GET {{baseUrl}}/api/auth/me HTTP/1.1
+
+### 2.5 Registrar un nuevo usuario en la plataforma
+POST {{baseUrl}}/api/auth/register HTTP/1.1
+Content-Type: {{contentType}}
+
+{
+  "name": "Carlos Mendoza",
+  "email": "carlos.mendoza@tiendaimei.com",
+  "password": "Password123!",
+  "storeName": "TecnoFix Express",
+  "stallNumber": "C-12",
+  "phone": "5512345678"
+}
+
+### 2.6 Intentar registrar usuario con correo duplicado (Debe responder 409 Conflict)
+POST {{baseUrl}}/api/auth/register HTTP/1.1
+Content-Type: {{contentType}}
+
+{
+  "name": "Ada Okafor Duplicada",
+  "email": "ada.okafor@imeihub.com",
+  "password": "Password123!"
+}
+
+
+# ==============================================================================
+# 3. CRUD DE PRODUCTOS (INVENTARIO - SCOPED POR USUARIO)
+# ==============================================================================
+
+### 3.1 Listar todos los productos del usuario autenticado
+GET {{baseUrl}}/api/products HTTP/1.1
+Authorization: Bearer {{authToken}}
+
+### 3.2 Filtrar productos por categoría (ej. Phones)
+GET {{baseUrl}}/api/products?category=Phones HTTP/1.1
+Authorization: Bearer {{authToken}}
+
+### 3.3 Buscar productos por nombre o SKU (ej. iPhone)
+GET {{baseUrl}}/api/products?search=iPhone HTTP/1.1
+Authorization: Bearer {{authToken}}
+
+### 3.4 Obtener detalle de un producto específico por ID (ID: 1)
+GET {{baseUrl}}/api/products/1 HTTP/1.1
+Authorization: Bearer {{authToken}}
+
+### 3.5 Intentar obtener un producto inexistente (Debe responder 404 Not Found)
+GET {{baseUrl}}/api/products/99999 HTTP/1.1
+Authorization: Bearer {{authToken}}
+
+### 3.6 Crear un nuevo producto en inventario
+# @name createProduct
+POST {{baseUrl}}/api/products HTTP/1.1
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "name": "Google Pixel 8 Pro · 128GB",
+  "brand": "Google",
+  "model": "GC3VE",
+  "type": "Smartphones",
+  "category": "Phones",
+  "condition": "Nuevo",
+  "sku": "PIX8P-128-OBS",
+  "cost": 13500,
+  "minPrice": 14999,
+  "price": 16299,
+  "location": "Vitrina A · Fila 1",
+  "variants": [
+    { "color": "Obsidiana", "stock": 2 },
+    { "color": "Porcelana", "stock": 1 }
+  ],
+  "serial": "358941092837461"
+}
+
+### Variable para el producto recién creado
+@newProductId = {{createProduct.response.body.id}}
+
+### 3.7 Intentar crear producto con precio de venta menor al precio mínimo (Debe responder 422 Unprocessable Entity)
+POST {{baseUrl}}/api/products HTTP/1.1
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "name": "Producto con error de precios",
+  "price": 500,
+  "minPrice": 1000,
+  "cost": 800
+}
+
+### 3.8 Actualizar información de un producto existente (PUT)
+PUT {{baseUrl}}/api/products/1 HTTP/1.1
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "name": "iPhone 13 Pro · 256GB (Edición Especial)",
+  "sku": "APL-13P-256-GR",
+  "price": "16,499",
+  "minPrice": "15,200",
+  "cost": "14,200",
+  "stock": 5
+}
+
+### 3.9 Eliminar producto (DELETE con confirmación)
+DELETE {{baseUrl}}/api/products/{{newProductId}} HTTP/1.1
+Authorization: Bearer {{authToken}}
+
+
+# ==============================================================================
+# 4. CAJA Y FLUJO DE EFECTIVO (CASH)
+# ==============================================================================
+
+### 4.1 Obtener balance de caja y lista de movimientos
+GET {{baseUrl}}/api/cash HTTP/1.1
+Authorization: Bearer {{authToken}}
+
+### 4.2 Registrar una entrada de dinero (ej. venta en mostrador)
+POST {{baseUrl}}/api/cash/entries HTTP/1.1
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "title": "Venta: Funda de uso rudo + Mica",
+  "note": "Venta directa en mostrador · Efectivo",
+  "amount": 350.00,
+  "kind": "in"
+}
+
+### 4.3 Registrar una salida de dinero / gasto de caja
+POST {{baseUrl}}/api/cash/entries HTTP/1.1
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "title": "Compra de insumos de limpieza",
+  "note": "Gasto operativo de tienda",
+  "amount": 120.00,
+  "kind": "out"
+}
+
+### 4.4 Intentar registrar movimiento con monto inválido (Debe responder 400 Bad Request)
+POST {{baseUrl}}/api/cash/entries HTTP/1.1
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "title": "Movimiento inválido",
+  "amount": -50.00,
+  "kind": "in"
+}
+
+### 4.5 Registrar cierre y arqueo de caja (Cash Close)
+POST {{baseUrl}}/api/cash/close HTTP/1.1
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "countedCash": 10500.00,
+  "expectedCash": 10500.00,
+  "difference": 0.00,
+  "notes": "Arqueo de jornada normal sin discrepancias"
+}
+
+
+# ==============================================================================
+# 5. PRÉSTAMOS DE DISPOSITIVOS ENTRE LOCALES (LOANS)
+# ==============================================================================
+
+### 5.1 Listar préstamos registrados
+GET {{baseUrl}}/api/loans HTTP/1.1
+Authorization: Bearer {{authToken}}
+
+### 5.2 Registrar un nuevo préstamo de equipo a otro taller/puesto
+# @name createLoan
+POST {{baseUrl}}/api/loans HTTP/1.1
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "item": "Xiaomi Redmi Note 12 · 128GB",
+  "serial": "864720059182374",
+  "stall": "Local B-07",
+  "person": "Roberto Gómez",
+  "notes": "Préstamo temporal para demostración a cliente"
+}
+
+### Variable para el préstamo recién creado
+@newLoanId = {{createLoan.response.body.id}}
+
+### 5.3 Intentar crear préstamo sin campos obligatorios (Debe responder 400)
+POST {{baseUrl}}/api/loans HTTP/1.1
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "item": "Equipo incompleto"
+}
+
+### 5.4 Marcar préstamo como devuelto (Confirmar recepción física de equipo)
+PATCH {{baseUrl}}/api/loans/{{newLoanId}}/return HTTP/1.1
+Authorization: Bearer {{authToken}}
+
+
+# ==============================================================================
+# 6. ÓRDENES DE VENTA Y COBRO (ORDERS)
+# ==============================================================================
+
+### 6.1 Listar órdenes del usuario
+GET {{baseUrl}}/api/orders HTTP/1.1
+Authorization: Bearer {{authToken}}
+
+### 6.2 Crear una nueva orden de venta
+# @name createOrder
+POST {{baseUrl}}/api/orders HTTP/1.1
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "name": "Orden #1050",
+  "customer": "Laura Gómez",
+  "type": "Minorista"
+}
+
+### Variable para la orden creada
+@newOrderId = {{createOrder.response.body.id}}
+
+### 6.3 Actualizar artículos de la orden (añadir productos seleccionados)
+PUT {{baseUrl}}/api/orders/{{newOrderId}}/items HTTP/1.1
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "items": {
+    "1": 1,
+    "2": 2
+  }
+}
+
+### 6.4 Liquidar y cobrar la orden (Checkout - descuenta stock y registra ingreso en caja)
+POST {{baseUrl}}/api/orders/{{newOrderId}}/checkout HTTP/1.1
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "paymentMethod": "Efectivo",
+  "total": 15999.00,
+  "items": [
+    { "productId": 1, "quantity": 1 }
+  ]
+}
+
+### 6.5 Intentar operar sobre una orden inexistente (Debe responder 404)
+POST {{baseUrl}}/api/orders/999999/checkout HTTP/1.1
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "paymentMethod": "Efectivo",
+  "total": 500.00
+}
