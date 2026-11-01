@@ -4,24 +4,24 @@
   (close)="close.emit()"
   [wide]="true"
 >
-  <form (ngSubmit)="submitForm($event)" novalidate>
+  <form [formGroup]="editForm" (ngSubmit)="submitForm($event)" novalidate>
     <div class="edit-product-grid">
       <app-field
         label="Nombre del producto"
         [required]="true"
-        [value]="name()"
-        [error]="nameError()"
-        (valueChange)="onNameChange($event)"
-        (blur)="validateName()"
+        [value]="editForm.controls.name.value"
+        [error]="nameError"
+        (valueChange)="editForm.controls.name.setValue($event)"
+        (blur)="editForm.controls.name.markAsTouched()"
       ></app-field>
 
       <app-field
         label="SKU"
         [required]="true"
-        [value]="sku()"
-        [error]="skuError()"
-        (valueChange)="onSkuChange($event)"
-        (blur)="validateSku()"
+        [value]="editForm.controls.sku.value"
+        [error]="skuError"
+        (valueChange)="editForm.controls.sku.setValue($event)"
+        (blur)="editForm.controls.sku.markAsTouched()"
       ></app-field>
 
       <app-field
@@ -30,10 +30,10 @@
         inputMode="decimal"
         [min]="0"
         [required]="true"
-        [value]="price()"
-        [error]="priceError()"
-        (valueChange)="onPriceChange($event)"
-        (blur)="validatePrice()"
+        [value]="editForm.controls.price.value"
+        [error]="priceError"
+        (valueChange)="editForm.controls.price.setValue($event)"
+        (blur)="editForm.controls.price.markAsTouched()"
       >
         <span class="field-suffix">MXN</span>
       </app-field>
@@ -44,10 +44,10 @@
         inputMode="decimal"
         [min]="0"
         [required]="true"
-        [value]="minPrice()"
-        [error]="minPriceError()"
-        (valueChange)="onMinPriceChange($event)"
-        (blur)="validateMinPrice()"
+        [value]="editForm.controls.minPrice.value"
+        [error]="minPriceError"
+        (valueChange)="editForm.controls.minPrice.setValue($event)"
+        (blur)="editForm.controls.minPrice.markAsTouched()"
       >
         <span class="field-suffix">MXN</span>
       </app-field>
@@ -58,10 +58,10 @@
         inputMode="decimal"
         [min]="0"
         [required]="true"
-        [value]="cost()"
-        [error]="costError()"
-        (valueChange)="onCostChange($event)"
-        (blur)="validateCost()"
+        [value]="editForm.controls.cost.value"
+        [error]="costError"
+        (valueChange)="editForm.controls.cost.setValue($event)"
+        (blur)="editForm.controls.cost.markAsTouched()"
       >
         <span class="field-suffix">MXN</span>
       </app-field>
@@ -72,10 +72,10 @@
         inputMode="numeric"
         [min]="0"
         [required]="true"
-        [value]="stock()"
-        [error]="stockError()"
-        (valueChange)="onStockChange($event)"
-        (blur)="validateStock()"
+        [value]="editForm.controls.stock.value"
+        [error]="stockError"
+        (valueChange)="editForm.controls.stock.setValue($event)"
+        (blur)="editForm.controls.stock.markAsTouched()"
       ></app-field>
     </div>
 
@@ -87,7 +87,11 @@
       </span>
     </div>
 
-    <app-button type="submit" className="full-button" [disabled]="submitting()">
+    <app-button
+      type="submit"
+      className="full-button"
+      [disabled]="submitting() || editForm.invalid"
+    >
       @if (submitting()) {
         Guardando cambios...
       } @else {
