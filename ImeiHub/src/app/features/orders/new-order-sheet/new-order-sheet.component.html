@@ -3,18 +3,17 @@
   subtitle="Define cómo identificar y gestionar esta venta."
   (close)="close.emit()"
 >
-  <form (ngSubmit)="submitForm()">
+  <form [formGroup]="orderForm" (ngSubmit)="submitForm()">
     <label class="new-order-name-field">
       <span>
         Nombre de la orden <small>Opcional</small>
       </span>
       <input
-        [(ngModel)]="newOrderName"
-        name="newOrderName"
+        formControlName="name"
         placeholder="#1043"
       />
       <small>
-        Si no escribes un nombre, se utilizará automáticamente #1043.
+        Si no escribes un nombre, se utilizará automáticamente un folio consecutivo.
       </small>
     </label>
     <div class="new-order-type">
@@ -22,8 +21,8 @@
       <div>
         <button
           type="button"
-          [class.active]="newOrderType === 'Minorista'"
-          (click)="newOrderType = 'Minorista'"
+          [class.active]="orderForm.controls.type.value === 'Minorista'"
+          (click)="selectType('Minorista')"
         >
           <span class="order-type-icon">
             <app-icon name="user"></app-icon>
@@ -32,7 +31,7 @@
             <strong>Minorista</strong>
             <small>Venta directa a cliente final</small>
           </span>
-          @if (newOrderType === 'Minorista') {
+          @if (orderForm.controls.type.value === 'Minorista') {
             <i>
               <app-icon name="check" [size]="12"></app-icon>
             </i>
@@ -40,8 +39,8 @@
         </button>
         <button
           type="button"
-          [class.active]="newOrderType === 'Mayorista'"
-          (click)="newOrderType = 'Mayorista'"
+          [class.active]="orderForm.controls.type.value === 'Mayorista'"
+          (click)="selectType('Mayorista')"
         >
           <span class="order-type-icon">
             <app-icon name="box"></app-icon>
@@ -50,7 +49,7 @@
             <strong>Mayorista</strong>
             <small>Compra por volumen o distribuidor</small>
           </span>
-          @if (newOrderType === 'Mayorista') {
+          @if (orderForm.controls.type.value === 'Mayorista') {
             <i>
               <app-icon name="check" [size]="12"></app-icon>
             </i>
@@ -65,7 +64,12 @@
         encabezado.
       </span>
     </div>
-    <app-button type="submit" icon="plus" className="full-button">
+    <app-button
+      type="submit"
+      icon="plus"
+      className="full-button"
+      [disabled]="orderForm.invalid"
+    >
       Crear orden
     </app-button>
   </form>
