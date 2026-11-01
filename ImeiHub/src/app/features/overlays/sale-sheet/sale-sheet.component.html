@@ -3,15 +3,14 @@
   subtitle="Cobro rápido para clientes en tienda."
   (close)="close.emit()"
 >
-  <form (ngSubmit)="submitForm($event)">
+  <form [formGroup]="saleForm" (ngSubmit)="submitForm($event)">
     <!-- Search bar to pick product -->
     <label class="search-box sale-search">
       <app-icon name="search"></app-icon>
       <input
-        [(ngModel)]="searchQuery"
-        name="searchQuery"
+        [value]="searchQuery"
         placeholder="Buscar o escanear un artículo..."
-        (input)="onSearchChange()"
+        (input)="onSearchInput($any($event.target).value)"
       />
       <button type="button" (click)="open.emit('scanner')" title="Abrir escáner">
         <app-icon name="scan"></app-icon>
@@ -56,14 +55,14 @@
             type="button"
             class="qty-btn"
             (click)="decrementQty()"
-            [disabled]="quantity() <= 1"
+            [disabled]="quantity <= 1"
           >-</button>
-          <span class="qty-display">{{ quantity() }}</span>
+          <span class="qty-display">{{ quantity }}</span>
           <button
             type="button"
             class="qty-btn"
             (click)="incrementQty()"
-            [disabled]="quantity() >= selectedProduct()!.stock"
+            [disabled]="quantity >= selectedProduct()!.stock"
           >+</button>
         </div>
       </div>
@@ -80,22 +79,22 @@
       <div>
         <button
           type="button"
-          [class.selected]="selectedPayment() === 'cash'"
-          (click)="selectedPayment.set('cash')"
+          [class.selected]="saleForm.controls.paymentMethod.value === 'cash'"
+          (click)="setPaymentMethod('cash')"
         >
           Efectivo
         </button>
         <button
           type="button"
-          [class.selected]="selectedPayment() === 'transfer'"
-          (click)="selectedPayment.set('transfer')"
+          [class.selected]="saleForm.controls.paymentMethod.value === 'transfer'"
+          (click)="setPaymentMethod('transfer')"
         >
           Transferencia
         </button>
         <button
           type="button"
-          [class.selected]="selectedPayment() === 'card'"
-          (click)="selectedPayment.set('card')"
+          [class.selected]="saleForm.controls.paymentMethod.value === 'card'"
+          (click)="setPaymentMethod('card')"
         >
           Tarjeta
         </button>
@@ -110,7 +109,7 @@
     <app-button
       type="submit"
       className="full-button"
-      [disabled]="!selectedProduct() || submitting()"
+      [disabled]="!selectedProduct() || submitting() || saleForm.invalid"
     >
       @if (submitting()) {
         Registrando venta...

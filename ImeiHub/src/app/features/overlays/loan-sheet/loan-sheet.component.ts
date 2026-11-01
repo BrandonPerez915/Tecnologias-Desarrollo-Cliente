@@ -1,6 +1,6 @@
 import { Component, output, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { ButtonComponent } from '../../../components/ui/button/button.component';
 import { FieldComponent } from '../../../components/ui/field/field.component';
 import { IconComponent } from '../../../components/ui/icon/icon.component';
@@ -16,7 +16,7 @@ import { NotificationService } from '../../../core/services/notification.service
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
+    ReactiveFormsModule,
     ButtonComponent,
     FieldComponent,
     IconComponent,
@@ -33,20 +33,31 @@ export class LoanSheetComponent {
   open = output<Overlay>();
   close = output<void>();
 
-  loanProductSearch = signal('');
-  loanProductSearchOpen = signal(false);
-  serialNumber = signal('');
-  stallNumber = signal('');
-  personName = signal('');
+  // Angular Reactive Forms - FormGroup y FormControls
+  loanForm = new FormGroup({
+    item: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required]
+    }),
+    serial: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.minLength(4)]
+    }),
+    stall: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required]
+    }),
+    person: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.minLength(2)]
+    })
+  });
 
-  productError = signal('');
-  serialError = signal('');
-  stallError = signal('');
-  personError = signal('');
+  loanProductSearchOpen = signal(false);
   submitting = signal(false);
 
   loanProductSuggestions = computed(() => {
-    const query = this.loanProductSearch().trim().toLowerCase();
+    const query = this.loanForm.controls.item.value.trim().toLowerCase();
     return query
       ? this.inventoryService.products()
           .filter((p) => p.name.toLowerCase().includes(query))
@@ -55,9 +66,8 @@ export class LoanSheetComponent {
   });
 
   onSearchChange(value: string) {
-    this.loanProductSearch.set(value);
+    this.loanForm.controls.item.setValue(value);
     this.loanProductSearchOpen.set(true);
-    if (this.productError()) this.validateProduct();
   }
 
   onBlur() {
@@ -65,86 +75,56 @@ export class LoanSheetComponent {
   }
 
   selectProduct(product: Product) {
-    this.loanProductSearch.set(product.name);
+    this.loanForm.controls.item.setValue(product.name);
     this.loanProductSearchOpen.set(false);
-    this.productError.set('');
   }
 
-  onSerialChange(val: string) {
-    this.serialNumber.set(val);
-    if (this.serialError()) this.validateSerial();
+  get productError(): string {
+    const ctrl = this.loanForm.controls.item;
+    if (!ctrl.touched && !ctrl.dirty) return '';
+    if (ctrl.hasError('required')) return 'Ingresa el nombre del artículo a prestar';
+    return '';
   }
 
-  onStallChange(val: string) {
-    this.stallNumber.set(val);
-    if (this.stallError()) this.validateStall();
+  get serialError(): string {
+    const ctrl = this.loanForm.controls.serial;
+    if (!ctrl.touched && !ctrl.dirty) return '';
+    if (ctrl.hasError('required')) return 'Ingresa el número de serie o IMEI';
+    if (ctrl.hasError('minlength')) return 'El serial o IMEI debe tener al menos 4 caracteres';
+    return '';
   }
 
-  onPersonChange(val: string) {
-    this.personName.set(val);
-    if (this.personError()) this.validatePerson();
+  get stallError(): string {
+    const ctrl = this.loanForm.controls.stall;
+    if (!ctrl.touched && !ctrl.dirty) return '';
+    if (ctrl.hasError('required')) return 'Indica el puesto o local solicitante (ej. B-14)';
+    return '';
   }
 
-  validateProduct(): boolean {
-    if (!this.loanProductSearch().trim()) {
-      this.productError.set('Ingresa el nombre del artículo a prestar');
-      return false;
-    }
-    this.productError.set('');
-    return true;
-  }
-
-  validateSerial(): boolean {
-    if (!this.serialNumber().trim()) {
-      this.serialError.set('Ingresa el número de serie o IMEI');
-      return false;
-    }
-    if (this.serialNumber().trim().length < 4) {
-      this.serialError.set('El serial o IMEI debe tener al menos 4 caracteres');
-      return false;
-    }
-    this.serialError.set('');
-    return true;
-  }
-
-  validateStall(): boolean {
-    if (!this.stallNumber().trim()) {
-      this.stallError.set('Indica el puesto o local solicitante (ej. B-14)');
-      return false;
-    }
-    this.stallError.set('');
-    return true;
-  }
-
-  validatePerson(): boolean {
-    if (!this.personName().trim()) {
-      this.personError.set('Indica el nombre de quien se lleva el artículo');
-      return false;
-    }
-    if (this.personName().trim().length < 2) {
-      this.personError.set('Ingresa un nombre válido');
-      return false;
-    }
-    this.personError.set('');
-    return true;
+  get personError(): string {
+    const ctrl = this.loanForm.controls.person;
+    if (!ctrl.touched && !ctrl.dirty) return '';
+    if (ctrl.hasError('required')) return 'Indica el nombre de quien se lleva el artículo';
+    if (ctrl.hasError('minlength')) return 'Ingresa un nombre válido';
+    return '';
   }
 
   submitForm(event: Event) {
     event.preventDefault();
-    const v1 = this.validateProduct();
-    const v2 = this.validateSerial();
-    const v3 = this.validateStall();
-    const v4 = this.validatePerson();
 
-    if (!v1 || !v2 || !v3 || !v4) return;
+    if (this.loanForm.invalid) {
+      this.loanForm.markAllAsTouched();
+      return;
+    }
 
     this.submitting.set(true);
+    const val = this.loanForm.getRawValue();
 
     const success = this.loansService.registerLoan({
-      item: this.loanProductSearch().trim(),
-      serial: this.serialNumber().trim(),
-      stall: this.stallNumber().trim(),
-      person: this.personName().trim()
+      item: val.item.trim(),
+      serial: val.serial.trim(),
+      stall: val.stall.trim(),
+      person: val.person.trim()
     });
 
     this.submitting.set(false);
