@@ -4,7 +4,7 @@
   maxWidth="540px"
   [showBackButton]="false"
 >
-  <form (ngSubmit)="handleSubmit($event)" class="register-form" novalidate>
+  <form [formGroup]="registerForm" (ngSubmit)="handleSubmit($event)" class="register-form" novalidate>
     <!-- General error banner if any -->
     @if (generalError()) {
       <div class="auth-alert alert-danger" role="alert">
@@ -22,10 +22,10 @@
         icon="user"
         autocomplete="name"
         [required]="true"
-        [value]="name()"
-        [error]="nameError()"
+        [value]="registerForm.controls.name.value"
+        [error]="nameError"
         (valueChange)="onNameChange($event)"
-        (blur)="validateName()"
+        (blur)="registerForm.controls.name.markAsTouched()"
       ></app-field>
 
       <!-- Store / Business Name -->
@@ -34,10 +34,10 @@
         placeholder="SmartFix Celulares"
         icon="store"
         [required]="true"
-        [value]="storeName()"
-        [error]="storeError()"
+        [value]="registerForm.controls.storeName.value"
+        [error]="storeError"
         (valueChange)="onStoreChange($event)"
-        (blur)="validateStore()"
+        (blur)="registerForm.controls.storeName.markAsTouched()"
       ></app-field>
     </div>
 
@@ -50,10 +50,10 @@
         icon="mail"
         autocomplete="email"
         [required]="true"
-        [value]="email()"
-        [error]="emailError()"
+        [value]="registerForm.controls.email.value"
+        [error]="emailError"
         (valueChange)="onEmailChange($event)"
-        (blur)="validateEmail()"
+        (blur)="registerForm.controls.email.markAsTouched()"
       ></app-field>
 
       <!-- Phone / WhatsApp -->
@@ -65,8 +65,8 @@
         inputMode="tel"
         autocomplete="tel"
         [required]="false"
-        [value]="phone()"
-        (valueChange)="phone.set($event)"
+        [value]="registerForm.controls.phone.value"
+        (valueChange)="onPhoneChange($event)"
       ></app-field>
     </div>
 
@@ -77,14 +77,14 @@
       placeholder="Crea una contraseña segura"
       autocomplete="new-password"
       [required]="true"
-      [value]="password()"
-      [error]="passwordError()"
+      [value]="registerForm.controls.password.value"
+      [error]="passwordError"
       (valueChange)="onPasswordChange($event)"
-      (blur)="validatePassword()"
+      (blur)="registerForm.controls.password.markAsTouched()"
     ></app-password-field>
 
     <!-- Password Strength Meter -->
-    @if (password().length > 0) {
+    @if (passwordVal().length > 0) {
       <div class="password-meter">
         <div class="meter-bar-track">
           <div
@@ -111,10 +111,10 @@
       placeholder="Repite la misma contraseña"
       autocomplete="new-password"
       [required]="true"
-      [value]="confirmPassword()"
-      [error]="confirmPasswordError()"
+      [value]="registerForm.controls.confirmPassword.value"
+      [error]="confirmPasswordError"
       (valueChange)="onConfirmPasswordChange($event)"
-      (blur)="validateConfirmPassword()"
+      (blur)="registerForm.controls.confirmPassword.markAsTouched()"
     ></app-password-field>
 
     <!-- Terms and Conditions Agreement -->
@@ -122,8 +122,7 @@
       <label class="custom-checkbox-label">
         <input
           type="checkbox"
-          [(ngModel)]="acceptTerms"
-          name="acceptTerms"
+          formControlName="acceptTerms"
           class="custom-checkbox"
         />
         <span class="type-caption">
@@ -134,8 +133,8 @@
           de ImeiHub.
         </span>
       </label>
-      @if (termsError()) {
-        <small class="terms-error">{{ termsError() }}</small>
+      @if (termsError) {
+        <small class="terms-error">{{ termsError }}</small>
       }
     </div>
 
@@ -145,7 +144,7 @@
         variant="primary"
         type="submit"
         className="full-button register-btn"
-        [disabled]="loading()"
+        [disabled]="loading() || registerForm.invalid"
       >
         @if (loading()) {
           <div class="spinner"></div>
