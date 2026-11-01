@@ -6,6 +6,7 @@ import { PageHeadingComponent } from '../../../components/ui/page-heading/page-h
 import { DatePickerSheetComponent } from '../date-picker-sheet/date-picker-sheet.component';
 import { ExportMovementsModalComponent } from '../export-movements-modal/export-movements-modal.component';
 import { Overlay } from '../../../types/navigation';
+import { CashEntry } from '../../../types/cash';
 import { CashService } from '../../../core/services/cash.service';
 import { OverlayService } from '../../../core/services/overlay.service';
 
@@ -35,7 +36,7 @@ export class CashFlowComponent {
 
   filterOptions = ['All', 'Money In', 'Money Out'];
 
-  visibleEntries = computed(() => {
+  visibleEntries = computed<CashEntry[]>(() => {
     const f = this.filter();
     const day = this.selectedDay();
 

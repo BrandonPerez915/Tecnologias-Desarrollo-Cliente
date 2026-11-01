@@ -114,7 +114,7 @@
       </dl>
 
       <!-- Interactive Cash Counting Input -->
-      <div class="counting-form mt-4">
+      <div class="counting-form mt-4" [formGroup]="closeForm">
         <app-field
           label="Efectivo contado físicamente en caja"
           placeholder="0.00"
@@ -122,15 +122,15 @@
           inputMode="decimal"
           [min]="0"
           [required]="true"
-          [value]="countedCash()"
-          [error]="countedError()"
-          (valueChange)="onCountedChange($event)"
-          (blur)="validateCounted()"
+          [value]="closeForm.controls.countedCash.value"
+          [error]="countedError"
+          (valueChange)="closeForm.controls.countedCash.setValue($event)"
+          (blur)="closeForm.controls.countedCash.markAsTouched()"
         >
           <span class="field-suffix">MXN</span>
         </app-field>
 
-        @if (countedCash().trim()) {
+        @if (closeForm.controls.countedCash.value.trim()) {
           <div class="difference-box" [class]="diffStatusClass()">
             <div class="diff-header">
               <span>Diferencia de arqueo:</span>
@@ -143,8 +143,8 @@
         <app-field
           label="Notas u observaciones de cierre"
           placeholder="p. ej., Se apartaron 2,000 para el depósito matutino"
-          [value]="notes()"
-          (valueChange)="notes.set($event)"
+          [value]="closeForm.controls.notes.value"
+          (valueChange)="closeForm.controls.notes.setValue($event)"
         ></app-field>
       </div>
 
@@ -186,7 +186,7 @@
     </app-button>
     <app-button
       icon="check"
-      [disabled]="closing()"
+      [disabled]="closing() || closeForm.invalid"
       (clicked)="finishClose()"
     >
       @if (closing()) {

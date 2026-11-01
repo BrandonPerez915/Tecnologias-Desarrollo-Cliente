@@ -1,6 +1,6 @@
 import { Component, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AmountComponent } from '../../../components/ui/amount/amount.component';
 import { ButtonComponent } from '../../../components/ui/button/button.component';
@@ -24,7 +24,7 @@ const defaultSoldProducts: SoldProduct[] = [
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
+    ReactiveFormsModule,
     AmountComponent,
     ButtonComponent,
     IconComponent,
@@ -44,9 +44,15 @@ export class CashCloseComponent {
   currentUser = this.authService.user;
   products = defaultSoldProducts;
 
-  countedCash = signal('');
-  notes = signal('');
-  countedError = signal('');
+  // Angular Reactive Forms
+  closeForm = new FormGroup({
+    countedCash: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.min(0)]
+    }),
+    notes: new FormControl('', { nonNullable: true })
+  });
+
   closing = signal(false);
 
   todayFormatted = new Intl.DateTimeFormat('es-MX', {
@@ -56,7 +62,7 @@ export class CashCloseComponent {
   }).format(new Date());
 
   cashDifference = computed(() => {
-    const val = parseFloat(this.countedCash());
+    const val = parseFloat(this.closeForm.controls.countedCash.value);
     if (isNaN(val)) return 0;
     return val - this.cashService.expectedCash();
   });
@@ -89,23 +95,19 @@ export class CashCloseComponent {
     this.router.navigate(['/cash']);
   }
 
-  onCountedChange(val: string) {
-    this.countedCash.set(val);
-    if (this.countedError()) this.validateCounted();
-  }
-
-  validateCounted(): boolean {
-    const val = parseFloat(this.countedCash());
+  get countedError(): string {
+    const ctrl = this.closeForm.controls.countedCash;
+    if (!ctrl.touched && !ctrl.dirty) return '';
+    const val = parseFloat(ctrl.value);
     if (isNaN(val) || val < 0) {
-      this.countedError.set('Ingresa una cantidad válida de efectivo contado');
-      return false;
+      return 'Ingresa una cantidad válida de efectivo contado';
     }
-    this.countedError.set('');
-    return true;
+    return '';
   }
 
   saveSummary() {
     const user = this.currentUser();
+    const countedVal = parseFloat(this.closeForm.controls.countedCash.value);
     const summary = {
       fecha: this.todayFormatted,
       puesto: user?.stallNumber || 'A-18',
@@ -115,9 +117,9 @@ export class CashCloseComponent {
       ventasTotales: this.cashService.totalSalesToday(),
       salidasTotales: this.cashService.totalExpensesToday(),
       efectivoEsperado: this.cashService.expectedCash(),
-      efectivoContado: parseFloat(this.countedCash()) || this.cashService.expectedCash(),
+      efectivoContado: !isNaN(countedVal) ? countedVal : this.cashService.expectedCash(),
       diferencia: this.cashDifference(),
-      notas: this.notes() || 'Cierre regular de jornada',
+      notas: this.closeForm.controls.notes.value || 'Cierre regular de jornada',
       movimientos: this.cashService.entries()
     };
 
@@ -134,15 +136,16 @@ export class CashCloseComponent {
   }
 
   finishClose() {
-    if (!this.validateCounted()) {
+    if (this.closeForm.invalid) {
+      this.closeForm.markAllAsTouched();
       this.notify.error('Debes indicar el conteo de efectivo físico para conciliar');
       return;
     }
 
     this.closing.set(true);
-    const counted = parseFloat(this.countedCash());
+    const counted = parseFloat(this.closeForm.controls.countedCash.value);
 
-    this.cashService.closeCashRegister(counted, this.notes());
+    this.cashService.closeCashRegister(counted, this.closeForm.controls.notes.value);
     this.closing.set(false);
     this.router.navigate(['/dashboard']);
   }
