@@ -1,4 +1,5 @@
 export interface LoanEntry {
+  id?: number | string;
   item: string;
   serial: string;
   fullSerial: string;

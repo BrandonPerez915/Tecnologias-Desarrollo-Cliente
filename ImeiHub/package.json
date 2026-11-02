@@ -5,6 +5,8 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "api": "node --watch server/api-server.mjs",
+    "start:all": "node --watch server/api-server.mjs & ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development"
   },
@@ -15,6 +17,8 @@
     "@angular/forms": "^19.1.0",
     "@angular/platform-browser": "^19.1.0",
     "@angular/router": "^19.1.0",
+    "cors": "^2.8.6",
+    "express": "^5.3.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
