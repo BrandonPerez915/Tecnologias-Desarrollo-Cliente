@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 
-export type NotificationType = 'success' | 'danger' | 'warning' | 'neutral';
+export type NotificationType = 'success' | 'error' | 'danger' | 'warning' | 'info' | 'neutral';
 
 export interface ToastNotification {
   id: number;
@@ -18,7 +18,7 @@ export class NotificationService {
 
   toast = this.currentToast.asReadonly();
 
-  show(message: string, type: NotificationType = 'success', duration = 2800) {
+  show(message: string, type: NotificationType = 'success', duration = 3000) {
     if (this.timer !== null) {
       window.clearTimeout(this.timer);
     }
@@ -36,16 +36,24 @@ export class NotificationService {
     }, duration);
   }
 
-  success(message: string, duration?: number) {
+  success(message: string, duration = 2800) {
     this.show(message, 'success', duration);
   }
 
-  error(message: string, duration?: number) {
+  error(message: string, duration = 3800) {
+    this.show(message, 'error', duration);
+  }
+
+  danger(message: string, duration = 3800) {
     this.show(message, 'danger', duration);
   }
 
-  warning(message: string, duration?: number) {
+  warning(message: string, duration = 3500) {
     this.show(message, 'warning', duration);
+  }
+
+  info(message: string, duration = 3000) {
+    this.show(message, 'info', duration);
   }
 
   clear() {

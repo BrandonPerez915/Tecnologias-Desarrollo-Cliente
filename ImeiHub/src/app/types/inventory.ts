@@ -3,6 +3,13 @@ export interface ProductVariant {
   stock: number;
 }
 
+export interface ProductIdentifier {
+  barcode: string;
+  serial: string;
+  condition: string;
+  added: string;
+}
+
 export interface Product {
   id: number;
   name: string;
@@ -10,17 +17,12 @@ export interface Product {
   stock: number;
   price: string;
   cost: string;
+  minPrice?: string;
   type: string;
   category: string;
   location: string;
   variants: ProductVariant[];
-}
-
-export interface ProductIdentifier {
-  barcode: string;
-  serial: string;
-  condition: string;
-  added: string;
+  identifier?: ProductIdentifier;
 }
 
 export interface NewProductVariantRow {

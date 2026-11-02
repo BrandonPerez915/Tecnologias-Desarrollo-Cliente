@@ -1,17 +1,25 @@
-import { Injectable, signal, computed } from '@angular/core';
-import { cashEntries } from '../../data/mockData';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { CashEntry } from '../../types/cash';
+import { ApiService } from './api.service';
 import { NotificationService } from './notification.service';
+import { finalize } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CashService {
-  private initialBaseSignal = signal<number>(9834);
-  private entriesSignal = signal<CashEntry[]>([...cashEntries]);
+  private api = inject(ApiService);
+  private notify = inject(NotificationService);
+
+  private initialBaseSignal = signal<number>(0);
+  private entriesSignal = signal<CashEntry[]>([]);
+  private loadingSignal = signal<boolean>(false);
+  private errorSignal = signal<string | null>(null);
 
   entries = this.entriesSignal.asReadonly();
   initialBase = this.initialBaseSignal.asReadonly();
+  loading = this.loadingSignal.asReadonly();
+  error = this.errorSignal.asReadonly();
 
   totalSalesToday = computed(() => {
     return this.entriesSignal()
@@ -35,7 +43,26 @@ export class CashService {
     return this.initialBaseSignal() + this.totalSalesToday() - this.totalExpensesToday();
   });
 
-  constructor(private notify: NotificationService) {}
+  constructor() {
+    this.fetchCash();
+  }
+
+  fetchCash(): void {
+    this.loadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    this.api.get<{ initialBase: number; entries: CashEntry[] }>('/cash')
+      .pipe(finalize(() => this.loadingSignal.set(false)))
+      .subscribe({
+        next: (data) => {
+          this.initialBaseSignal.set(data.initialBase || 9834);
+          this.entriesSignal.set(data.entries || []);
+        },
+        error: (err) => {
+          this.errorSignal.set(err.message || 'No fue posible sincronizar los movimientos de caja');
+        }
+      });
+  }
 
   registerExpense(
     amountOrObj: number | { amount: number; category: string; note: string },
@@ -65,19 +92,18 @@ export class CashService {
       return false;
     }
 
-    const now = new Date();
-    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-    const newEntry: CashEntry = {
-      time: timeStr,
+    this.api.post<CashEntry>('/cash/entries', {
       title: n.trim(),
       note: `${cat} · Ada Okafor`,
-      amount: `−${amount.toLocaleString('es-MX')}`,
+      amount,
       kind: 'out'
-    };
+    }).subscribe({
+      next: (entry) => {
+        this.entriesSignal.update((list) => [entry, ...list]);
+        this.notify.success(`Gasto de MXN ${amount.toLocaleString('es-MX')} registrado`);
+      }
+    });
 
-    this.entriesSignal.update((list) => [newEntry, ...list]);
-    this.notify.success(`Gasto de MXN ${amount.toLocaleString('es-MX')} registrado`);
     return true;
   }
 
@@ -105,19 +131,18 @@ export class CashService {
       return false;
     }
 
-    const now = new Date();
-    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-    const newEntry: CashEntry = {
-      time: timeStr,
-      title: title,
+    this.api.post<CashEntry>('/cash/entries', {
+      title,
       note: `Venta · ${method} · Ada Okafor`,
-      amount: `+${amount.toLocaleString('es-MX')}`,
+      amount,
       kind: 'in'
-    };
+    }).subscribe({
+      next: (entry) => {
+        this.entriesSignal.update((list) => [entry, ...list]);
+        this.notify.success(`Venta de MXN ${amount.toLocaleString('es-MX')} añadida a caja`);
+      }
+    });
 
-    this.entriesSignal.update((list) => [newEntry, ...list]);
-    this.notify.success(`Venta de MXN ${amount.toLocaleString('es-MX')} añadida a caja`);
     return true;
   }
 
@@ -125,14 +150,28 @@ export class CashService {
     const expected = this.expectedCash();
     const difference = countedAmount - expected;
 
-    this.notify.success(
-      difference === 0
-        ? 'Caja cuadrada exactamente al centavo'
-        : difference > 0
-          ? `Cierre con sobrante de MXN ${difference.toLocaleString('es-MX')}`
-          : `Cierre con faltante de MXN ${Math.abs(difference).toLocaleString('es-MX')}`
-    );
+    this.api.post('/cash/close', {
+      countedCash: countedAmount,
+      expectedCash: expected,
+      difference,
+      notes: notes || 'Cierre regular de jornada'
+    }).subscribe({
+      next: () => {
+        this.notify.success(
+          difference === 0
+            ? 'Caja cuadrada exactamente al centavo'
+            : difference > 0
+              ? `Cierre con sobrante de MXN ${difference.toLocaleString('es-MX')}`
+              : `Cierre con faltante de MXN ${Math.abs(difference).toLocaleString('es-MX')}`
+        );
+      }
+    });
 
     return { success: true, difference };
+  }
+
+  clear(): void {
+    this.initialBaseSignal.set(0);
+    this.entriesSignal.set([]);
   }
 }
