@@ -1,7 +1,7 @@
 <div class="page">
   <app-page-heading
     title="Movimientos"
-    subtitle="Todos los movimientos de entrada y salida de tu caja."
+    subtitle="Todos los movimientos de entrada y salida de tu caja sincronizados con la API."
   ></app-page-heading>
 
   <div class="cash-summary-row">
@@ -69,43 +69,66 @@
         <app-icon name="chevron" [size]="14"></app-icon>
       </button>
     </div>
-    <div class="ledger-head">
-      <span>Hora y movimiento</span>
-      <span>Detalles</span>
-      <span>Importe</span>
-    </div>
-    <div class="ledger-list">
-      @for (entry of visibleEntries(); track entry.time + '-' + entry.title) {
-        <div class="ledger-row">
-          <div class="ledger-time">
-            <span [class]="'flow-mark ' + entry.kind">
-              <app-icon
-                [name]="entry.kind === 'in' ? 'arrow-down' : 'arrow-up'"
-                [size]="17"
-              ></app-icon>
-            </span>
-            <span>{{ entry.time }}</span>
-          </div>
-          <div class="ledger-details">
-            <strong>{{ entry.title }}</strong>
-            <span>{{ entry.note }}</span>
-          </div>
-          <strong [class]="'ledger-amount ' + entry.kind">
-            {{ entry.amount }}
-          </strong>
-        </div>
-      }
 
-      @if (visibleEntries().length === 0) {
-        <div class="empty-ledger">
-          <app-icon name="calendar" [size]="28"></app-icon>
-          <p>No hay movimientos registrados para el {{ selectedDay() }} de junio.</p>
-        </div>
-      }
-    </div>
-    <div class="ledger-footer">
-      <span>Mostrando {{ visibleEntries().length }} movimientos</span>
-    </div>
+    <!-- ESTADO: CARGANDO -->
+    @if (cashService.loading()) {
+      <div class="state-container state-loading">
+        <div class="spinner"></div>
+        <p><strong>Cargando movimientos...</strong></p>
+        <small>Obteniendo transacciones desde el servidor de caja</small>
+      </div>
+    }
+
+    <!-- ESTADO: ERROR -->
+    @else if (cashService.error()) {
+      <div class="state-container state-error">
+        <div class="state-icon">⚠️</div>
+        <h3>Error al consultar caja</h3>
+        <p>{{ cashService.error() }}</p>
+        <app-button icon="swap" (clicked)="cashService.fetchCash()">Reintentar sincronización</app-button>
+      </div>
+    }
+
+    <!-- ESTADO: CON DATOS O VACÍO -->
+    @else {
+      <div class="ledger-head">
+        <span>Hora y movimiento</span>
+        <span>Detalles</span>
+        <span>Importe</span>
+      </div>
+      <div class="ledger-list">
+        @for (entry of visibleEntries(); track (entry.id ?? entry.time) + '-' + entry.title + '-' + $index) {
+          <div class="ledger-row">
+            <div class="ledger-time">
+              <span [class]="'flow-mark ' + entry.kind">
+                <app-icon
+                  [name]="entry.kind === 'in' ? 'arrow-down' : 'arrow-up'"
+                  [size]="17"
+                ></app-icon>
+              </span>
+              <span>{{ entry.time }}</span>
+            </div>
+            <div class="ledger-details">
+              <strong>{{ entry.title }}</strong>
+              <span>{{ entry.note }}</span>
+            </div>
+            <strong [class]="'ledger-amount ' + entry.kind">
+              {{ entry.amount }}
+            </strong>
+          </div>
+        }
+
+        @if (visibleEntries().length === 0) {
+          <div class="empty-ledger">
+            <app-icon name="calendar" [size]="28"></app-icon>
+            <p>No hay movimientos registrados para el {{ selectedDay() }} de junio.</p>
+          </div>
+        }
+      </div>
+      <div class="ledger-footer">
+        <span>Mostrando {{ visibleEntries().length }} movimientos</span>
+      </div>
+    }
   </section>
 
   @if (showCalendar()) {
