@@ -23,7 +23,11 @@
       class="product-select"
       [ngModel]="selectedProductId()"
       (ngModelChange)="onSelectProduct($event)"
+      [disabled]="products().length === 0"
     >
+      @if (products().length === 0) {
+        <option value="" disabled selected>No hay productos en inventario</option>
+      }
       @for (prod of products(); track prod.id) {
         <option [value]="prod.id">
           {{ prod.name }} ({{ prod.sku }}) — MXN {{ prod.price }}
@@ -72,6 +76,7 @@
   <app-button
     icon="printer"
     className="full-button"
+    [disabled]="!selectedProduct() || printCopies < 1"
     (clicked)="handlePrint()"
   >
     Imprimir {{ printCopies }} {{ printCopies === 1 ? 'copia' : 'copias' }}

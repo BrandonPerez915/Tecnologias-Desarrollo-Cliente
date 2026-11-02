@@ -1,6 +1,6 @@
-import { Component, input, output, signal, inject } from '@angular/core';
+import { Component, input, output, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
 import { AmountComponent } from '../../../components/ui/amount/amount.component';
 import { ButtonComponent } from '../../../components/ui/button/button.component';
 import { FieldComponent } from '../../../components/ui/field/field.component';
@@ -18,7 +18,7 @@ import { NotificationService } from '../../../core/services/notification.service
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
+    ReactiveFormsModule,
     AmountComponent,
     ButtonComponent,
     FieldComponent,
@@ -41,25 +41,17 @@ export class OrderCheckoutViewComponent {
   complete = output<void>();
   notify = output<string>();
 
-  paymentMethod: PaymentMethod = 'Efectivo';
-  generateInvoice = false;
-  printTicket = true;
-
-  cashReceived = signal('');
-  cashError = signal('');
-
-  transferRef = signal('');
-
-  cardLast4 = signal('');
-  cardAuth = signal('');
-  cardAuthError = signal('');
-
-  invoiceName = signal('');
-  invoiceRfc = signal('');
-  invoiceEmail = signal('');
-  invoiceNameError = signal('');
-  invoiceRfcError = signal('');
-  invoiceEmailError = signal('');
+  checkoutForm = new FormGroup({
+    paymentMethod: new FormControl<PaymentMethod>('Efectivo', { nonNullable: true }),
+    cashReceived: new FormControl('', { nonNullable: true }),
+    transferRef: new FormControl('', { nonNullable: true }),
+    cardAuth: new FormControl('', { nonNullable: true }),
+    generateInvoice: new FormControl(false, { nonNullable: true }),
+    printTicket: new FormControl(true, { nonNullable: true }),
+    invoiceName: new FormControl('', { nonNullable: true }),
+    invoiceRfc: new FormControl('', { nonNullable: true }),
+    invoiceEmail: new FormControl('', { nonNullable: true })
+  });
 
   paymentMethods: { name: PaymentMethod; icon: IconName; detail: string }[] = [
     { name: 'Efectivo', icon: 'cash', detail: 'Pago en caja' },
@@ -67,12 +59,24 @@ export class OrderCheckoutViewComponent {
     { name: 'Tarjeta', icon: 'cash', detail: 'Débito o crédito' },
   ];
 
+  get paymentMethod(): PaymentMethod {
+    return this.checkoutForm.controls.paymentMethod.value;
+  }
+
+  get generateInvoice(): boolean {
+    return this.checkoutForm.controls.generateInvoice.value;
+  }
+
+  get printTicket(): boolean {
+    return this.checkoutForm.controls.printTicket.value;
+  }
+
   get totalItemCount(): number {
     return this.activeItems().reduce((sum, item) => sum + item.quantity, 0);
   }
 
   get estimatedChange(): string {
-    const val = parseFloat(this.cashReceived()) || 0;
+    const val = parseFloat(this.checkoutForm.controls.cashReceived.value) || 0;
     return Math.max(0, val - this.total()).toLocaleString('es-MX');
   }
 
@@ -81,112 +85,95 @@ export class OrderCheckoutViewComponent {
     return (unitPrice * item.quantity).toLocaleString('es-MX');
   }
 
-  onCashReceivedChange(value: string) {
-    this.cashReceived.set(value);
-    if (this.cashError()) this.validateCashReceived();
+  setPaymentMethod(method: PaymentMethod) {
+    this.checkoutForm.controls.paymentMethod.setValue(method);
   }
 
-  validateCashReceived(): boolean {
-    const val = parseFloat(this.cashReceived());
-    if (isNaN(val) || val <= 0) {
-      this.cashError.set('Ingresa la cantidad recibida');
-      return false;
+  toggleInvoice(checked: boolean) {
+    this.checkoutForm.controls.generateInvoice.setValue(checked);
+  }
+
+  togglePrintTicket(checked: boolean) {
+    this.checkoutForm.controls.printTicket.setValue(checked);
+  }
+
+  get cashError(): string {
+    const ctrl = this.checkoutForm.controls.cashReceived;
+    if (!ctrl.touched && !ctrl.dirty) return '';
+    const val = parseFloat(ctrl.value);
+    if (isNaN(val) || val <= 0) return 'Ingresa la cantidad recibida';
+    if (val < this.total()) return `El importe debe cubrir al menos MXN ${this.total().toLocaleString('es-MX')}`;
+    return '';
+  }
+
+  get cardAuthError(): string {
+    const ctrl = this.checkoutForm.controls.cardAuth;
+    if (!ctrl.touched && !ctrl.dirty) return '';
+    if (!ctrl.value.trim()) return 'Ingresa el código de autorización del voucher';
+    return '';
+  }
+
+  get invoiceNameError(): string {
+    const ctrl = this.checkoutForm.controls.invoiceName;
+    if (!ctrl.touched && !ctrl.dirty) return '';
+    if (!ctrl.value.trim()) return 'Ingresa la razón social';
+    return '';
+  }
+
+  get invoiceRfcError(): string {
+    const ctrl = this.checkoutForm.controls.invoiceRfc;
+    if (!ctrl.touched && !ctrl.dirty) return '';
+    const rfc = ctrl.value.trim().toUpperCase();
+    if (!rfc) return 'Ingresa el RFC del cliente';
+    if (rfc.length < 12 || rfc.length > 13) return 'El RFC debe contener entre 12 y 13 caracteres';
+    return '';
+  }
+
+  get invoiceEmailError(): string {
+    const ctrl = this.checkoutForm.controls.invoiceEmail;
+    if (!ctrl.touched && !ctrl.dirty) return '';
+    const email = ctrl.value.trim();
+    if (!email) return 'Ingresa el correo para envío de factura';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Ingresa un correo electrónico válido';
+    return '';
+  }
+
+  isFormValid(): boolean {
+    const values = this.checkoutForm.getRawValue();
+    const tot = this.total();
+
+    if (values.paymentMethod === 'Efectivo') {
+      const cash = parseFloat(values.cashReceived);
+      if (isNaN(cash) || cash < tot) return false;
+    } else if (values.paymentMethod === 'Tarjeta') {
+      if (!values.cardAuth.trim()) return false;
     }
-    if (val < this.total()) {
-      this.cashError.set(`El importe recibido debe cubrir al menos MXN ${this.total().toLocaleString('es-MX')}`);
-      return false;
+
+    if (values.generateInvoice) {
+      if (!values.invoiceName.trim()) return false;
+      const rfc = values.invoiceRfc.trim();
+      if (rfc.length < 12 || rfc.length > 13) return false;
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.invoiceEmail.trim())) return false;
     }
-    this.cashError.set('');
-    return true;
-  }
 
-  onCardAuthChange(value: string) {
-    this.cardAuth.set(value);
-    if (this.cardAuthError()) this.validateCardAuth();
-  }
-
-  validateCardAuth(): boolean {
-    if (!this.cardAuth().trim()) {
-      this.cardAuthError.set('Ingresa el código de autorización del voucher');
-      return false;
-    }
-    this.cardAuthError.set('');
-    return true;
-  }
-
-  onInvoiceNameChange(val: string) {
-    this.invoiceName.set(val);
-    if (this.invoiceNameError()) this.validateInvoiceName();
-  }
-
-  validateInvoiceName(): boolean {
-    if (!this.invoiceName().trim()) {
-      this.invoiceNameError.set('Ingresa la razón social');
-      return false;
-    }
-    this.invoiceNameError.set('');
-    return true;
-  }
-
-  onInvoiceRfcChange(val: string) {
-    this.invoiceRfc.set(val);
-    if (this.invoiceRfcError()) this.validateInvoiceRfc();
-  }
-
-  validateInvoiceRfc(): boolean {
-    const rfc = this.invoiceRfc().trim().toUpperCase();
-    if (!rfc) {
-      this.invoiceRfcError.set('Ingresa el RFC del cliente');
-      return false;
-    }
-    if (rfc.length < 12 || rfc.length > 13) {
-      this.invoiceRfcError.set('El RFC debe contener entre 12 y 13 caracteres');
-      return false;
-    }
-    this.invoiceRfcError.set('');
-    return true;
-  }
-
-  onInvoiceEmailChange(val: string) {
-    this.invoiceEmail.set(val);
-    if (this.invoiceEmailError()) this.validateInvoiceEmail();
-  }
-
-  validateInvoiceEmail(): boolean {
-    const email = this.invoiceEmail().trim();
-    if (!email) {
-      this.invoiceEmailError.set('Ingresa el correo para envío de factura');
-      return false;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      this.invoiceEmailError.set('Ingresa un correo electrónico válido');
-      return false;
-    }
-    this.invoiceEmailError.set('');
     return true;
   }
 
   submitPayment(event: Event) {
     event.preventDefault();
 
-    if (this.paymentMethod === 'Efectivo') {
-      if (!this.validateCashReceived()) return;
-    } else if (this.paymentMethod === 'Tarjeta') {
-      if (!this.validateCardAuth()) return;
+    if (!this.isFormValid()) {
+      this.checkoutForm.markAllAsTouched();
+      return;
     }
 
-    if (this.generateInvoice) {
-      const v1 = this.validateInvoiceName();
-      const v2 = this.validateInvoiceRfc();
-      const v3 = this.validateInvoiceEmail();
-      if (!v1 || !v2 || !v3) return;
-    }
+    const formValues = this.checkoutForm.getRawValue();
 
-    this.ordersService.checkoutActiveOrder(this.paymentMethod, this.total());
+    this.ordersService.checkoutActiveOrder(formValues.paymentMethod, this.total());
 
-    const message = `Pago con ${this.paymentMethod.toLowerCase()} de MXN ${this.total().toLocaleString('es-MX')} registrado correctamente${
-      this.printTicket ? ' · Ticket enviado a impresión' : ''
-    }${this.generateInvoice ? ' · Factura timbrada' : ''}`;
+    const message = `Pago con ${formValues.paymentMethod.toLowerCase()} de MXN ${this.total().toLocaleString('es-MX')} registrado correctamente${
+      formValues.printTicket ? ' · Ticket enviado a impresión' : ''
+    }${formValues.generateInvoice ? ' · Factura timbrada' : ''}`;
 
     this.notifyService.success(message);
     this.notify.emit(message);

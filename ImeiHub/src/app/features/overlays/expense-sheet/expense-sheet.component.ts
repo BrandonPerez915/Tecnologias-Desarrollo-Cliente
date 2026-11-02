@@ -1,6 +1,6 @@
 import { Component, output, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { ButtonComponent } from '../../../components/ui/button/button.component';
 import { FieldComponent } from '../../../components/ui/field/field.component';
 import { IconComponent } from '../../../components/ui/icon/icon.component';
@@ -13,7 +13,7 @@ import { NotificationService } from '../../../core/services/notification.service
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
+    ReactiveFormsModule,
     ButtonComponent,
     FieldComponent,
     IconComponent,
@@ -28,60 +28,63 @@ export class ExpenseSheetComponent {
 
   close = output<void>();
 
-  selectedCategory = signal<'merchandise' | 'food' | 'transport' | 'other'>('merchandise');
-  amount = signal('');
-  note = signal('');
-  amountError = signal('');
-  noteError = signal('');
+  // Angular Reactive Forms - FormGroup y FormControls
+  expenseForm = new FormGroup({
+    category: new FormControl<'merchandise' | 'food' | 'transport' | 'other'>('merchandise', {
+      nonNullable: true,
+      validators: [Validators.required]
+    }),
+    amount: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.min(0.01)]
+    }),
+    note: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.minLength(3)]
+    })
+  });
+
   submitting = signal(false);
 
   projectedCash = computed(() => {
-    const val = parseFloat(this.amount()) || 0;
+    const val = parseFloat(this.expenseForm.controls.amount.value) || 0;
     return Math.max(0, this.cashService.expectedCash() - val);
   });
 
-  onAmountChange(val: string) {
-    this.amount.set(val);
-    if (this.amountError()) this.validateAmount();
+  setCategory(cat: 'merchandise' | 'food' | 'transport' | 'other') {
+    this.expenseForm.controls.category.setValue(cat);
   }
 
-  onNoteChange(val: string) {
-    this.note.set(val);
-    if (this.noteError()) this.validateNote();
-  }
-
-  validateAmount(): boolean {
-    const val = parseFloat(this.amount());
-    if (isNaN(val) || val <= 0) {
-      this.amountError.set('Ingresa un importe mayor a cero');
-      return false;
-    }
+  get amountError(): string {
+    const ctrl = this.expenseForm.controls.amount;
+    if (!ctrl.touched && !ctrl.dirty) return '';
+    const val = parseFloat(ctrl.value);
+    if (isNaN(val) || val <= 0) return 'Ingresa un importe mayor a cero';
     if (val > this.cashService.expectedCash()) {
-      this.amountError.set(`El importe excede el efectivo actual disponible (MXN ${this.cashService.expectedCash().toFixed(2)})`);
-      return false;
+      return `El importe excede el efectivo actual disponible (MXN ${this.cashService.expectedCash().toFixed(2)})`;
     }
-    this.amountError.set('');
-    return true;
+    return '';
   }
 
-  validateNote(): boolean {
-    if (!this.note().trim()) {
-      this.noteError.set('Describe el motivo del gasto');
-      return false;
-    }
-    this.noteError.set('');
-    return true;
+  get noteError(): string {
+    const ctrl = this.expenseForm.controls.note;
+    if (!ctrl.touched && !ctrl.dirty) return '';
+    if (ctrl.hasError('required')) return 'Describe el motivo del gasto';
+    if (ctrl.hasError('minlength')) return 'La descripción debe tener al menos 3 caracteres';
+    return '';
   }
 
   submitForm(event: Event) {
     event.preventDefault();
-    const v1 = this.validateAmount();
-    const v2 = this.validateNote();
 
-    if (!v1 || !v2) return;
+    if (this.expenseForm.invalid || (parseFloat(this.expenseForm.controls.amount.value) > this.cashService.expectedCash())) {
+      this.expenseForm.markAllAsTouched();
+      return;
+    }
 
     this.submitting.set(true);
-    const amountNum = parseFloat(this.amount());
+    const formVal = this.expenseForm.getRawValue();
+    const amountNum = parseFloat(formVal.amount);
 
     const categoryLabels: Record<string, string> = {
       merchandise: 'Compra de mercancía',
@@ -91,9 +94,9 @@ export class ExpenseSheetComponent {
     };
 
     this.cashService.registerExpense({
-      category: categoryLabels[this.selectedCategory()] || 'Otros',
+      category: categoryLabels[formVal.category] || 'Otros',
       amount: amountNum,
-      note: this.note().trim()
+      note: formVal.note.trim()
     });
 
     this.notify.success(`Gasto de MXN ${amountNum.toFixed(2)} registrado en caja`);

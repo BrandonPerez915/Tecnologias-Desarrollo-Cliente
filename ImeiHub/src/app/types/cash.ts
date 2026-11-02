@@ -1,4 +1,5 @@
 export interface CashEntry {
+  id?: number | string;
   time: string;
   title: string;
   note: string;

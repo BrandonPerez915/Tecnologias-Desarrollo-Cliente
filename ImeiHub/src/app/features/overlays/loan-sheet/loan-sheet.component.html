@@ -4,7 +4,7 @@
   (close)="close.emit()"
   [wide]="true"
 >
-  <form (ngSubmit)="submitForm($event)" novalidate>
+  <form [formGroup]="loanForm" (ngSubmit)="submitForm($event)" novalidate>
     <div class="two-col-fields">
       <div class="loan-product-search">
         <label class="field">
@@ -12,15 +12,14 @@
             Nombre del artículo
             <span class="field-required">*</span>
           </span>
-          <div class="field-control" [class.error]="!!productError()">
+          <div class="field-control" [class.error]="!!productError">
             <app-icon name="box" [size]="18"></app-icon>
             <input
               placeholder="Buscar en el inventario o escribir nombre"
-              [ngModel]="loanProductSearch()"
-              (ngModelChange)="onSearchChange($event)"
+              [value]="loanForm.controls.item.value"
+              (input)="onSearchChange($any($event.target).value)"
               (focus)="loanProductSearchOpen.set(true)"
-              (blur)="onBlur()"
-              name="loanProductSearch"
+              (blur)="onBlur(); loanForm.controls.item.markAsTouched()"
             />
             <button
               type="button"
@@ -30,11 +29,11 @@
               <app-icon name="scan" [size]="17"></app-icon> Escanear
             </button>
           </div>
-          @if (productError()) {
-            <small class="field-error">{{ productError() }}</small>
+          @if (productError) {
+            <small class="field-error">{{ productError }}</small>
           }
         </label>
-        @if (loanProductSearchOpen() && loanProductSearch().trim()) {
+        @if (loanProductSearchOpen() && loanForm.controls.item.value.trim()) {
           <div class="loan-product-suggestions">
             @if (loanProductSuggestions().length > 0) {
               @for (product of loanProductSuggestions(); track product.id) {
@@ -71,20 +70,20 @@
         placeholder="Introducir o escanear serie"
         icon="tag"
         [required]="true"
-        [value]="serialNumber()"
-        [error]="serialError()"
-        (valueChange)="onSerialChange($event)"
-        (blur)="validateSerial()"
+        [value]="loanForm.controls.serial.value"
+        [error]="serialError"
+        (valueChange)="loanForm.controls.serial.setValue($event)"
+        (blur)="loanForm.controls.serial.markAsTouched()"
       ></app-field>
 
       <app-field
         label="Número del puesto solicitante"
         placeholder="p. ej., B-14, C-02"
         [required]="true"
-        [value]="stallNumber()"
-        [error]="stallError()"
-        (valueChange)="onStallChange($event)"
-        (blur)="validateStall()"
+        [value]="loanForm.controls.stall.value"
+        [error]="stallError"
+        (valueChange)="loanForm.controls.stall.setValue($event)"
+        (blur)="loanForm.controls.stall.markAsTouched()"
       ></app-field>
 
       <app-field
@@ -92,10 +91,10 @@
         placeholder="Nombre de quien recibe el artículo"
         icon="user"
         [required]="true"
-        [value]="personName()"
-        [error]="personError()"
-        (valueChange)="onPersonChange($event)"
-        (blur)="validatePerson()"
+        [value]="loanForm.controls.person.value"
+        [error]="personError"
+        (valueChange)="loanForm.controls.person.setValue($event)"
+        (blur)="loanForm.controls.person.markAsTouched()"
       ></app-field>
     </div>
 
@@ -109,7 +108,11 @@
       </span>
     </div>
 
-    <app-button type="submit" className="full-button" [disabled]="submitting()">
+    <app-button
+      type="submit"
+      className="full-button"
+      [disabled]="submitting() || loanForm.invalid"
+    >
       @if (submitting()) {
         Registrando préstamo...
       } @else {

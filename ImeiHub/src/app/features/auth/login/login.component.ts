@@ -1,6 +1,6 @@
 import { Component, inject, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthLayoutComponent } from '../auth-layout/auth-layout.component';
 import { FieldComponent } from '../../../components/ui/field/field.component';
@@ -15,7 +15,7 @@ import { NotificationService } from '../../../core/services/notification.service
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
+    ReactiveFormsModule,
     AuthLayoutComponent,
     FieldComponent,
     PasswordFieldComponent,
@@ -35,64 +35,55 @@ export class LoginComponent {
   backToDashboard = output<void>();
   notify = output<string>();
 
-  email = signal('');
-  password = signal('');
-  rememberMe = true;
+  loginForm = new FormGroup({
+    email: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.email]
+    }),
+    password: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.minLength(6)]
+    }),
+    rememberMe: new FormControl(true, { nonNullable: true })
+  });
 
-  emailError = signal('');
-  passwordError = signal('');
   generalError = signal('');
   loading = signal(false);
 
   showRecoveryModal = signal(false);
   recoveryEmail = signal('');
 
+  get emailError(): string {
+    const ctrl = this.loginForm.controls.email;
+    if (!ctrl.touched && !ctrl.dirty) return '';
+    if (ctrl.hasError('required')) return 'Ingresa tu correo electrónico o usuario';
+    if (ctrl.hasError('email')) return 'Ingresa un formato de correo electrónico válido';
+    return '';
+  }
+
+  get passwordError(): string {
+    const ctrl = this.loginForm.controls.password;
+    if (!ctrl.touched && !ctrl.dirty) return '';
+    if (ctrl.hasError('required')) return 'Ingresa tu contraseña';
+    if (ctrl.hasError('minlength')) return 'La contraseña debe tener al menos 6 caracteres';
+    return '';
+  }
+
   onEmailChange(val: string) {
-    this.email.set(val);
-    if (this.emailError()) this.validateEmail();
+    this.loginForm.controls.email.setValue(val);
     this.generalError.set('');
   }
 
   onPasswordChange(val: string) {
-    this.password.set(val);
-    if (this.passwordError()) this.validatePassword();
+    this.loginForm.controls.password.setValue(val);
     this.generalError.set('');
-  }
-
-  validateEmail(): boolean {
-    const val = this.email().trim();
-    if (!val) {
-      this.emailError.set('Ingresa tu correo electrónico o usuario');
-      return false;
-    }
-    if (val.includes('@') && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
-      this.emailError.set('Ingresa un formato de correo electrónico válido');
-      return false;
-    }
-    this.emailError.set('');
-    return true;
-  }
-
-  validatePassword(): boolean {
-    const val = this.password();
-    if (!val) {
-      this.passwordError.set('Ingresa tu contraseña');
-      return false;
-    }
-    if (val.length < 6) {
-      this.passwordError.set('La contraseña debe tener al menos 6 caracteres');
-      return false;
-    }
-    this.passwordError.set('');
-    return true;
   }
 
   async handleSubmit(event: Event) {
     event.preventDefault();
-    const isEmailValid = this.validateEmail();
-    const isPasswordValid = this.validatePassword();
 
-    if (!isEmailValid || !isPasswordValid) {
+    if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
       return;
     }
 
@@ -100,15 +91,16 @@ export class LoginComponent {
     this.generalError.set('');
 
     try {
+      const { email, password } = this.loginForm.getRawValue();
       const user = await this.authService.login({
-        email: this.email().trim(),
-        password: this.password()
+        email: email.trim(),
+        password: password
       });
       this.loading.set(false);
       this.loginSuccess.emit({ email: user.email, name: user.name });
-    } catch {
+    } catch (err: any) {
       this.loading.set(false);
-      this.generalError.set('Credenciales incorrectas o error en el servidor');
+      this.generalError.set(err?.message || 'Correo o contraseña incorrectos');
     }
   }
 
@@ -118,7 +110,7 @@ export class LoginComponent {
   }
 
   handleForgotPassword() {
-    this.recoveryEmail.set(this.email() || '');
+    this.recoveryEmail.set(this.loginForm.controls.email.value || '');
     this.showRecoveryModal.set(true);
   }
 

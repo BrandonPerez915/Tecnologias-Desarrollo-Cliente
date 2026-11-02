@@ -1,21 +1,70 @@
-import { Injectable, signal } from '@angular/core';
-import { products, productIdentifiers, minimumPrices } from '../../data/mockData';
+import { Injectable, signal, inject } from '@angular/core';
 import { Product, ProductIdentifier } from '../../types/inventory';
+
+import { ApiService } from './api.service';
 import { NotificationService } from './notification.service';
+import { finalize } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class InventoryService {
-  private productsSignal = signal<Product[]>([...products]);
-  private identifiersSignal = signal<Record<number, ProductIdentifier>>({ ...productIdentifiers });
-  private minPricesSignal = signal<Record<number, string>>({ ...minimumPrices });
+  private api = inject(ApiService);
+  private notify = inject(NotificationService);
+
+  private productsSignal = signal<Product[]>([]);
+  private identifiersSignal = signal<Record<number, ProductIdentifier>>({});
+  private minPricesSignal = signal<Record<number, string>>({});
+
+  private loadingSignal = signal<boolean>(false);
+  private errorSignal = signal<string | null>(null);
 
   products = this.productsSignal.asReadonly();
   identifiers = this.identifiersSignal.asReadonly();
   minPrices = this.minPricesSignal.asReadonly();
+  loading = this.loadingSignal.asReadonly();
+  error = this.errorSignal.asReadonly();
 
-  constructor(private notify: NotificationService) {}
+  constructor() {
+    this.fetchProducts();
+  }
+
+  fetchProducts(): void {
+    this.loadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    this.api.get<Product[]>('/products')
+      .pipe(finalize(() => this.loadingSignal.set(false)))
+      .subscribe({
+        next: (items) => {
+          this.productsSignal.set(items);
+
+          const idMap: Record<number, ProductIdentifier> = {};
+          const minMap: Record<number, string> = {};
+
+          for (const item of items) {
+            if (item.identifier) {
+              idMap[item.id] = item.identifier;
+            } else {
+              idMap[item.id] = {
+                barcode: '8901420' + String(item.id).padStart(6, '0'),
+                serial: 'SN-' + item.id + '-TEMPORAL',
+                condition: 'Nuevo · Sellado',
+                added: 'Hoy'
+              };
+            }
+            minMap[item.id] = item.minPrice || (parseFloat(String(item.price).replace(/,/g, '')) * 0.9).toLocaleString('es-MX');
+          }
+
+          this.identifiersSignal.set(idMap);
+          this.minPricesSignal.set(minMap);
+        },
+        error: (err) => {
+          const msg = err.message || 'No fue posible cargar el inventario desde el servidor';
+          this.errorSignal.set(msg);
+        }
+      });
+  }
 
   getProductById(id: number): Product | undefined {
     return this.productsSignal().find((p) => p.id === id);
@@ -34,85 +83,74 @@ export class InventoryService {
     serial?: string;
     variants: { color: string; stock: number }[];
     location?: string;
-  }): boolean {
+  }, callback?: (success: boolean) => void): void {
     if (!newProduct.name?.trim()) {
       this.notify.error('El nombre del producto es obligatorio');
-      return false;
+      if (callback) callback(false);
+      return;
     }
     if (!newProduct.price || newProduct.price <= 0) {
       this.notify.error('El precio debe ser un número mayor a 0');
-      return false;
+      if (callback) callback(false);
+      return;
     }
 
-    const nextId = Math.max(...this.productsSignal().map((p) => p.id), 0) + 1;
-    const totalStock = newProduct.variants.reduce((sum, v) => sum + (v.stock || 0), 0);
+    this.api.post<Product>('/products', newProduct).subscribe({
+      next: (created) => {
+        this.productsSignal.update((list) => [created, ...list]);
 
-    const product: Product = {
-      id: nextId,
-      name: newProduct.name.trim(),
-      sku: newProduct.sku?.trim() || `SKU-${nextId}`,
-      stock: totalStock,
-      price: newProduct.price.toLocaleString('es-MX'),
-      cost: (newProduct.cost || newProduct.price * 0.85).toLocaleString('es-MX'),
-      type: newProduct.type || 'Accessories',
-      category: newProduct.category || 'Phones',
-      location: newProduct.location || 'Vitrina Principal',
-      variants: newProduct.variants.length > 0 ? newProduct.variants : [{ color: 'Estándar', stock: 1 }]
-    };
+        if (created.identifier) {
+          this.identifiersSignal.update((map) => ({ ...map, [created.id]: created.identifier! }));
+        }
+        if (created.minPrice) {
+          this.minPricesSignal.update((map) => ({ ...map, [created.id]: created.minPrice! }));
+        }
 
-    this.productsSignal.update((list) => [product, ...list]);
-
-    // Always ensure identifiers exist for any product
-    this.identifiersSignal.update((map) => ({
-      ...map,
-      [nextId]: {
-        barcode: '8901420' + String(nextId).padStart(6, '0'),
-        serial: newProduct.serial?.trim() || `SN-${nextId}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
-        condition: 'Nuevo',
-        added: 'Hoy'
+        this.notify.success(`Producto "${created.name}" agregado con éxito`);
+        if (callback) callback(true);
+      },
+      error: () => {
+        if (callback) callback(false);
       }
-    }));
-
-    this.minPricesSignal.update((map) => ({
-      ...map,
-      [nextId]: (newProduct.minPrice || newProduct.price * 0.9).toLocaleString('es-MX')
-    }));
-
-    this.notify.success(`Producto "${product.name}" agregado con éxito`);
-    return true;
+    });
   }
 
-  updateProduct(id: number, changes: Partial<Product>): boolean {
-    const exists = this.getProductById(id);
-    if (!exists) {
-      this.notify.error('Producto no encontrado');
-      return false;
-    }
-
-    this.productsSignal.update((list) =>
-      list.map((p) => (p.id === id ? { ...p, ...changes } : p))
-    );
-    this.notify.success(`Datos de "${exists.name}" actualizados`);
-    return true;
+  updateProduct(id: number, changes: Partial<Product>, callback?: (success: boolean) => void): void {
+    this.api.put<Product>(`/products/${id}`, changes).subscribe({
+      next: (updated) => {
+        this.productsSignal.update((list) =>
+          list.map((p) => (p.id === id ? { ...p, ...updated } : p))
+        );
+        if (updated.minPrice) {
+          this.minPricesSignal.update((map) => ({ ...map, [id]: updated.minPrice! }));
+        }
+        this.notify.success(`Datos de "${updated.name}" actualizados`);
+        if (callback) callback(true);
+      },
+      error: () => {
+        if (callback) callback(false);
+      }
+    });
   }
 
-  deleteProduct(id: number): boolean {
+  deleteProduct(id: number, callback?: (success: boolean) => void): void {
     const exists = this.getProductById(id);
-    if (!exists) {
-      this.notify.error('Producto no encontrado');
-      return false;
-    }
-
-    this.productsSignal.update((list) => list.filter((p) => p.id !== id));
-    this.notify.show(`"${exists.name}" eliminado del inventario`, 'neutral');
-    return true;
+    this.api.delete<{ message: string; id: number }>(`/products/${id}`).subscribe({
+      next: () => {
+        this.productsSignal.update((list) => list.filter((p) => p.id !== id));
+        this.notify.show(`"${exists?.name || 'Producto'}" eliminado del inventario`, 'neutral');
+        if (callback) callback(true);
+      },
+      error: () => {
+        if (callback) callback(false);
+      }
+    });
   }
 
   findProductByCode(code: string): Product | undefined {
     const clean = code.trim().toLowerCase();
     if (!clean) return undefined;
 
-    // Check SKU or Name in products
     const direct = this.productsSignal().find(
       (p) =>
         p.sku.toLowerCase() === clean ||
@@ -120,7 +158,6 @@ export class InventoryService {
     );
     if (direct) return direct;
 
-    // Check barcode or serial in identifiers
     const idMap = this.identifiersSignal();
     for (const [idStr, ident] of Object.entries(idMap)) {
       if (
@@ -135,8 +172,16 @@ export class InventoryService {
   }
 
   decrementStock(id: number, quantity = 1) {
-    this.productsSignal.update((list) =>
-      list.map((p) => (p.id === id ? { ...p, stock: Math.max(0, p.stock - quantity) } : p))
-    );
+    const prod = this.getProductById(id);
+    if (prod) {
+      const nextStock = Math.max(0, prod.stock - quantity);
+      this.updateProduct(id, { stock: nextStock });
+    }
+  }
+
+  clear(): void {
+    this.productsSignal.set([]);
+    this.identifiersSignal.set({});
+    this.minPricesSignal.set({});
   }
 }

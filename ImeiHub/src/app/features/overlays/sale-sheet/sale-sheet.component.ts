@@ -1,6 +1,6 @@
 import { Component, output, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { AmountComponent } from '../../../components/ui/amount/amount.component';
 import { ButtonComponent } from '../../../components/ui/button/button.component';
 import { IconComponent } from '../../../components/ui/icon/icon.component';
@@ -14,7 +14,7 @@ import { Product } from '../../../types/inventory';
 @Component({
   selector: 'app-sale-sheet',
   standalone: true,
-  imports: [CommonModule, FormsModule, AmountComponent, ButtonComponent, IconComponent, SheetComponent],
+  imports: [CommonModule, ReactiveFormsModule, AmountComponent, ButtonComponent, IconComponent, SheetComponent],
   templateUrl: './sale-sheet.component.html',
   styleUrls: ['./sale-sheet.component.css']
 })
@@ -26,9 +26,19 @@ export class SaleSheetComponent {
   open = output<Overlay>();
   close = output<void>();
 
-  selectedPayment = signal<'cash' | 'transfer' | 'card'>('cash');
+  // Angular Reactive Forms
+  saleForm = new FormGroup({
+    paymentMethod: new FormControl<'cash' | 'transfer' | 'card'>('cash', {
+      nonNullable: true,
+      validators: [Validators.required]
+    }),
+    quantity: new FormControl<number>(1, {
+      nonNullable: true,
+      validators: [Validators.required, Validators.min(1)]
+    })
+  });
+
   selectedProduct = signal<Product | null>(null);
-  quantity = signal<number>(1);
   searchQuery = '';
   isSearching = signal(false);
   itemError = signal(false);
@@ -56,19 +66,28 @@ export class SaleSheetComponent {
     return parseFloat(val.replace(/,/g, '')) || 0;
   }
 
+  get quantity(): number {
+    return this.saleForm.controls.quantity.value;
+  }
+
   totalAmount = computed(() => {
     const p = this.selectedProduct();
     if (!p) return 0;
-    return this.parsePrice(p.price) * this.quantity();
+    return this.parsePrice(p.price) * this.quantity;
   });
 
   onSearchChange() {
     this.isSearching.set(this.searchQuery.trim().length > 0);
   }
 
+  onSearchInput(val: string) {
+    this.searchQuery = val;
+    this.onSearchChange();
+  }
+
   selectProduct(product: Product) {
     this.selectedProduct.set(product);
-    this.quantity.set(1);
+    this.saleForm.controls.quantity.setValue(1);
     this.isSearching.set(false);
     this.searchQuery = '';
     this.itemError.set(false);
@@ -76,19 +95,23 @@ export class SaleSheetComponent {
 
   clearProduct() {
     this.selectedProduct.set(null);
-    this.quantity.set(1);
+    this.saleForm.controls.quantity.setValue(1);
+  }
+
+  setPaymentMethod(method: 'cash' | 'transfer' | 'card') {
+    this.saleForm.controls.paymentMethod.setValue(method);
   }
 
   incrementQty() {
     const p = this.selectedProduct();
-    if (p && this.quantity() < p.stock) {
-      this.quantity.update(q => q + 1);
+    if (p && this.quantity < p.stock) {
+      this.saleForm.controls.quantity.setValue(this.quantity + 1);
     }
   }
 
   decrementQty() {
-    if (this.quantity() > 1) {
-      this.quantity.update(q => q - 1);
+    if (this.quantity > 1) {
+      this.saleForm.controls.quantity.setValue(this.quantity - 1);
     }
   }
 
@@ -101,7 +124,12 @@ export class SaleSheetComponent {
       return;
     }
 
-    const qty = this.quantity();
+    if (this.saleForm.invalid) {
+      this.saleForm.markAllAsTouched();
+      return;
+    }
+
+    const qty = this.quantity;
     if (qty <= 0 || qty > product.stock) {
       this.notify.error(`Cantidad inválida (disponible: ${product.stock})`);
       return;
@@ -109,11 +137,12 @@ export class SaleSheetComponent {
 
     this.submitting.set(true);
     const amount = this.totalAmount();
+    const method = this.saleForm.controls.paymentMethod.value;
     const paymentLabel = {
       cash: 'Efectivo',
       transfer: 'Transferencia',
       card: 'Tarjeta'
-    }[this.selectedPayment()];
+    }[method];
 
     this.cashService.registerSale({
       description: `Venta: ${product.name} (x${qty})`,

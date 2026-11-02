@@ -20,19 +20,34 @@
       </div>
     </app-page-heading>
 
-    <app-order-workspace
-      [activeOrderName]="activeOrderName()"
-      [activeOrderCustomer]="activeOrderCustomer()"
-      [customOrderType]="customOrderType()"
-      [activeOrder]="activeOrder()"
-      [ordersCount]="orders().length"
-      [activeItems]="activeItems()"
-      [total]="total()"
-      (openOrders)="showOrders.set(true)"
-      (openPicker)="showPicker.set(true)"
-      (updateQuantity)="updateQuantity($event.id, $event.change)"
-      (continueToCheckout)="showCheckout.set(true)"
-    ></app-order-workspace>
+    @if (orders().length === 0) {
+      <div class="empty-orders-panel">
+        <div class="empty-icon-circle">
+          <app-icon name="receipt" [size]="36"></app-icon>
+        </div>
+        <h3>No tienes órdenes activas</h3>
+        <p class="type-body-sm text-muted">
+          Comienza creando una nueva orden para registrar ventas, seleccionar productos y gestionar cobros en mostrador.
+        </p>
+        <app-button icon="plus" (clicked)="showNewOrder.set(true)">
+          Crear mi primera orden
+        </app-button>
+      </div>
+    } @else {
+      <app-order-workspace
+        [activeOrderName]="activeOrderName()"
+        [activeOrderCustomer]="activeOrderCustomer()"
+        [customOrderType]="customOrderType()"
+        [activeOrder]="activeOrder()"
+        [ordersCount]="orders().length"
+        [activeItems]="activeItems()"
+        [total]="total()"
+        (openOrders)="showOrders.set(true)"
+        (openPicker)="showPicker.set(true)"
+        (updateQuantity)="updateQuantity($event.id, $event.change)"
+        (continueToCheckout)="showCheckout.set(true)"
+      ></app-order-workspace>
+    }
 
     @if (showPicker()) {
       <app-order-product-picker-sheet

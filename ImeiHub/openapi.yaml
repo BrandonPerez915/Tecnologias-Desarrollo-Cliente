@@ -1,0 +1,892 @@
+openapi: 3.0.3
+info:
+  title: ImeiHub REST API
+  description: |
+    API REST para la plataforma ImeiHub (Sistema de Punto de Venta e Inventario para tiendas de telefonía móvil y electrónica).
+    Proporciona operaciones CRUD completas sobre el inventario de dispositivos y accesorios, gestión del flujo de caja, control de préstamos entre locales y orquestación de órdenes de venta.
+  version: 1.0.0
+  contact:
+    name: Soporte ImeiHub
+    email: soporte@imeihub.com
+
+servers:
+  - url: http://localhost:3000/api
+    description: Servidor de desarrollo local (Node.js REST Server)
+  - url: https://api.imeihub.com/api
+    description: Servidor de producción
+
+tags:
+  - name: Health
+    description: Verificación de estado del servicio
+  - name: Auth
+    description: Autenticación y registro de cuentas comerciales
+  - name: Products
+    description: CRUD completo del inventario de productos, variantes y números de serie / IMEI
+  - name: Cash
+    description: Flujo de caja, ingresos, egresos y arqueo / cierre de turno
+  - name: Loans
+    description: Control de préstamos y transferencias de dispositivos entre locales/técnicos
+  - name: Orders
+    description: Creación, actualización y cobro de órdenes en punto de venta (POS)
+
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Comprobar salud y disponibilidad de la API
+      operationId: getHealth
+      responses:
+        '200':
+          description: Servicio operando correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: '2026-11-01T10:00:00.000Z'
+                  version:
+                    type: string
+                    example: 1.0.0
+
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Autenticar usuario comercial
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Inicio de sesión exitoso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '500':
+          $ref: '#/components/responses/500InternalError'
+
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Registrar nuevo comercio o usuario
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Comercio registrado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '422':
+          $ref: '#/components/responses/422ValidationError'
+        '500':
+          $ref: '#/components/responses/500InternalError'
+
+  /products:
+    get:
+      tags:
+        - Products
+      summary: Listar todos los productos del inventario
+      operationId: getProducts
+      parameters:
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filtrar por categoría (phones, tablets, accessories, laptops)
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Búsqueda textual por nombre o modelo
+      responses:
+        '200':
+          description: Lista de productos en inventario
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+        '500':
+          $ref: '#/components/responses/500InternalError'
+    post:
+      tags:
+        - Products
+      summary: Crear un nuevo producto en el inventario
+      operationId: createProduct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProductInput'
+      responses:
+        '201':
+          description: Producto creado con éxito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '422':
+          $ref: '#/components/responses/422ValidationError'
+        '500':
+          $ref: '#/components/responses/500InternalError'
+
+  /products/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Identificador numérico del producto
+    get:
+      tags:
+        - Products
+      summary: Obtener detalle completo de un producto
+      operationId: getProductById
+      responses:
+        '200':
+          description: Información detallada del producto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalError'
+    put:
+      tags:
+        - Products
+      summary: Actualizar datos de un producto existente
+      operationId: updateProduct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProductInput'
+      responses:
+        '200':
+          description: Producto actualizado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalError'
+    delete:
+      tags:
+        - Products
+      summary: Eliminar un producto del inventario
+      operationId: deleteProduct
+      responses:
+        '200':
+          description: Producto eliminado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  deletedId:
+                    type: integer
+                    example: 1
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalError'
+
+  /cash:
+    get:
+      tags:
+        - Cash
+      summary: Obtener resumen financiero y lista de movimientos de caja
+      operationId: getCashSummary
+      responses:
+        '200':
+          description: Resumen financiero y movimientos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CashSummaryResponse'
+        '500':
+          $ref: '#/components/responses/500InternalError'
+
+  /cash/entries:
+    post:
+      tags:
+        - Cash
+      summary: Registrar ingreso o egreso manual en caja
+      operationId: addCashEntry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CashEntryInput'
+      responses:
+        '201':
+          description: Movimiento registrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CashEntry'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '500':
+          $ref: '#/components/responses/500InternalError'
+
+  /cash/close:
+    post:
+      tags:
+        - Cash
+      summary: Realizar arqueo y cierre del turno actual
+      operationId: closeCash
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                realCash:
+                  type: number
+                  example: 12500
+                note:
+                  type: string
+                  example: Cierre de turno matutino sin discrepancias
+      responses:
+        '200':
+          description: Turno cerrado con balance generado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Turno cerrado correctamente
+                  discrepancy:
+                    type: number
+                    example: 0
+
+  /loans:
+    get:
+      tags:
+        - Loans
+      summary: Listar préstamos de dispositivos entre locales y técnicos
+      operationId: getLoans
+      responses:
+        '200':
+          description: Lista de préstamos registrados
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LoanEntry'
+        '500':
+          $ref: '#/components/responses/500InternalError'
+    post:
+      tags:
+        - Loans
+      summary: Registrar un nuevo préstamo de artículo
+      operationId: createLoan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLoanInput'
+      responses:
+        '201':
+          description: Préstamo creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoanEntry'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '500':
+          $ref: '#/components/responses/500InternalError'
+
+  /loans/{id}/return:
+    patch:
+      tags:
+        - Loans
+      summary: Marcar un préstamo como devuelto al inventario
+      operationId: returnLoan
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID del registro de préstamo
+      responses:
+        '200':
+          description: Estado del préstamo actualizado a Devuelto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoanEntry'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+
+  /orders:
+    get:
+      tags:
+        - Orders
+      summary: Listar órdenes de venta en curso o recientes
+      operationId: getOrders
+      responses:
+        '200':
+          description: Lista de órdenes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderEntry'
+    post:
+      tags:
+        - Orders
+      summary: Crear una nueva orden vacía o para cliente
+      operationId: createOrder
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                customer:
+                  type: string
+                  example: Mostrador
+      responses:
+        '201':
+          description: Orden creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderEntry'
+
+  /orders/{id}/checkout:
+    post:
+      tags:
+        - Orders
+      summary: Cobrar orden y registrar venta en caja e inventario
+      operationId: checkoutOrder
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - paymentMethod
+                - amount
+              properties:
+                paymentMethod:
+                  type: string
+                  enum: [Efectivo, Tarjeta, Transferencia]
+                  example: Tarjeta
+                amount:
+                  type: number
+                  example: 18499
+      responses:
+        '200':
+          description: Orden cobrada satisfactoriamente
+
+components:
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: admin@imeihub.com
+        password:
+          type: string
+          format: password
+          example: Password123!
+
+    RegisterRequest:
+      type: object
+      required:
+        - name
+        - email
+        - password
+        - storeName
+      properties:
+        name:
+          type: string
+          example: Ada Okafor
+        email:
+          type: string
+          format: email
+          example: ada@smartfix.com
+        password:
+          type: string
+          format: password
+          minLength: 8
+          example: SuperSecure99!
+        storeName:
+          type: string
+          example: SmartFix Celulares
+        phone:
+          type: string
+          example: '+52 55 1234 5678'
+        stallNumber:
+          type: string
+          example: Local A-18
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        user:
+          $ref: '#/components/schemas/AuthUser'
+
+    AuthUser:
+      type: object
+      properties:
+        id:
+          type: string
+          example: usr_1714567890
+        name:
+          type: string
+          example: Ada Okafor
+        email:
+          type: string
+          example: ada@smartfix.com
+        role:
+          type: string
+          example: Propietaria
+        storeName:
+          type: string
+          example: SmartFix Celulares
+        stallNumber:
+          type: string
+          example: A-18
+
+    ProductVariant:
+      type: object
+      required:
+        - color
+        - stock
+      properties:
+        color:
+          type: string
+          example: Negro Espacial
+        stock:
+          type: integer
+          minimum: 0
+          example: 4
+
+    IdentifierData:
+      type: object
+      properties:
+        barcode:
+          type: string
+          example: '8901420000001'
+        serial:
+          type: string
+          example: '358912345678901'
+        condition:
+          type: string
+          enum: [Nuevo, Como nuevo, Usado, Reacondicionado, Grado A, Grado B]
+          example: Nuevo
+        added:
+          type: string
+          example: Hoy
+
+    Product:
+      type: object
+      required:
+        - id
+        - name
+        - category
+        - type
+        - price
+        - cost
+        - stock
+        - status
+        - image
+        - variants
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: iPhone 13 128GB
+        category:
+          type: string
+          enum: [phones, tablets, accessories, laptops]
+          example: phones
+        type:
+          type: string
+          example: single
+        price:
+          type: string
+          example: '14,999'
+        minPrice:
+          type: string
+          example: '13,500'
+        cost:
+          type: string
+          example: '11,500'
+        stock:
+          type: integer
+          example: 5
+        status:
+          type: string
+          enum: [En stock, Pocas existencias, Agotado]
+          example: En stock
+        statusTone:
+          type: string
+          enum: [success, warning, danger]
+          example: success
+        image:
+          type: string
+          example: /assets/products/iphone13.webp
+        variants:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductVariant'
+        identifier:
+          $ref: '#/components/schemas/IdentifierData'
+
+    CreateProductInput:
+      type: object
+      required:
+        - name
+        - category
+        - price
+        - cost
+        - stock
+      properties:
+        name:
+          type: string
+          example: Xiaomi Redmi Note 13 Pro
+        category:
+          type: string
+          example: phones
+        type:
+          type: string
+          example: single
+        price:
+          type: string
+          example: '5,999'
+        minPrice:
+          type: string
+          example: '5,200'
+        cost:
+          type: string
+          example: '4,200'
+        stock:
+          type: integer
+          example: 8
+        color:
+          type: string
+          example: Azul Medianoche
+        barcode:
+          type: string
+          example: '8901420999001'
+        serial:
+          type: string
+          example: '864210987654321'
+        condition:
+          type: string
+          example: Nuevo
+
+    UpdateProductInput:
+      type: object
+      properties:
+        name:
+          type: string
+        category:
+          type: string
+        price:
+          type: string
+        minPrice:
+          type: string
+        cost:
+          type: string
+        stock:
+          type: integer
+        status:
+          type: string
+
+    CashEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 101
+        time:
+          type: string
+          example: '14:20'
+        title:
+          type: string
+          example: Venta iPhone 13 128GB
+        note:
+          type: string
+          example: Efectivo · Ticket #4021
+        amount:
+          type: string
+          example: '+14,999'
+        kind:
+          type: string
+          enum: [in, out]
+          example: in
+
+    CashEntryInput:
+      type: object
+      required:
+        - title
+        - amount
+        - kind
+      properties:
+        title:
+          type: string
+          example: Pago a proveedor de micas
+        note:
+          type: string
+          example: Insumos de taller
+        amount:
+          type: string
+          example: '−850'
+        kind:
+          type: string
+          enum: [in, out]
+          example: out
+
+    CashSummaryResponse:
+      type: object
+      properties:
+        total:
+          type: string
+          example: '45,280'
+        inFlow:
+          type: string
+          example: '58,400'
+        outFlow:
+          type: string
+          example: '13,120'
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/CashEntry'
+
+    LoanEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 501
+        item:
+          type: string
+          example: Samsung Galaxy S23 Ultra
+        serial:
+          type: string
+          example: '...9421'
+        fullSerial:
+          type: string
+          example: '3598120491829421'
+        stall:
+          type: string
+          example: Local B-12
+        person:
+          type: string
+          example: Carlos Mendoza
+        age:
+          type: string
+          example: Hace 2 horas
+        status:
+          type: string
+          enum: [Activo, Vencido, Devuelto]
+          example: Activo
+        tone:
+          type: string
+          enum: [success, warning, danger, neutral]
+          example: warning
+        loanedAt:
+          type: string
+          example: '10:30 AM'
+        dueAt:
+          type: string
+          example: '06:00 PM'
+        condition:
+          type: string
+          example: Excelente
+        agreedPrice:
+          type: string
+          example: '18,500'
+        notes:
+          type: string
+          example: Prestado para demostración a cliente
+
+    CreateLoanInput:
+      type: object
+      required:
+        - item
+        - stall
+        - person
+      properties:
+        item:
+          type: string
+          example: iPhone 14 Pro
+        serial:
+          type: string
+          example: '354910294819201'
+        stall:
+          type: string
+          example: Puesto C-04
+        person:
+          type: string
+          example: Roberto Flores
+        agreedPrice:
+          type: string
+          example: '16,000'
+        condition:
+          type: string
+          example: Reacondicionado
+        notes:
+          type: string
+          example: Demostración técnica
+
+    OrderEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1042
+        name:
+          type: string
+          example: '#1042'
+        customer:
+          type: string
+          example: Cliente de mostrador
+        status:
+          type: string
+          enum: [En espera, Completada, Pagada]
+          example: En espera
+        itemsCount:
+          type: integer
+          example: 3
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          example: Recurso no encontrado
+        details:
+          type: array
+          items:
+            type: string
+          example: ['El campo name es obligatorio']
+
+  responses:
+    400BadRequest:
+      description: Solicitud incorrecta o datos inválidos
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: Parámetros de solicitud no válidos
+
+    401Unauthorized:
+      description: Autenticación requerida o credenciales incorrectas
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: Credenciales incorrectas
+
+    404NotFound:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: Producto no encontrado con el id proporcionado
+
+    422ValidationError:
+      description: Error de validación semántica de campos
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: Error de validación en campos obligatorios
+            details: ['El precio debe ser un número positivo']
+
+    500InternalError:
+      description: Error interno del servidor
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: Error interno del servidor procesando la petición

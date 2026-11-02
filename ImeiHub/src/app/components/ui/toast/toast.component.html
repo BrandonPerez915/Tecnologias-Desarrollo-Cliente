@@ -1,6 +1,6 @@
-<div class="toast" role="status" aria-live="polite">
+<div [class]="'toast ' + toastClass()" [attr.role]="ariaRole()" aria-live="polite">
   <span class="toast-icon">
-    <app-icon name="check" [size]="16"></app-icon>
+    <app-icon [name]="iconName()" [size]="15"></app-icon>
   </span>
   <strong class="toast-text">{{ message() }}</strong>
 </div>

@@ -1,6 +1,7 @@
-import { Component, output, signal, computed, inject } from '@angular/core';
+import { Component, output, signal, computed, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '../../../components/ui/button/button.component';
+import { IconComponent } from '../../../components/ui/icon/icon.component';
 import { PageHeadingComponent } from '../../../components/ui/page-heading/page-heading.component';
 import { NewOrderSheetComponent } from '../new-order-sheet/new-order-sheet.component';
 import { OpenOrdersSheetComponent } from '../open-orders-sheet/open-orders-sheet.component';
@@ -21,6 +22,7 @@ import { NotificationService } from '../../../core/services/notification.service
     PageHeadingComponent,
     NewOrderSheetComponent,
     OpenOrdersSheetComponent,
+    IconComponent,
     OrderCheckoutViewComponent,
     OrderProductPickerSheetComponent,
     OrderWorkspaceComponent,
@@ -35,42 +37,38 @@ export class OrdersComponent {
 
   notify = output<string>();
 
-  private ordersList = signal<Order[]>([
-    {
-      id: '1042',
-      name: '#1042',
-      customer: 'Cliente de mostrador',
-      items: 3,
-      total: '18,247',
-    },
-    {
-      id: '1041',
-      name: '#1041',
-      customer: 'María Santos',
-      items: 2,
-      total: '6,948',
-    },
-    {
-      id: '1040',
-      name: '#1040',
-      customer: 'Emeka Phones',
-      items: 4,
-      total: '26,847',
-    },
-  ]);
+  private ordersList = signal<Order[]>([]);
+  private orderItemsStore = signal<Record<string, Record<number, number>>>({});
 
-  private orderItemsStore = signal<Record<string, Record<number, number>>>({
-    '1042': { 1: 1, 3: 2 },
-    '1041': { 2: 1, 4: 1 },
-    '1040': { 1: 2, 5: 2 },
-  });
-
-  activeOrder = signal('1042');
+  activeOrder = signal('');
   showPicker = signal(false);
   showCheckout = signal(false);
   showOrders = signal(false);
   showNewOrder = signal(false);
   customOrderType = signal('');
+
+  constructor() {
+    effect(() => {
+      const apiOrders = this.ordersService.orders();
+      if (apiOrders.length > 0) {
+        this.ordersList.set(
+          apiOrders.map((o) => ({
+            id: String(o.id),
+            name: o.name,
+            customer: o.customer,
+            items: o.itemsCount || 0,
+            total: '0'
+          }))
+        );
+        if (!this.activeOrder() || !apiOrders.some((o) => String(o.id) === this.activeOrder())) {
+          this.activeOrder.set(String(apiOrders[0].id));
+        }
+      } else {
+        this.ordersList.set([]);
+        this.activeOrder.set('');
+      }
+    });
+  }
 
   items = computed<Record<number, number>>(() => {
     return this.orderItemsStore()[this.activeOrder()] || {};
@@ -154,18 +152,13 @@ export class OrdersComponent {
   }
 
   handleCreateNewOrder(name: string, type: string) {
-    const existingIds = this.ordersList()
-      .map((o) => parseInt(o.id.replace(/\D/g, ''), 10))
-      .filter((n) => !isNaN(n));
-    const nextNum = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1043;
-    const nextId = String(nextNum);
-    const orderName = name.trim() || `#${nextId}`;
-    const customer = type === 'Mayorista' ? 'Distribuidor mayorista' : 'Cliente minorista';
-
+    const customer = type === 'Mayorista' ? 'Distribuidor mayorista' : (name.trim() || 'Cliente en mostrador');
+    const created = this.ordersService.createOrder(customer);
+    const nextId = String(created.id);
     const newOrder: Order = {
       id: nextId,
-      name: orderName,
-      customer,
+      name: created.name,
+      customer: created.customer,
       items: 0,
       total: '0',
     };
@@ -175,7 +168,6 @@ export class OrdersComponent {
     this.activeOrder.set(nextId);
     this.customOrderType.set(type);
     this.showNewOrder.set(false);
-    this.notifyService.success(`Orden ${orderName} creada exitosamente`);
   }
 
   onCheckoutComplete() {

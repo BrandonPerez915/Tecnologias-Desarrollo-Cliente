@@ -1,6 +1,6 @@
 import { Component, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormGroup, FormControl, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthLayoutComponent } from '../auth-layout/auth-layout.component';
 import { FieldComponent } from '../../../components/ui/field/field.component';
@@ -10,12 +10,19 @@ import { IconComponent } from '../../../components/ui/icon/icon.component';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 
+function passwordsMatchValidator(control: AbstractControl): ValidationErrors | null {
+  const password = control.get('password')?.value;
+  const confirmPassword = control.get('confirmPassword')?.value;
+  if (!confirmPassword) return null;
+  return password === confirmPassword ? null : { mismatch: true };
+}
+
 @Component({
   selector: 'app-register',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
+    ReactiveFormsModule,
     AuthLayoutComponent,
     FieldComponent,
     PasswordFieldComponent,
@@ -30,25 +37,42 @@ export class RegisterComponent {
   private router = inject(Router);
   private notify = inject(NotificationService);
 
-  name = signal('');
-  storeName = signal('');
-  email = signal('');
-  phone = signal('');
-  password = signal('');
-  confirmPassword = signal('');
-  acceptTerms = false;
+  registerForm = new FormGroup({
+    name: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.minLength(3)]
+    }),
+    storeName: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required]
+    }),
+    email: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.email]
+    }),
+    phone: new FormControl('', {
+      nonNullable: true
+    }),
+    password: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.minLength(8)]
+    }),
+    confirmPassword: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required]
+    }),
+    acceptTerms: new FormControl(false, {
+      nonNullable: true,
+      validators: [Validators.requiredTrue]
+    })
+  }, { validators: passwordsMatchValidator });
 
-  nameError = signal('');
-  storeError = signal('');
-  emailError = signal('');
-  passwordError = signal('');
-  confirmPasswordError = signal('');
-  termsError = signal('');
+  passwordVal = signal('');
   generalError = signal('');
   loading = signal(false);
 
   strengthLevel = computed(() => {
-    const pwd = this.password();
+    const pwd = this.passwordVal();
     if (!pwd) return 0;
     let score = 0;
     if (pwd.length >= 8) score++;
@@ -83,127 +107,104 @@ export class RegisterComponent {
     }
   });
 
+  get nameError(): string {
+    const ctrl = this.registerForm.controls.name;
+    if (!ctrl.touched && !ctrl.dirty) return '';
+    if (ctrl.hasError('required')) return 'Ingresa tu nombre completo';
+    if (ctrl.hasError('minlength')) return 'El nombre debe tener al menos 3 caracteres';
+    return '';
+  }
+
+  get storeError(): string {
+    const ctrl = this.registerForm.controls.storeName;
+    if (!ctrl.touched && !ctrl.dirty) return '';
+    if (ctrl.hasError('required')) return 'Ingresa el nombre de tu tienda o taller';
+    return '';
+  }
+
+  get emailError(): string {
+    const ctrl = this.registerForm.controls.email;
+    if (!ctrl.touched && !ctrl.dirty) return '';
+    if (ctrl.hasError('required')) return 'Ingresa tu correo electrónico';
+    if (ctrl.hasError('email')) return 'Ingresa un correo electrónico válido';
+    return '';
+  }
+
+  get passwordError(): string {
+    const ctrl = this.registerForm.controls.password;
+    if (!ctrl.touched && !ctrl.dirty) return '';
+    if (ctrl.hasError('required')) return 'Ingresa una contraseña';
+    if (ctrl.hasError('minlength')) return 'La contraseña debe tener al menos 8 caracteres';
+    return '';
+  }
+
+  get confirmPasswordError(): string {
+    const ctrl = this.registerForm.controls.confirmPassword;
+    if (!ctrl.touched && !ctrl.dirty) return '';
+    if (ctrl.hasError('required')) return 'Confirma tu contraseña';
+    if (this.registerForm.hasError('mismatch')) return 'Las contraseñas no coinciden';
+    return '';
+  }
+
+  get termsError(): string {
+    const ctrl = this.registerForm.controls.acceptTerms;
+    if (!ctrl.touched && !ctrl.dirty) return '';
+    if (ctrl.hasError('required')) return 'Debes aceptar los términos y condiciones para continuar';
+    return '';
+  }
+
   goToLogin() {
     this.router.navigate(['/login']);
   }
 
   onNameChange(val: string) {
-    this.name.set(val);
-    if (this.nameError()) this.validateName();
+    this.registerForm.controls.name.setValue(val);
   }
 
   onStoreChange(val: string) {
-    this.storeName.set(val);
-    if (this.storeError()) this.validateStore();
+    this.registerForm.controls.storeName.setValue(val);
   }
 
   onEmailChange(val: string) {
-    this.email.set(val);
-    if (this.emailError()) this.validateEmail();
+    this.registerForm.controls.email.setValue(val);
+  }
+
+  onPhoneChange(val: string) {
+    this.registerForm.controls.phone.setValue(val);
   }
 
   onPasswordChange(val: string) {
-    this.password.set(val);
-    if (this.passwordError()) this.validatePassword();
-    if (this.confirmPassword()) this.validateConfirmPassword();
+    this.registerForm.controls.password.setValue(val);
+    this.passwordVal.set(val);
+    this.registerForm.controls.confirmPassword.updateValueAndValidity();
+    this.registerForm.updateValueAndValidity();
   }
 
   onConfirmPasswordChange(val: string) {
-    this.confirmPassword.set(val);
-    if (this.confirmPasswordError()) this.validateConfirmPassword();
-  }
-
-  validateName(): boolean {
-    if (!this.name().trim()) {
-      this.nameError.set('Ingresa tu nombre completo');
-      return false;
-    }
-    if (this.name().trim().length < 3) {
-      this.nameError.set('El nombre debe tener al menos 3 caracteres');
-      return false;
-    }
-    this.nameError.set('');
-    return true;
-  }
-
-  validateStore(): boolean {
-    if (!this.storeName().trim()) {
-      this.storeError.set('Ingresa el nombre de tu tienda o taller');
-      return false;
-    }
-    this.storeError.set('');
-    return true;
-  }
-
-  validateEmail(): boolean {
-    const val = this.email().trim();
-    if (!val) {
-      this.emailError.set('Ingresa tu correo electrónico');
-      return false;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
-      this.emailError.set('Ingresa un correo electrónico válido');
-      return false;
-    }
-    this.emailError.set('');
-    return true;
-  }
-
-  validatePassword(): boolean {
-    const val = this.password();
-    if (!val) {
-      this.passwordError.set('Ingresa una contraseña');
-      return false;
-    }
-    if (val.length < 8) {
-      this.passwordError.set('La contraseña debe tener al menos 8 caracteres');
-      return false;
-    }
-    this.passwordError.set('');
-    return true;
-  }
-
-  validateConfirmPassword(): boolean {
-    if (!this.confirmPassword()) {
-      this.confirmPasswordError.set('Confirma tu contraseña');
-      return false;
-    }
-    if (this.confirmPassword() !== this.password()) {
-      this.confirmPasswordError.set('Las contraseñas no coinciden');
-      return false;
-    }
-    this.confirmPasswordError.set('');
-    return true;
+    this.registerForm.controls.confirmPassword.setValue(val);
+    this.registerForm.updateValueAndValidity();
   }
 
   async handleSubmit(event: Event) {
     event.preventDefault();
-    const v1 = this.validateName();
-    const v2 = this.validateStore();
-    const v3 = this.validateEmail();
-    const v4 = this.validatePassword();
-    const v5 = this.validateConfirmPassword();
 
-    if (!this.acceptTerms) {
-      this.termsError.set('Debes aceptar los términos y condiciones para continuar');
-    } else {
-      this.termsError.set('');
-    }
-
-    if (!v1 || !v2 || !v3 || !v4 || !v5 || !this.acceptTerms) {
+    if (this.registerForm.invalid) {
+      this.registerForm.markAllAsTouched();
       return;
     }
 
     this.loading.set(true);
     this.generalError.set('');
 
+    const formValues = this.registerForm.getRawValue();
+
     try {
       await this.authService.register({
-        name: this.name().trim(),
-        storeName: this.storeName().trim(),
-        email: this.email().trim(),
-        phone: this.phone().trim() || undefined,
-        password: this.password()
+        name: formValues.name.trim(),
+        storeName: formValues.storeName.trim(),
+        email: formValues.email.trim(),
+        phone: formValues.phone.trim() || undefined,
+        password: formValues.password
       });
     } catch (err: any) {
       this.generalError.set(err?.message || 'Error al crear la cuenta. Intenta de nuevo.');

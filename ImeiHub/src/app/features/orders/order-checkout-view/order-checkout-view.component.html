@@ -55,7 +55,7 @@
     </section>
 
     <section class="panel checkout-payment-panel">
-      <form (ngSubmit)="submitPayment($event)" novalidate>
+      <form [formGroup]="checkoutForm" (ngSubmit)="submitPayment($event)" novalidate>
         <div class="checkout-order-total">
           <span>Total a cobrar</span>
           <app-amount size="hero">{{ total().toLocaleString('es-MX') }}</app-amount>
@@ -68,7 +68,7 @@
               <button
                 type="button"
                 [class.active]="paymentMethod === method.name"
-                (click)="paymentMethod = method.name"
+                (click)="setPaymentMethod(method.name)"
               >
                 <span>
                   <app-icon [name]="method.icon"></app-icon>
@@ -94,10 +94,10 @@
               inputMode="decimal"
               [min]="total()"
               [required]="true"
-              [value]="cashReceived()"
-              [error]="cashError()"
-              (valueChange)="onCashReceivedChange($event)"
-              (blur)="validateCashReceived()"
+              [value]="checkoutForm.controls.cashReceived.value"
+              [error]="cashError"
+              (valueChange)="checkoutForm.controls.cashReceived.setValue($event)"
+              (blur)="checkoutForm.controls.cashReceived.markAsTouched()"
             >
               <span class="field-suffix">MXN</span>
             </app-field>
@@ -142,8 +142,8 @@
             <app-field
               label="Referencia o folio de la transferencia"
               placeholder="Introduce el folio de confirmación bancaria"
-              [value]="transferRef()"
-              (valueChange)="transferRef.set($event)"
+              [value]="checkoutForm.controls.transferRef.value"
+              (valueChange)="checkoutForm.controls.transferRef.setValue($event)"
             ></app-field>
           </div>
         }
@@ -171,19 +171,13 @@
             </dl>
             <div class="payment-reference-fields">
               <app-field
-                label="Últimos 4 dígitos"
-                placeholder="4589"
-                [value]="cardLast4()"
-                (valueChange)="cardLast4.set($event)"
-              ></app-field>
-              <app-field
                 label="Código de autorización"
                 placeholder="p. ej., 483921"
                 [required]="true"
-                [value]="cardAuth()"
-                [error]="cardAuthError()"
-                (valueChange)="onCardAuthChange($event)"
-                (blur)="validateCardAuth()"
+                [value]="checkoutForm.controls.cardAuth.value"
+                [error]="cardAuthError"
+                (valueChange)="checkoutForm.controls.cardAuth.setValue($event)"
+                (blur)="checkoutForm.controls.cardAuth.markAsTouched()"
               ></app-field>
             </div>
           </div>
@@ -199,8 +193,7 @@
           </span>
           <input
             type="checkbox"
-            [(ngModel)]="generateInvoice"
-            name="generateInvoice"
+            formControlName="generateInvoice"
           />
           <i></i>
         </label>
@@ -211,20 +204,20 @@
               label="Nombre o razón social"
               placeholder="Nombre de la empresa o cliente"
               [required]="true"
-              [value]="invoiceName()"
-              [error]="invoiceNameError()"
-              (valueChange)="onInvoiceNameChange($event)"
-              (blur)="validateInvoiceName()"
+              [value]="checkoutForm.controls.invoiceName.value"
+              [error]="invoiceNameError"
+              (valueChange)="checkoutForm.controls.invoiceName.setValue($event)"
+              (blur)="checkoutForm.controls.invoiceName.markAsTouched()"
             ></app-field>
 
             <app-field
               label="RFC"
               placeholder="XAXX010101000"
               [required]="true"
-              [value]="invoiceRfc()"
-              [error]="invoiceRfcError()"
-              (valueChange)="onInvoiceRfcChange($event)"
-              (blur)="validateInvoiceRfc()"
+              [value]="checkoutForm.controls.invoiceRfc.value"
+              [error]="invoiceRfcError"
+              (valueChange)="checkoutForm.controls.invoiceRfc.setValue($event)"
+              (blur)="checkoutForm.controls.invoiceRfc.markAsTouched()"
             ></app-field>
 
             <app-field
@@ -232,10 +225,10 @@
               placeholder="facturas@cliente.com"
               type="email"
               [required]="true"
-              [value]="invoiceEmail()"
-              [error]="invoiceEmailError()"
-              (valueChange)="onInvoiceEmailChange($event)"
-              (blur)="validateInvoiceEmail()"
+              [value]="checkoutForm.controls.invoiceEmail.value"
+              [error]="invoiceEmailError"
+              (valueChange)="checkoutForm.controls.invoiceEmail.setValue($event)"
+              (blur)="checkoutForm.controls.invoiceEmail.markAsTouched()"
             ></app-field>
           </div>
         }
@@ -252,8 +245,7 @@
           </span>
           <input
             type="checkbox"
-            [(ngModel)]="printTicket"
-            name="printTicket"
+            formControlName="printTicket"
           />
           <i></i>
         </label>
@@ -281,6 +273,7 @@
           type="submit"
           icon="check"
           className="full-button"
+          [disabled]="!isFormValid()"
         >
           Confirmar pago de MXN {{ total().toLocaleString('es-MX') }}
         </app-button>
