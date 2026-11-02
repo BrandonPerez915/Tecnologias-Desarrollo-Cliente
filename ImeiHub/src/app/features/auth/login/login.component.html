@@ -4,7 +4,7 @@
   maxWidth="460px"
   [showBackButton]="false"
 >
-  <form (ngSubmit)="handleSubmit($event)" class="login-form" novalidate>
+  <form [formGroup]="loginForm" (ngSubmit)="handleSubmit($event)" class="login-form" novalidate>
     <!-- General error banner if any -->
     @if (generalError()) {
       <div class="auth-alert alert-danger" role="alert">
@@ -21,10 +21,10 @@
       icon="mail"
       autocomplete="email"
       [required]="true"
-      [value]="email()"
-      [error]="emailError()"
+      [value]="loginForm.controls.email.value"
+      [error]="emailError"
       (valueChange)="onEmailChange($event)"
-      (blur)="validateEmail()"
+      (blur)="loginForm.controls.email.markAsTouched()"
     ></app-field>
 
     <!-- Password Field with Forgot Password action -->
@@ -34,10 +34,10 @@
       placeholder="Tu contraseña secreta"
       autocomplete="current-password"
       [required]="true"
-      [value]="password()"
-      [error]="passwordError()"
+      [value]="loginForm.controls.password.value"
+      [error]="passwordError"
       (valueChange)="onPasswordChange($event)"
-      (blur)="validatePassword()"
+      (blur)="loginForm.controls.password.markAsTouched()"
     >
       <button
         label-extra
@@ -54,8 +54,7 @@
       <label class="custom-checkbox-label">
         <input
           type="checkbox"
-          [(ngModel)]="rememberMe"
-          name="rememberMe"
+          formControlName="rememberMe"
           class="custom-checkbox"
         />
         <span class="type-body-sm">Recordarme en este dispositivo</span>
@@ -68,7 +67,7 @@
         variant="primary"
         type="submit"
         className="full-button login-btn"
-        [disabled]="loading()"
+        [disabled]="loading() || loginForm.invalid"
       >
         @if (loading()) {
           <div class="spinner"></div>
