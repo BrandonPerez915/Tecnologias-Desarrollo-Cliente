@@ -1,7 +1,4 @@
 # ImeiHub · Sistema de Punto de Venta y Trazabilidad por IMEI
-**Integrantes del equipo**:
-Brandon Michelle Pérez Saldaña
-Yair Emmanuel Arias Madera
 
 <p align="center">
   <img src="public/imeihub-logo.jpeg" alt="ImeiHub Logo" width="130" style="border-radius: 20px; box-shadow: 0 4px 14px rgba(0,0,0,0.15);" />
@@ -33,10 +30,16 @@ Yair Emmanuel Arias Madera
    - [3.8. Módulos Flotantes y Overlays Globales](#38-overlays-y-módulos-flotantes-globales)
    - [3.9. Shell, Navegación y Experiencia de Usuario](#39-shell-de-aplicación-navegación-y-notificaciones)
 4. [Matriz Resumen de Rutas y Capacidades](#-matriz-resumen-de-rutas-y-capacidades)
-5. [Arquitectura Técnica y Estado en Memoria](#-arquitectura-técnica-y-estado-en-memoria)
-6. [Estructura del Proyecto](#-estructura-del-proyecto)
-7. [Guía de Instalación y Ejecución](#-guía-de-instalación-y-ejecución)
-8. [Documentación Formal en Word (.docx)](#-documentación-formal-en-word-docx)
+5. [Arquitectura Técnica e Integración con API REST](#-arquitectura-técnica-e-integración-con-api-rest)
+6. [Backend y Fuente de Datos (Elección y Justificación)](#️-backend-y-fuente-de-datos-elección-y-justificación)
+7. [Contrato de API (OpenAPI 3.0.3)](#-contrato-de-api-openapi-303)
+8. [Capa de Servicios y Manejo Centralizado de Errores](#-capa-de-servicios-y-manejo-centralizado-de-errores)
+9. [CRUD Completo de la Entidad Principal (Productos / Inventario)](#-crud-completo-de-la-entidad-principal-productos--inventario)
+10. [Formularios Validados y Estados de Envío](#-formularios-validados-y-estados-de-envío)
+11. [Estados de la Interfaz (Carga, Error y Vacío)](#-estados-de-la-interfaz-carga-error-y-vacío)
+12. [Trabajo en Equipo y Despliegue Automático (CI/CD)](#-trabajo-en-equipo-y-despliegue-automático-cicd)
+13. [Guía de Pruebas con `test.http`](#-guía-de-pruebas-con-testhttp)
+14. [Guía de Ejecución Rápida](#-guía-de-ejecución-rápida)
 
 ---
 
@@ -314,67 +317,298 @@ Disponibles desde cualquier parte de la aplicación a través de `OverlayManager
 
 ---
 
-## ⚡ Arquitectura Técnica y Estado en Memoria
+## ⚡ Arquitectura Técnica e Integración con API REST
 
-ImeiHub fue desarrollado siguiendo las mejores prácticas de la arquitectura moderna de Angular 19:
+ImeiHub implementa una arquitectura desacoplada, tipada y reactiva en **Angular 19** conectada a un backend REST propio construido sobre **Express**, gestionando el estado con **Angular Signals**, validación reactiva estricta mediante **Angular Reactive Forms** (`FormGroup`, `FormControl`, `Validators`) y manejo de errores centralizado a través de interceptores HTTP.
+
+### Estructura Completa del Proyecto:
 
 ```
-src/app/
-├── app/                     # Componente raíz de la aplicación (AppComponent)
-├── components/
-│   ├── layout/              # Componentes estructurales (AppShell, Sidebar, Topbar, BottomNav, Profile)
-│   └── ui/                  # Biblioteca UI reutilizable (Button, Field, Icon, Toast, Modal, etc.)
-├── core/
-│   ├── guards/              # authGuard y guestGuard
-│   └── services/            # Servicios de dominio reactivos con Signals
-├── data/                    # Datos semilla iniciales en memoria
-├── features/                # Módulos de funcionalidad (Auth, Dashboard, Inventory, Cash, Orders, Loans, Overlays)
-├── styles/                  # Variables CSS globales, tokens de diseño y tipografías
-└── types/                   # Modelos de datos e interfaces TypeScript estrictas
+ImeiHub/
+├── server/
+│   ├── api-server.mjs           # Servidor REST modular con Express (CORS, JSON, Logger, Latencia)
+│   ├── db.mjs                   # Gestor de base de datos JSON con persistencia atómica
+│   ├── db.json                  # Almacén de persistencia (usuarios, productos, caja, préstamos, órdenes)
+│   └── test.http                # Suite completa de pruebas HTTP (REST Client / IntelliJ)
+├── openapi.yaml                 # Contrato formal de API bajo especificación OpenAPI 3.0.3
+├── src/
+│   ├── environments/
+│   │   ├── environment.ts            # Configuración de desarrollo (apiUrl: http://localhost:3000/api)
+│   │   └── environment.development.ts # Configuración de producción para despliegues
+│   └── app/
+│       ├── app.config.ts             # Proveedores globales (Router, HttpClient, Interceptors)
+│       ├── app.routes.ts             # Definición de rutas protegidas y públicas
+│       ├── core/
+│       │   ├── guards/
+│       │   │   ├── auth.guard.ts     # Protección de rutas privadas (requiere sesión activa)
+│       │   │   └── guest.guard.ts    # Redirección de usuarios autenticados fuera de login/register
+│       │   ├── interceptors/
+│       │   │   └── error.interceptor.ts   # Captura y normalización global de errores HTTP
+│       │   └── services/
+│       │       ├── api.service.ts         # Cliente HTTP base tipado
+│       │       ├── auth.service.ts        # Autenticación, JWT, registro y perfil de usuario
+│       │       ├── inventory.service.ts   # CRUD reactivo y filtrado de productos con Signals
+│       │       ├── cash.service.ts        # Libro de caja, balance en vivo, entradas y salidas
+│       │       ├── loans.service.ts       # Préstamos de equipos y confirmación de devoluciones
+│       │       ├── orders.service.ts      # Carrito, tickets, cotizaciones y checkout
+│       │       └── notification.service.ts# Toasts reactivos (success, error, warning, info)
+│       ├── features/
+│       │   ├── auth/
+│       │   │   ├── auth-layout/           # Plantilla base compartida para autenticación
+│       │   │   ├── login/                 # Inicio de sesión con Reactive Forms
+│       │   │   └── register/              # Registro de negocio y usuario con Reactive Forms
+│       │   ├── dashboard/
+│       │   │   ├── dashboard/             # Panel principal de control
+│       │   │   ├── cash-hero-card/        # Métrica destacada de balance en tiempo real
+│       │   │   ├── metric-card/           # Indicadores visuales de ventas y órdenes
+│       │   │   └── quick-actions-grid/    # Lanzadores táctiles para acciones rápidas
+│       │   ├── inventory/
+│       │   │   ├── inventory/             # Vista principal de inventario (Loading, Error, Empty)
+│       │   │   ├── inventory-table/       # Tabla interactiva con badges de stock
+│       │   │   ├── inventory-toolbar/     # Barra de búsqueda y selector de vistas
+│       │   │   ├── inventory-filters-sheet/ # Filtro lateral multicriterio
+│       │   │   ├── product-add-view/      # Alta de producto seriado con validaciones nativas
+│       │   │   ├── product-edit-sheet/    # Edición de precios, costos y stock
+│       │   │   └── product-detail-modal/  # Ficha técnica, IMEI y acción de eliminación
+│       │   ├── cash/
+│       │   │   ├── cash-flow/             # Historial de entradas, salidas y filtros
+│       │   │   ├── cash-close/            # Formulario de arqueo físico y conciliación
+│       │   │   ├── date-picker-sheet/     # Selector modal de fechas
+│       │   │   └── export-movements-modal/# Exportación de movimientos (CSV, XLS, JSON)
+│       │   ├── orders/
+│       │   │   ├── orders/                # Vista de órdenes activas y carritos
+│       │   │   ├── order-workspace/       # Espacio de trabajo de la orden seleccionada
+│       │   │   ├── order-checkout-view/   # Pasarela de cobro, desglose y facturación
+│       │   │   ├── new-order-sheet/       # Modal de creación de orden (Minorista / Mayorista)
+│       │   │   ├── open-orders-sheet/     # Selector de pedidos en espera
+│       │   │   └── order-product-picker-sheet/ # Selector de artículos para agregar
+│       │   ├── loans/
+│       │   │   ├── loans/                 # Tablero de equipos prestados a otros locales
+│       │   │   ├── loan-detail-modal/     # Ficha de préstamo y tiempos de entrega
+│       │   │   └── confirm-return-modal/  # Verificación física de serie e IMEI al devolver
+│       │   └── overlays/
+│       │       ├── overlay-manager/       # Coordinador central de modales y drawers
+│       │       ├── sale-sheet/            # Venta express en mostrador
+│       │       ├── expense-sheet/         # Registro inmediato de gasto clasificado
+│       │       ├── loan-sheet/            # Salida rápida de equipo en préstamo
+│       │       ├── print-label-sheet/     # Impresión térmica de etiquetas de 40×30 mm
+│       │       ├── quick-actions-sheet/   # Menú táctil flotante de accesos directos
+│       │       └── scanner-modal/         # Lector óptico de códigos de barras e IMEI
+│       ├── components/
+│       │   ├── layout/                    # Shell de la aplicación (topbar, sidebar, nav móvil)
+│       │   └── ui/                        # Componentes UI reutilizables (field, button, toast...)
+│       └── types/                         # Modelos y contratos de TypeScript
 ```
-
-### Características Técnicas Destacadas:
-1. **Componentes Standalone Puros:** Eliminación total de `NgModule`. Cada componente declara sus propias dependencias mediante `imports: [...]`.
-2. **Separación de Responsabilidades:** Todos los componentes cuentan con su propia carpeta dedicada con la terna de archivos independientes:
-   - `[nombre].component.ts` (Lógica con `templateUrl` y `styleUrls`).
-   - `[nombre].component.html` (Estructura semántica HTML).
-   - `[nombre].component.css` (Estilos encapsulados).
-3. **Reactividad basada en Angular Signals:** Manejo de datos y sincronización de vistas mediante primitivas reactivas `signal()`, `computed()` y `effect()`, garantizando detección de cambios quirúrgica y de alto rendimiento.
-4. **Almacenamiento 100% en Memoria (Zero LocalStorage):** Por directriz de arquitectura, la aplicación no almacena datos en `localStorage` ni cookies. Toda la información vive en servicios singleton inyectados en la raíz (`@Injectable({ providedIn: 'root' })`). Al recargar la página, el estado se reinicia de manera limpia y predecible.
-5. **Formularios con Validación Reactiva:** Todos los formularios de alta, edición y pago cuentan con validaciones síncronas que notifican al usuario en tiempo real antes de procesar cualquier transacción.
 
 ---
 
-## 🚀 Guía de Instalación y Ejecución
+## 🛠️ Backend y Fuente de Datos (Elección y Justificación)
 
-### Requisitos Previos:
-- **Node.js:** v18.19.0 o superior (recomendado v20+ o v22+).
-- **npm:** v9.0.0 o superior.
+Para el backend se implementó una **API REST propia construida con Node.js y Express** (`server/api-server.mjs`), respaldada por persistencia en archivo JSON (`server/db.json`) mediante sincronización atómica (`server/db.mjs`).
 
-### Pasos para ejecutar localmente:
+### Justificación de la Elección:
+1. **Adopción del Estándar Express:** Proporciona un enrutamiento declarativo y expresivo (`app.get`, `app.post`, `app.put`, `app.delete`, `app.patch`), simplificando el middleware de parsing con `express.json()` y el manejo de cabeceras CORS mediante el paquete oficial `cors`.
+2. **Independencia y Modelado Exacto del Dominio:** Una API propia permite modelar al 100% las entidades específicas del negocio de telefonía seriada y plazas tecnológicas (`Product`, `Variant`, `IdentifierData`, `CashEntry`, `LoanEntry`, `User`), algo inviable con APIs genéricas públicas.
+3. **Multi-tenancy y Aislamiento por Usuario (`userId`):** El backend aísla el catálogo, los movimientos y los pedidos de cada comerciante. Al registrarse un usuario nuevo, su inventario comienza completamente limpio e independiente de otras cuentas.
+4. **Simulación Realista de Latencia:** Incorpora un retardo configurable (100 ms) para evaluar de forma fidedigna los estados de carga (**Loading**, deshabilitación de botones y spinners de espera) en el frontend.
+5. **Portabilidad Inmediata sin Configuración de Bases de Datos Externas:** Funciona al clonar el repositorio sin necesidad de instalar Docker, PostgreSQL ni configurar variables en la nube.
+6. **Fácil Evolución a Producción:** Al consumir la URL base mediante `environment.apiUrl`, el backend local puede desplegarse en Cloud Run, Railway o sustituirse por NestJS/Supabase sin requerir cambios en el código de Angular.
 
-1. **Clonar o situarse en el repositorio:**
-   ```bash
-   cd ImeiHub
-   ```
+---
 
-2. **Instalar dependencias:**
-   ```bash
-   npm install
-   ```
+## 📑 Contrato de API (OpenAPI 3.0.3)
 
-3. **Ejecutar el servidor de desarrollo:**
-   ```bash
-   npm start
-   # o bien: npx ng serve
-   ```
-   La aplicación estará disponible en tu navegador en: `http://localhost:4200`
+El contrato formal de la API se encuentra documentado en el archivo [`openapi.yaml`](openapi.yaml) conforme al estándar **OpenAPI 3.0.3**. A continuación se resume la especificación de endpoints, modelos y errores:
 
-4. **Compilar para producción:**
-   ```bash
-   npm run build
-   ```
-   Los artefactos optimizados se generarán en la carpeta `dist/imeihub-angular`.
+### Endpoints Principales:
+
+| Módulo | Método | Endpoint | Descripción | Códigos HTTP |
+| :--- | :--- | :--- | :--- | :--- |
+| **Health** | `GET` | `/api/health` | Verificación de estado del servidor | `200` |
+| **Auth** | `POST` | `/api/auth/login` | Autenticación de usuario comercial | `200`, `400`, `401` |
+| **Auth** | `POST` | `/api/auth/register` | Registro de nuevo comercio o usuario | `201`, `400`, `409` |
+| **Auth** | `GET` | `/api/auth/me` | Obtener perfil del usuario autenticado | `200`, `401` |
+| **Productos** | `GET` | `/api/products` | Listar catálogo (filtros: `category`, `search`) | `200`, `500` |
+| **Productos** | `GET` | `/api/products/{id}` | Obtener detalle de un producto e IMEI | `200`, `404` |
+| **Productos** | `POST` | `/api/products` | Crear nuevo artículo seriado en inventario | `201`, `400`, `422` |
+| **Productos** | `PUT` | `/api/products/{id}` | Actualizar información del producto | `200`, `400`, `404`, `422` |
+| **Productos** | `DELETE` | `/api/products/{id}` | Eliminar producto del inventario | `200`, `404` |
+| **Caja** | `GET` | `/api/cash` | Resumen financiero (entradas, salidas, balance) | `200` |
+| **Caja** | `POST` | `/api/cash/entries` | Registrar ingreso o egreso manual | `201`, `400` |
+| **Caja** | `POST` | `/api/cash/close` | Arqueo y cierre del turno actual | `200`, `400` |
+| **Préstamos** | `GET` | `/api/loans` | Listar préstamos a locales vecinos | `200` |
+| **Préstamos** | `POST` | `/api/loans` | Registrar salida de equipo en préstamo | `201`, `400` |
+| **Préstamos** | `PATCH`| `/api/loans/{id}/return` | Registrar devolución de equipo prestado | `200`, `404` |
+| **Órdenes** | `GET` | `/api/orders` | Listar órdenes abiertas y cobradas | `200` |
+| **Órdenes** | `POST` | `/api/orders` | Crear nueva orden de venta | `201` |
+| **Órdenes** | `PUT` | `/api/orders/{id}/items` | Actualizar productos y cantidades en orden | `200`, `404` |
+| **Órdenes** | `POST` | `/api/orders/{id}/checkout` | Cobrar orden, descontar stock y registrar ingreso | `200`, `400`, `404` |
+
+### Estructura Estándar de Respuesta de Error (`ErrorResponse`):
+```json
+{
+  "statusCode": 400,
+  "error": "Bad Request",
+  "message": "Descripción legible de la causa del error"
+}
+```
+
+---
+
+## 🔌 Capa de Servicios y Manejo Centralizado de Errores
+
+1. **Separación Estricta:** Ningún componente realiza llamadas `HttpClient` de forma directa. Toda interacción se encapsula en servicios de dominio (`InventoryService`, `CashService`, `LoansService`, `OrdersService`, `AuthService`), los cuales a su vez delegan en un servicio base `ApiService`.
+2. **URL Base desde Variables de Entorno:**
+   - Desarrollo: `src/environments/environment.ts` (`apiUrl: 'http://localhost:3000/api'`).
+   - Producción: `src/environments/environment.production.ts`.
+   - Reemplazo automático configurado en `angular.json` bajo `fileReplacements`.
+3. **Manejo Centralizado de Errores (`ErrorInterceptor`):**
+   - Registrado en `app.config.ts` mediante `provideHttpClient(withInterceptors([errorInterceptor]))`.
+   - Detecta fallos de conectividad (`status === 0`, servidor apagado o sin red), errores semánticos `400`, `401`, `403`, `404`, `409`, `422` y errores no controlados `500`.
+   - Traduce los códigos HTTP a mensajes claros en español y los proyecta automáticamente en la UI mediante `NotificationService` con toasts de diferentes tonalidades (`success`, `danger`/`error`, `warning`, `info`).
+
+---
+
+## 🔄 CRUD Completo de la Entidad Principal (Productos / Inventario)
+
+La entidad principal **Productos** cuenta con todas las operaciones CRUD implementadas desde la interfaz y conectadas a la API:
+
+1. **Listar (`Read`):**
+   - Vista: `InventoryComponent` (`/inventory`).
+   - Consume: `GET /api/products`.
+   - Soporta búsqueda reactiva en tiempo real y filtrado por categoría (`phones`, `tablets`, `accessories`, `computers`, `audio`).
+2. **Ver Detalle (`Read Detail`):**
+   - Vista: `ProductDetailModalComponent`.
+   - Consume: `GET /api/products/:id` (con respaldo en el store reactivo de Signals).
+   - Muestra desglose por variantes de color con stock específico, precio ideal vs. precio mínimo de mostrador, e historial de identificación (IMEI / serie, código de barras y estado físico).
+3. **Crear (`Create`):**
+   - Vista: `ProductAddViewComponent` (activado desde el botón *"+ Añadir producto"*).
+   - Consume: `POST /api/products`.
+   - Formulario completo con validación reactiva nativa (`productForm.invalid`), bloqueo del botón de envío si el formulario está vacío o incompleto, y notificación de éxito.
+4. **Editar (`Update`):**
+   - Vista: `ProductEditSheetComponent` (activado desde el detalle del producto o la tabla).
+   - Consume: `PUT /api/products/:id`.
+   - Permite modificar nombre, SKU, precio de venta, precio mínimo autorizado, costo de adquisición y existencias con validación síncrona.
+5. **Eliminar con Confirmación (`Delete`):**
+   - Vista: `ProductDetailModalComponent` mediante el botón con icono de papelera *"Eliminar del inventario"*.
+   - Confirmación: Dispara un diálogo nativo de confirmación (`confirm('¿Estás seguro de eliminar...?')`). Al confirmar, emite `DELETE /api/products/:id`, retira el producto del store reactivo y muestra una notificación toast.
+
+---
+
+## 📝 Formularios Validados y Estados de Envío
+
+Todos los formularios de la aplicación utilizan **Angular Reactive Forms** mediante [`FormGroup`](https://angular.dev/api/forms/FormGroup), [`FormControl`](https://angular.dev/api/forms/FormControl) y las validaciones nativas de [`Validators`](https://angular.dev/api/forms/Validators).
+
+### Principios de Validación Implementados:
+- **Bloqueo Preventivo del Botón:** El botón de envío se mantiene en estado `disabled` (`[disabled]="form.invalid || loading()"`) mientras la información requerida no haya sido suministrada o contenga errores.
+- **Mensajes de Error por Campo:** Se evalúa el estado del control (`ctrl.touched && ctrl.dirty && ctrl.hasError(...)`) para mostrar mensajes claros debajo de cada campo con error.
+- **Validadores a Nivel de Grupo:** Validación cruzada en jerarquías de precios (`price >= minPrice`) y coincidencia de contraseñas (`password === confirmPassword`).
+- **Deshabilitación Durante Procesamiento:** Evita envíos duplicados bloqueando los botones y mostrando spinners de carga mientras la petición HTTP está en curso.
+
+### Formularios con Validación Nativa:
+1. **Iniciar Sesión (`LoginComponent`):**
+   - `loginForm`: `email` (`required`, `email`), `password` (`required`, `minLength(6)`), `rememberMe`.
+   - Botón *"Acceder al sistema"* deshabilitado inicialmente hasta que el correo tenga formato válido y la contraseña tenga al menos 6 caracteres.
+2. **Crear Cuenta (`RegisterComponent`):**
+   - `registerForm`: `name` (`required`, `minLength(3)`), `storeName` (`required`), `email` (`required`, `email`), `phone` (opcional), `password` (`required`, `minLength(8)`), `confirmPassword` (`required`), `acceptTerms` (`requiredTrue`).
+   - Validador a nivel de grupo `passwordsMatchValidator`.
+   - Medidor de seguridad de contraseña reactivo (Débil, Media, Fuerte).
+3. **Alta de Producto (`ProductAddViewComponent`):**
+   - `productForm`: `name` (`required`, `minLength(3)`), `cost` (`required`, `min(0.01)`), `minPrice` (`required`, `min(0.01)`), `price` (`required`, `min(0.01)`), `type`, `category`, `condition`, `variants`.
+   - Validador cruzado `priceHierarchyValidator` (`price >= minPrice`).
+4. **Edición de Producto (`ProductEditSheetComponent`):**
+   - `editForm`: `name` (`required`), `sku` (`required`), `price` (`required`, `min(0.01)`), `minPrice` (`required`, `min(0.01)`), `cost` (`required`, `min(0.01)`), `stock` (`required`, `min(0)`).
+5. **Crear Nueva Orden (`NewOrderSheetComponent`):**
+   - `orderForm`: `name` (opcional), `type` (`required`, Minorista o Mayorista).
+6. **Checkout y Cobro (`OrderCheckoutViewComponent`):**
+   - `checkoutForm`: Efectivo recibido ≥ total de la orden, folio de autorización en tarjeta, y validación estricta de razón social, RFC y correo fiscal si se solicita factura electrónica.
+7. **Registrar Préstamo (`LoanSheetComponent`):**
+   - `loanForm`: `item` (`required`), `serial` (`required`, `minLength(4)`), `stall` (`required`), `person` (`required`, `minLength(2)`).
+8. **Venta Rápida (`SaleSheetComponent`):**
+   - `saleForm`: `quantity` (`required`, `min(1)`), `paymentMethod` (`required`), con bloqueo de botones cuando se alcanza el stock máximo disponible.
+9. **Registrar Gasto (`ExpenseSheetComponent`):**
+   - `expenseForm`: `category` (`required`), `amount` (`required`, `min(0.01)`), `note` (`required`, `minLength(3)`), bloqueando el envío si el gasto supera el efectivo disponible en caja.
+10. **Cierre de Caja (`CashCloseComponent`):**
+    - `closeForm`: `countedCash` (`required`, `min(0)`), `notes`.
+
+---
+
+## ⏳ Estados de la Interfaz (Carga, Error y Vacío)
+
+Toda vista que consume datos de la API contempla los tres estados esenciales de experiencia de usuario:
+
+1. **Estado de Carga (`Loading`):**
+   - Mientras los servicios recuperan datos iniciales de la API, se muestra un contenedor centralizado con spinner CSS animado y el mensaje descriptivo correspondiente (ej. *"Cargando catálogo de productos desde la API..."* o *"Cargando movimientos de caja..."*).
+2. **Estado de Error (`Error` con Reintento):**
+   - Si el servidor está apagado o responde con error (`status 0` o `500`), la interfaz oculta la tabla y despliega una tarjeta de error estilizada con icono de advertencia, descripción del problema y un botón prominente **"Reintentar conexión"** que vuelve a disparar la petición HTTP sin necesidad de refrescar la página.
+3. **Estado Vacío (`Empty State`):**
+   - Cuando no existen registros o una búsqueda/filtro no arroja resultados, se presenta una ilustración con mensaje claro (ej. *"No se encontraron productos coincidentes con tu búsqueda"*) y un botón de acción como **"Restablecer filtros"** o **"Añadir nuevo producto"**.
+
+---
+
+## 👥 Trabajo en Equipo y Despliegue Automático (CI/CD)
+
+### Flujo de Trabajo Git Basado en Ramas y Pull Requests:
+Para asegurar la calidad del código y la colaboración estructurada:
+1. **Rama Protegida `main`:** Ningún integrante del equipo hace push directo a `main`. Todo código nuevo entra exclusivamente mediante **Pull Requests (PR)**.
+2. **Nomenclatura de Ramas:**
+   - `feature/api-server-rest`: Implementación del servidor Express y contrato OpenAPI.
+   - `feature/core-services-crud`: Capa de servicios `HttpClient`, interceptor y Signals.
+   - `feature/ui-states-validation`: Integración de spinners de carga, empty states y validaciones.
+   - `fix/error-handling`: Correcciones y robustecimiento de respuestas de red.
+3. **Checklist Obligatorio para Revisión de PRs:**
+   - [ ] Compilación limpia con `npm run build` sin errores de tipos TypeScript.
+   - [ ] Verificación de formularios con campos vacíos e inválidos (`FormGroup.invalid`).
+   - [ ] Prueba del botón de reintento en caso de error de red.
+   - [ ] Al menos una aprobación (`Review Approved`) de otro compañero antes del merge.
+
+### Pipeline de Despliegue Automático (`.github/workflows/ci-deploy.yml`):
+Se configuró un flujo de GitHub Actions que:
+- Se ejecuta automáticamente en cada **Pull Request** hacia `main`, verificando dependencias, base de datos semilla y compilación de producción (`npm run build`).
+- Al realizar **Merge / Push a `main`**, empaqueta los artefactos optimizados de `dist/imeihub-angular/browser` y los despliega automáticamente en **GitHub Pages**.
+
+---
+
+## 🧪 Guía de Pruebas con `test.http`
+
+Se incluye el archivo [`server/test.http`](server/test.http) con la colección completa de peticiones listas para ejecutarse con un clic mediante la extensión **REST Client** de VS Code o el cliente HTTP de WebStorm/IntelliJ:
+
+1. Inicia el servidor backend: `npm run api`.
+2. Abre `server/test.http` en el editor.
+3. Ejecuta la petición **2.1 Iniciar sesión exitosamente**; la variable `@authToken` capturará el token JWT devuelto.
+4. Ejecuta cualquiera de las peticiones para verificar:
+   - Casos de éxito (`200 OK`, `201 Created`).
+   - Validaciones de negocio (`400 Bad Request`, `422 Unprocessable Entity` cuando el precio de venta es menor al mínimo).
+   - Seguridad y credenciales (`401 Unauthorized`, `409 Conflict` en correos duplicados).
+   - Rutas no encontradas (`404 Not Found`).
+
+---
+
+## 🚀 Guía de Ejecución Rápida
+
+### 1. Iniciar el Servidor de la API REST:
+En una terminal ejecuta:
+```bash
+npm run api
+```
+El servidor arrancará en `http://localhost:3000/api` y reportará los endpoints disponibles.
+
+### 2. Iniciar el Frontend de Angular:
+En una segunda terminal ejecuta:
+```bash
+npm start
+```
+Abre tu navegador en `http://localhost:4200`.
+
+### 3. Ejecutar Ambos con un Solo Comando:
+```bash
+npm run start:all
+```
+
+### 4. Compilar para Producción:
+```bash
+npm run build
+```
 
 ---
 

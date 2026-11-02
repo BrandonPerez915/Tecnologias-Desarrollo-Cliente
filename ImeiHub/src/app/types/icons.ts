@@ -34,4 +34,5 @@ export type IconName =
   | "eye-off"
   | "store"
   | "phone"
+  | "info"
   | "shield";
