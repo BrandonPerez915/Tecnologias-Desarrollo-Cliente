@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { hashPassword, isHashed, ROLES } from './auth.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -148,10 +149,20 @@ export function getInitialData() {
       name: "Ada Okafor",
       email: "ada.okafor@imeihub.com",
       password: "Password123!",
-      role: "Propietaria",
+      role: ROLES.OWNER,
       storeName: "SmartFix Celulares",
       stallNumber: "A-18",
       createdAt: "2024-01-15T08:00:00.000Z"
+  }, {
+      id: "usr_2",
+      name: "Carlos Mendoza",
+      email: "carlos.mendoza@imeihub.com",
+      password: "Vendedor123!",
+      role: ROLES.SELLER,
+      ownerId: "usr_1",
+      storeName: "SmartFix Celulares",
+      stallNumber: "A-18",
+      createdAt: "2024-02-01T08:00:00.000Z"
   }];
 
   return { products, cash, loans, orders, users };
@@ -160,22 +171,62 @@ export function getInitialData() {
 export function loadDatabase() {
   if (!fs.existsSync(DB_FILE)) {
     const data = getInitialData();
+    migrateDatabase(data);
     saveDatabase(data);
     return data;
   }
   try {
     const raw = fs.readFileSync(DB_FILE, 'utf-8');
     const data = JSON.parse(raw);
-    if (!Array.isArray(data.users) || data.users.length === 0) {
-      data.users = getInitialData().users;
+    if (migrateDatabase(data)) {
+      saveDatabase(data);
     }
     return data;
   } catch (err) {
     console.error('Error reading db.json, recreating with initial seed', err);
     const data = getInitialData();
+    migrateDatabase(data);
     saveDatabase(data);
     return data;
   }
+}
+
+// Fills missing collections, adds the test users and hashes the plain text passwords
+// (the seed passwords are only stored hashed in db.json)
+function migrateDatabase(data) {
+  let changed = false;
+  const seed = getInitialData();
+
+  for (const key of ['products', 'loans', 'orders', 'users']) {
+    if (!Array.isArray(data[key])) {
+      data[key] = seed[key];
+      changed = true;
+    }
+  }
+  if (!data.cash || !Array.isArray(data.cash.entries)) {
+    data.cash = seed.cash;
+    changed = true;
+  }
+
+  for (const seedUser of seed.users) {
+    if (!data.users.some(user => user.email?.toLowerCase() === seedUser.email)) {
+      data.users.push(seedUser);
+      changed = true;
+    }
+  }
+
+  for (const user of data.users) {
+    if (!isHashed(user.password)) {
+      user.password = hashPassword(String(user.password || ''));
+      changed = true;
+    }
+    if (user.role !== ROLES.OWNER && user.role !== ROLES.SELLER) {
+      user.role = ROLES.OWNER;
+      changed = true;
+    }
+  }
+
+  return changed;
 }
 
 export function saveDatabase(data) {

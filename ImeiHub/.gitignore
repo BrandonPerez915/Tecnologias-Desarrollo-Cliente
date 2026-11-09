@@ -49,3 +49,8 @@ yarn-debug.log*
 .npmrc
 .npmignore
 .npm
+
+# Environment
+.env
+.env.*
+!.env.example
