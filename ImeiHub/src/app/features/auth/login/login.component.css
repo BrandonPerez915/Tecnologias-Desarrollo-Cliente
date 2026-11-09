@@ -14,6 +14,12 @@
   font-weight: 600;
 }
 
+.alert-info {
+  background: var(--primary-soft, #edf2ff);
+  color: var(--primary-dark, #173ca8);
+  border: 1px solid rgba(36, 87, 230, 0.2);
+}
+
 .alert-danger {
   background: var(--color-danger-soft, #fff0f0);
   color: var(--color-danger, #d94a4a);

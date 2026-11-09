@@ -1,8 +1,14 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from '../services/auth.service';
+import { environment } from '../../../environments/environment';
 
+// Adds the session token to every request sent to the ImeiHub API
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  if (!req.url.startsWith(environment.apiUrl)) {
+    return next(req);
+  }
+
   const authService = inject(AuthService);
   const token = authService.token();
   const user = authService.user();
@@ -17,6 +23,5 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     headers = headers.set('Authorization', `Bearer ${token}`);
   }
 
-  const authReq = req.clone({ headers });
-  return next(authReq);
+  return next(req.clone({ headers }));
 };

@@ -5,6 +5,13 @@
   [showBackButton]="false"
 >
   <form [formGroup]="loginForm" (ngSubmit)="handleSubmit($event)" class="login-form" novalidate>
+    @if (sessionNotice() && !generalError()) {
+      <div class="auth-alert alert-info" role="status">
+        <app-icon name="info" [size]="17"></app-icon>
+        <span>{{ sessionNotice() }}</span>
+      </div>
+    }
+
     <!-- General error banner if any -->
     @if (generalError()) {
       <div class="auth-alert alert-danger" role="alert">

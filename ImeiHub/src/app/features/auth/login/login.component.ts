@@ -1,7 +1,7 @@
 import { Component, inject, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthLayoutComponent } from '../auth-layout/auth-layout.component';
 import { FieldComponent } from '../../../components/ui/field/field.component';
 import { PasswordFieldComponent } from '../../../components/ui/password-field/password-field.component';
@@ -28,7 +28,18 @@ import { NotificationService } from '../../../core/services/notification.service
 export class LoginComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private notifyService = inject(NotificationService);
+
+  // Set by the auth guard and by the session expiry handler
+  private returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+  sessionNotice = signal(
+    this.route.snapshot.queryParamMap.get('reason') === 'expired'
+      ? 'Tu sesión expiró. Inicia sesión de nuevo para continuar donde te quedaste.'
+      : this.returnUrl
+        ? 'Inicia sesión para continuar a la sección que solicitaste.'
+        : ''
+  );
 
   loginSuccess = output<{ email: string; name?: string }>();
   switchToRegister = output<void>();
@@ -92,10 +103,10 @@ export class LoginComponent {
 
     try {
       const { email, password } = this.loginForm.getRawValue();
-      const user = await this.authService.login({
-        email: email.trim(),
-        password: password
-      });
+      const user = await this.authService.login(
+        { email: email.trim(), password },
+        this.returnUrl
+      );
       this.loading.set(false);
       this.loginSuccess.emit({ email: user.email, name: user.name });
     } catch (err: any) {

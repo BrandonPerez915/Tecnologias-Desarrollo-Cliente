@@ -1,0 +1,18 @@
+<section class="error-view">
+  <div class="error-card">
+    <span class="error-code danger">403</span>
+    <h1>Acceso denegado</h1>
+    <p>
+      Tu rol de <strong>{{ roleLabel() }}</strong> no tiene permiso para ver
+      @if (from()) {
+        <code>{{ from() }}</code>.
+      } @else {
+        esta sección.
+      }
+      Si crees que es un error, pide acceso al propietario de la tienda.
+    </p>
+    <div class="error-actions">
+      <app-button icon="home" (clicked)="goHome()">Volver al panel</app-button>
+    </div>
+  </div>
+</section>

@@ -14,10 +14,8 @@
 @baseUrl = http://localhost:3000
 @contentType = application/json
 
-# Token de respaldo generado para el usuario demo (Ada Okafor - usr_1)
-@demoToken = imeihub-jwt-eyJpZCI6InVzcl8xIiwiZW1haWwiOiJhZGEub2thZm9yQGltZWlodWIuY29tIn0=
-# Token dinámico (se sobreescribe con el resultado del Login)
-@authToken = {{demoToken}}
+### El token se obtiene ejecutando la petición 2.1 (login), ya no hay tokens fijos
+### porque la API valida la firma y la expiración del JWT
 
 
 # ==============================================================================
@@ -320,3 +318,50 @@ Content-Type: {{contentType}}
   "paymentMethod": "Efectivo",
   "total": 500.00
 }
+
+### ==============================================================================
+### 7. ROLES Y PERMISOS
+### ==============================================================================
+
+### 7.1 Iniciar sesión como vendedor
+# @name sellerLogin
+POST {{baseUrl}}/api/auth/login HTTP/1.1
+Content-Type: {{contentType}}
+
+{
+  "email": "carlos.mendoza@imeihub.com",
+  "password": "Vendedor123!"
+}
+
+###
+@sellerToken = {{sellerLogin.response.body.token}}
+
+### 7.2 El vendedor intenta eliminar un producto (Debe responder 403 Forbidden)
+DELETE {{baseUrl}}/api/products/1 HTTP/1.1
+Authorization: Bearer {{sellerToken}}
+
+### 7.3 El vendedor intenta editar un producto (Debe responder 403 Forbidden)
+PUT {{baseUrl}}/api/products/1 HTTP/1.1
+Authorization: Bearer {{sellerToken}}
+Content-Type: {{contentType}}
+
+{
+  "price": 1
+}
+
+### 7.4 El vendedor intenta cerrar la caja (Debe responder 403 Forbidden)
+POST {{baseUrl}}/api/cash/close HTTP/1.1
+Authorization: Bearer {{sellerToken}}
+Content-Type: {{contentType}}
+
+{
+  "countedCash": 0
+}
+
+### 7.5 El vendedor sí puede consultar el inventario de su tienda (200)
+GET {{baseUrl}}/api/products HTTP/1.1
+Authorization: Bearer {{sellerToken}}
+
+### 7.6 Token alterado (Debe responder 401 con code TOKEN_INVALID)
+GET {{baseUrl}}/api/auth/me HTTP/1.1
+Authorization: Bearer {{sellerToken}}x
