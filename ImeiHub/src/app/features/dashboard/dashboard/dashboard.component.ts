@@ -11,6 +11,7 @@ import { Overlay, Screen } from '../../../types/navigation';
 import { CashService } from '../../../core/services/cash.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { OverlayService } from '../../../core/services/overlay.service';
+import { HasRoleDirective } from '../../../core/directives/has-role.directive';
 
 @Component({
   selector: 'app-dashboard',
@@ -23,6 +24,7 @@ import { OverlayService } from '../../../core/services/overlay.service';
     CashHeroCardComponent,
     MetricCardComponent,
     QuickActionsGridComponent,
+    HasRoleDirective
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']

@@ -7,7 +7,7 @@
     <span class="avatar">{{ userInitials() }}</span>
     <span>
       <strong>{{ user()?.name || 'Ada Okafor' }}</strong>
-      <small>{{ user()?.role || 'Propietaria' }} · Puesto {{ user()?.stallNumber || 'A-18' }}</small>
+      <small>{{ roleLabel() }} · Puesto {{ user()?.stallNumber || 'A-18' }}</small>
     </span>
   </div>
   <div class="profile-popover-actions">

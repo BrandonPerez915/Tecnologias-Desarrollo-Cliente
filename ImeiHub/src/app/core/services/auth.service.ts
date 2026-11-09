@@ -6,33 +6,42 @@ import { InventoryService } from './inventory.service';
 import { CashService } from './cash.service';
 import { LoansService } from './loans.service';
 import { OrdersService } from './orders.service';
+import { AuthResponse, AuthUser, JwtPayload, ROLE_LABELS, Role } from '../../types/auth';
 
-export interface AuthUser {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  storeName: string;
-  stallNumber: string;
-  phone?: string;
-}
+export type { AuthUser } from '../../types/auth';
 
 const STORAGE_KEY_TOKEN = 'imeihub_auth_token';
-const STORAGE_KEY_USER = 'imeihub_auth_user';
+const DEFAULT_ROUTE = '/dashboard';
 
-function getInitialSession(): { token: string | null; user: AuthUser | null } {
+// Reads the payload of a JWT, the signature is validated by the API
+function decodeToken(token: string): JwtPayload | null {
   try {
-    if (typeof localStorage !== 'undefined') {
-      const token = localStorage.getItem(STORAGE_KEY_TOKEN);
-      const userRaw = localStorage.getItem(STORAGE_KEY_USER);
-      if (token && userRaw) {
-        return { token, user: JSON.parse(userRaw) as AuthUser };
-      }
-    }
-  } catch (e) {
-    console.warn('Error reading session from localStorage', e);
+    const payload = token.split('.')[1];
+    const json = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+    const decoded = JSON.parse(decodeURIComponent(escape(json))) as JwtPayload;
+    return decoded?.sub && decoded?.exp ? decoded : null;
+  } catch {
+    return null;
   }
-  return { token: null, user: null };
+}
+
+function isExpired(payload: JwtPayload): boolean {
+  return payload.exp * 1000 <= Date.now();
+}
+
+function readStoredToken(): string | null {
+  try {
+    return localStorage.getItem(STORAGE_KEY_TOKEN);
+  } catch {
+    return null;
+  }
+}
+
+// Avoids open redirects, only internal paths are accepted
+export function safeReturnUrl(url: string | null | undefined): string {
+  if (!url || !url.startsWith('/') || url.startsWith('//')) return DEFAULT_ROUTE;
+  if (url.startsWith('/login') || url.startsWith('/register')) return DEFAULT_ROUTE;
+  return url;
 }
 
 @Injectable({
@@ -47,69 +56,40 @@ export class AuthService {
   private loansService = inject(LoansService);
   private ordersService = inject(OrdersService);
 
-  private initialSession = getInitialSession();
-  private userSignal = signal<AuthUser | null>(this.initialSession.user);
-  private tokenSignal = signal<string | null>(this.initialSession.token);
+  private tokenSignal = signal<string | null>(null);
+  private userSignal = signal<AuthUser | null>(null);
+  private expiryTimer: ReturnType<typeof setTimeout> | null = null;
 
-  user = this.userSignal.asReadonly();
   token = this.tokenSignal.asReadonly();
-  isAuthenticated = computed(() => !!this.userSignal() && !!this.tokenSignal());
+  user = this.userSignal.asReadonly();
+  isAuthenticated = computed(() => !!this.tokenSignal() && !!this.userSignal());
+  role = computed<Role | null>(() => this.userSignal()?.role ?? null);
+  roleLabel = computed(() => {
+    const role = this.role();
+    return role ? ROLE_LABELS[role] : '';
+  });
 
   constructor() {
-    // Si hay un token persistido
-    if (this.tokenSignal()) {
-      this.validateSession();
-    }
+    this.restoreSession();
   }
 
-  private validateSession() {
-    this.api.get<{ user: AuthUser }>('/auth/me').subscribe({
-      next: (res) => {
-        if (res && res.user) {
-          this.userSignal.set(res.user);
-          localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(res.user));
-          this.refreshUserData();
-        }
-      },
-      error: () => {
-        // Token inválido o expirado en el servidor
-        this.clearSession();
-      }
-    });
+  hasRole(roles: Role | readonly Role[] | null | undefined): boolean {
+    const current = this.role();
+    if (!current) return false;
+    if (!roles || (Array.isArray(roles) && roles.length === 0)) return true;
+    return Array.isArray(roles) ? roles.includes(current) : roles === current;
   }
 
-  private refreshUserData() {
-    this.inventoryService.fetchProducts();
-    this.cashService.fetchCash();
-    this.loansService.fetchLoans();
-    this.ordersService.fetchOrders();
-  }
-
-  login(credentials: { email: string; password: string }): Promise<AuthUser> {
+  login(credentials: { email: string; password: string }, returnUrl?: string | null): Promise<AuthUser> {
     return new Promise((resolve, reject) => {
-      this.api.post<{ token: string; user: AuthUser; message?: string }>('/auth/login', credentials).subscribe({
+      this.api.post<AuthResponse>('/auth/login', credentials).subscribe({
         next: (res) => {
-          this.userSignal.set(res.user);
-          this.tokenSignal.set(res.token);
-
-          try {
-            localStorage.setItem(STORAGE_KEY_TOKEN, res.token);
-            localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(res.user));
-          } catch (e) {
-            console.warn('Could not persist to localStorage', e);
-          }
-
-          // Cargar exclusivamente los datos del usuario autenticado
-          this.refreshUserData();
-
+          this.startSession(res);
           this.notify.success(`¡Bienvenido de nuevo, ${res.user.name}!`);
-          this.router.navigate(['/dashboard']);
+          this.router.navigateByUrl(safeReturnUrl(returnUrl));
           resolve(res.user);
         },
-        error: (err) => {
-          const message = err?.error?.message || err?.message || 'Correo o contraseña incorrectos';
-          reject(new Error(message));
-        }
+        error: (err) => reject(new Error(err?.message || 'Correo o contraseña incorrectos'))
       });
     });
   }
@@ -123,29 +103,14 @@ export class AuthService {
     phone?: string;
   }): Promise<AuthUser> {
     return new Promise((resolve, reject) => {
-      this.api.post<{ token: string; user: AuthUser; message?: string }>('/auth/register', data).subscribe({
+      this.api.post<AuthResponse>('/auth/register', data).subscribe({
         next: (res) => {
-          this.userSignal.set(res.user);
-          this.tokenSignal.set(res.token);
-
-          try {
-            localStorage.setItem(STORAGE_KEY_TOKEN, res.token);
-            localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(res.user));
-          } catch (e) {
-            console.warn('Could not persist to localStorage', e);
-          }
-
-          // Al ser nuevo usuario, todo inicia vacío
-          this.refreshUserData();
-
+          this.startSession(res);
           this.notify.success(`Cuenta de "${data.storeName || 'ImeiHub'}" creada con éxito`);
-          this.router.navigate(['/dashboard']);
+          this.router.navigateByUrl(DEFAULT_ROUTE);
           resolve(res.user);
         },
-        error: (err) => {
-          const message = err?.error?.message || err?.message || 'No fue posible registrar la cuenta';
-          reject(new Error(message));
-        }
+        error: (err) => reject(new Error(err?.message || 'No fue posible registrar la cuenta'))
       });
     });
   }
@@ -156,15 +121,109 @@ export class AuthService {
     this.router.navigate(['/login']);
   }
 
-  private clearSession(): void {
-    this.userSignal.set(null);
-    this.tokenSignal.set(null);
+  // Called by the error interceptor on any 401 and by the expiry timer
+  handleUnauthorized(message = 'Tu sesión expiró, inicia sesión de nuevo'): void {
+    if (!this.tokenSignal()) return;
+
+    const currentUrl = this.router.url;
+    this.clearSession();
+    this.notify.warning(message);
+    this.router.navigate(['/login'], {
+      queryParams: { returnUrl: safeReturnUrl(currentUrl), reason: 'expired' }
+    });
+  }
+
+  private restoreSession(): void {
+    const token = readStoredToken();
+    if (!token) return;
+
+    const payload = decodeToken(token);
+    if (!payload || isExpired(payload)) {
+      this.removeStoredToken();
+      if (payload) {
+        this.notify.warning('Tu sesión expiró, inicia sesión de nuevo');
+      }
+      return;
+    }
+
+    // The token already carries the user basics, /auth/me fills the rest
+    this.tokenSignal.set(token);
+    this.userSignal.set({
+      id: payload.sub,
+      name: payload.name,
+      email: payload.email,
+      role: payload.role,
+      storeName: '',
+      stallNumber: ''
+    });
+    this.scheduleExpiry(payload);
+
+    // Deferred so the interceptors can inject this service once it is built
+    queueMicrotask(() => this.loadProfile());
+  }
+
+  private loadProfile(): void {
+    this.api.get<{ user: AuthUser }>('/auth/me').subscribe({
+      next: (res) => {
+        this.userSignal.set(res.user);
+        this.refreshUserData();
+      },
+      error: () => {
+        // 401 is handled by the error interceptor
+      }
+    });
+  }
+
+  private startSession(res: AuthResponse): void {
+    this.tokenSignal.set(res.token);
+    this.userSignal.set(res.user);
+    try {
+      localStorage.setItem(STORAGE_KEY_TOKEN, res.token);
+    } catch {
+      // Private mode, the session lives only in memory
+    }
+    const payload = decodeToken(res.token);
+    if (payload) this.scheduleExpiry(payload);
+    this.refreshUserData();
+  }
+
+  private scheduleExpiry(payload: JwtPayload): void {
+    this.clearExpiryTimer();
+    const remaining = payload.exp * 1000 - Date.now();
+    // setTimeout overflows above ~24.8 days
+    if (remaining > 2_147_483_647) return;
+    this.expiryTimer = setTimeout(() => this.handleUnauthorized(), Math.max(remaining, 0));
+  }
+
+  private clearExpiryTimer(): void {
+    if (this.expiryTimer !== null) {
+      clearTimeout(this.expiryTimer);
+      this.expiryTimer = null;
+    }
+  }
+
+  private refreshUserData(): void {
+    this.inventoryService.fetchProducts();
+    this.cashService.fetchCash();
+    this.loansService.fetchLoans();
+    this.ordersService.fetchOrders();
+  }
+
+  private removeStoredToken(): void {
     try {
       localStorage.removeItem(STORAGE_KEY_TOKEN);
-      localStorage.removeItem(STORAGE_KEY_USER);
-    } catch (e) {
-      console.warn('Could not clear localStorage', e);
+      // Key used by the previous version of the app
+      localStorage.removeItem('imeihub_auth_user');
+    } catch {
+      // Nothing to clean
     }
+  }
+
+  private clearSession(): void {
+    this.clearExpiryTimer();
+    this.userSignal.set(null);
+    this.tokenSignal.set(null);
+    this.removeStoredToken();
     this.inventoryService.clear();
     this.cashService.clear();
     this.loansService.clear();

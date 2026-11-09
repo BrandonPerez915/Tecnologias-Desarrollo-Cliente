@@ -17,6 +17,7 @@ export class ProfilePopoverComponent {
   private notifyService = inject(NotificationService);
 
   user = this.authService.user;
+  roleLabel = this.authService.roleLabel;
 
   mouseEnter = output<void>();
   mouseLeave = output<void>();

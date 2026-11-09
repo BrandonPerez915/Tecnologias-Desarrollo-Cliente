@@ -12,6 +12,7 @@ import {
 import { Product } from '../../../types/inventory';
 import { Overlay } from '../../../types/navigation';
 import { InventoryService } from '../../../core/services/inventory.service';
+import { HasRoleDirective } from '../../../core/directives/has-role.directive';
 
 @Component({
   selector: 'app-product-detail-modal',
@@ -22,6 +23,7 @@ import { InventoryService } from '../../../core/services/inventory.service';
     IconComponent,
     StatusBadgeComponent,
     AmountComponent,
+    HasRoleDirective
   ],
   templateUrl: './product-detail-modal.component.html',
   styleUrls: ['./product-detail-modal.component.css']
