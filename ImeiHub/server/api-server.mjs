@@ -20,7 +20,6 @@ const SIMULATED_LATENCY_MS = 1000;
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   exposedHeaders: ['*']
 }));
 // Global JSON body parser with a size limit of 10MB
