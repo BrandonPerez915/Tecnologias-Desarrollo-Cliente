@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { guestGuard } from './core/guards/guest.guard';
+import { roleGuard } from './core/guards/role.guard';
 import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
 import { AppShellComponent } from './components/layout/app-shell/app-shell.component';
@@ -10,6 +11,8 @@ import { OrdersComponent } from './features/orders/orders/orders.component';
 import { InventoryComponent } from './features/inventory/inventory/inventory.component';
 import { LoansComponent } from './features/loans/loans/loans.component';
 import { CashCloseComponent } from './features/cash/cash-close/cash-close.component';
+import { ForbiddenComponent } from './features/errors/forbidden/forbidden.component';
+import { NotFoundComponent } from './features/errors/not-found/not-found.component';
 
 export const routes: Routes = [
   {
@@ -28,6 +31,7 @@ export const routes: Routes = [
     path: '',
     component: AppShellComponent,
     canActivate: [authGuard],
+    canActivateChild: [authGuard],
     children: [
       {
         path: '',
@@ -62,12 +66,20 @@ export const routes: Routes = [
       {
         path: 'close',
         component: CashCloseComponent,
+        canActivate: [roleGuard],
+        data: { roles: ['owner'] },
         title: 'ImeiHub · Cierre de turno'
+      },
+      {
+        path: 'forbidden',
+        component: ForbiddenComponent,
+        title: 'ImeiHub · Acceso denegado'
       }
     ]
   },
   {
     path: '**',
-    redirectTo: 'dashboard'
+    component: NotFoundComponent,
+    title: 'ImeiHub · Página no encontrada'
   }
 ];

@@ -38,8 +38,9 @@
 10. [Formularios Validados y Estados de Envío](#-formularios-validados-y-estados-de-envío)
 11. [Estados de la Interfaz (Carga, Error y Vacío)](#-estados-de-la-interfaz-carga-error-y-vacío)
 12. [Trabajo en Equipo y Despliegue Automático (CI/CD)](#-trabajo-en-equipo-y-despliegue-automático-cicd)
-13. [Guía de Pruebas con `test.http`](#-guía-de-pruebas-con-testhttp)
-14. [Guía de Ejecución Rápida](#-guía-de-ejecución-rápida)
+13. [Autenticación y Permisos (Entrega 3)](#autenticación-y-permisos-entrega-3)
+14. [Guía de Pruebas con `test.http`](#-guía-de-pruebas-con-testhttp)
+15. [Guía de Ejecución Rápida](#-guía-de-ejecución-rápida)
 
 ---
 
@@ -91,7 +92,7 @@ Permite a los usuarios acceder al sistema de forma segura.
 
 * **Formulario Reactivo con Validación:** Validación sintáctica de correo electrónico y contraseña.
 * **Componente de Contraseña (`PasswordFieldComponent`):** Toggle visual de ojo para alternar entre texto claro y caracteres ocultos, con tipografía uniforme para evitar distorsiones en el placeholder.
-* **Control de Sesión en Memoria:** Autenticación rápida administrada mediante Signals en `AuthService`, asignando token y datos de usuario sin depender de `localStorage`.
+* **Control de Sesión:** `AuthService` guarda el JWT firmado por la API y expone el usuario y su rol con Signals. El detalle está en [Autenticación y Permisos](#autenticación-y-permisos-entrega-3).
 * **Guardia de Navegación (`guestGuard`):** Redirige directamente al Dashboard si ya existe una sesión activa para evitar pantallas redundantes.
 
 #### B. Registro de Tienda y Usuario (`RegisterComponent` · Ruta: `/register`)
@@ -569,6 +570,90 @@ Se configuró un flujo de GitHub Actions que:
 
 ---
 
+## Autenticación y Permisos (Entrega 3)
+
+### Usuarios de prueba
+
+| Rol | Correo | Contraseña |
+| :--- | :--- | :--- |
+| Propietario (`owner`) | `ada.okafor@imeihub.com` | `Password123!` |
+| Vendedor (`seller`) | `carlos.mendoza@imeihub.com` | `Vendedor123!` |
+
+Los dos usuarios pertenecen a la misma tienda (*SmartFix Celulares · Puesto A-18*), así que ven el mismo inventario, caja, préstamos y órdenes. Si `server/db.json` no los tiene, la API los crea al arrancar.
+
+### Proveedor de autenticación: API propia con JWT
+
+Elegimos la opción de **API propia** porque ImeiHub ya tenía su backend en Express (`server/api-server.mjs`) y así la autenticación vive junto a las reglas de negocio que protege, sin depender de un servicio externo ni de cuentas en la nube para poder revisar el proyecto.
+
+- **Contraseñas con hash:** se guardan con `bcryptjs` (10 rondas de salt). En `db.json` nunca hay contraseñas en texto plano; si encuentra alguna de una versión anterior, la API la convierte a hash al leer la base.
+- **Token:** al iniciar sesión o registrarse, la API firma un JWT con `jsonwebtoken` (HS256) que incluye `sub` (id), `email`, `name`, `role` y la expiración `exp`. La llave es `JWT_SECRET` y la duración `JWT_EXPIRES_IN` (2 h por defecto).
+- **Validación:** el middleware `authenticate` (`server/auth.mjs`) revisa el header `Authorization: Bearer <token>` en todas las rutas excepto `GET /api/health`, `POST /api/auth/login` y `POST /api/auth/register`. Si falta, está alterado o ya expiró responde **401** con `code` `TOKEN_MISSING`, `TOKEN_INVALID` o `TOKEN_EXPIRED`.
+- **Permisos:** `requireRole('owner')` protege las acciones restringidas y responde **403** si el rol no alcanza.
+- **Rol:** lo asigna el servidor. Quien se registra crea su propia tienda y queda como `owner`; el rol nunca se recibe desde el formulario ni se escribe fijo en el front.
+
+### Manejo y almacenamiento del token en Angular
+
+| Pieza | Archivo | Responsabilidad |
+| :--- | :--- | :--- |
+| `AuthService` | `core/services/auth.service.ts` | Único lugar con la lógica de sesión: login, registro, logout, restaurar la sesión, expiración y `hasRole()`. |
+| `authInterceptor` | `core/interceptors/auth.interceptor.ts` | Agrega `Authorization: Bearer <token>` a toda petición hacia `environment.apiUrl`. Ningún servicio lo pone a mano. |
+| `errorInterceptor` | `core/interceptors/error.interceptor.ts` | Manejo global de errores. Un **401** cierra la sesión y manda al login con mensaje; un **403** muestra el motivo que regresa la API. |
+| `authGuard` | `core/guards/auth.guard.ts` | Rutas privadas: sin sesión redirige a `/login?returnUrl=<ruta>` y después del login regresa a esa ruta. |
+| `roleGuard` | `core/guards/role.guard.ts` | Lee `data.roles` de la ruta; si el rol no está permitido muestra la vista `/forbidden` (403). |
+| `guestGuard` | `core/guards/guest.guard.ts` | Con sesión activa no se puede volver a `/login` ni `/register`. |
+| `*appHasRole` | `core/directives/has-role.directive.ts` | Directiva estructural para mostrar u ocultar elementos según el rol, con soporte para `else`. |
+
+- **Persistencia:** el token se guarda en `localStorage` (`imeihub_auth_token`) para que la sesión sobreviva al recargar. Al iniciar, `AuthService` decodifica el token, descarta los que ya expiraron y consulta `GET /api/auth/me` para traer el perfil actualizado. El usuario y el rol nunca se leen de `localStorage`, siempre salen del token o de `/me`.
+- **Expiración:** `AuthService` programa un temporizador con el `exp` del token. Al cumplirse, o si cualquier petición regresa 401, limpia la sesión y redirige a `/login` con el aviso *"Tu sesión expiró"*, guardando la ruta para regresar a ella al volver a entrar.
+- **Cerrar sesión:** borra el token, el temporizador y los datos de inventario, caja, préstamos y órdenes en memoria, y redirige a `/login`.
+
+### Roles y permisos
+
+| Acción o vista | Propietario (`owner`) | Vendedor (`seller`) |
+| :--- | :---: | :---: |
+| Panel, inventario, órdenes, préstamos y movimientos de caja | Sí | Sí |
+| Alta de productos | Sí | Sí |
+| Vender, cobrar órdenes, registrar gastos y préstamos | Sí | Sí |
+| Editar productos (precios, costo, stock) | Sí | No · botón oculto y la API responde 403 |
+| Eliminar productos del inventario | Sí | No · botón oculto y la API responde 403 |
+| Cierre de caja y arqueo (`/close`) | Sí | No · `roleGuard` muestra la vista 403 y la API responde 403 |
+| Botón *"Cerrar caja"* del panel | Visible | Oculto con `*appHasRole` |
+
+Ejemplo de la directiva en el detalle de producto:
+
+```html
+<div class="detail-footer-actions" *appHasRole="'owner'; else readOnlyNotice">
+  <button (click)="edit.emit()">Editar datos del artículo</button>
+  <button (click)="handleDelete()">Eliminar del inventario</button>
+</div>
+```
+
+Ocultar el botón no es la única defensa: si un vendedor llama `DELETE /api/products/:id` o `PUT /api/products/:id` (por ejemplo con `server/test.http`), la API responde 403. El `errorInterceptor` muestra el mensaje y `InventoryService` solo modifica la lista cuando la petición tiene éxito, así que la interfaz no queda en un estado inconsistente.
+
+### Vistas de error
+
+- `/forbidden`: **Acceso denegado (403)**, se muestra cuando `roleGuard` bloquea una ruta.
+- Cualquier ruta inexistente: **Página no encontrada (404)**.
+
+### Variables de entorno
+
+No se sube ninguna llave al repositorio. `.env` está en `.gitignore` y `.env.example` documenta las variables:
+
+```bash
+cp .env.example .env
+node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"   # pega el resultado en JWT_SECRET
+```
+
+| Variable | Uso | Ejemplo |
+| :--- | :--- | :--- |
+| `PORT` | Puerto de la API | `3000` |
+| `JWT_SECRET` | Llave para firmar y validar los JWT | cadena aleatoria larga |
+| `JWT_EXPIRES_IN` | Vida del token | `2h` |
+
+Si `JWT_SECRET` no está definido, la API genera una llave temporal y avisa en consola; las sesiones se invalidan al reiniciarla. El front no maneja secretos: `src/environments/*.ts` solo contiene la URL de la API.
+
+---
+
 ## 🧪 Guía de Pruebas con `test.http`
 
 Se incluye el archivo [`server/test.http`](server/test.http) con la colección completa de peticiones listas para ejecutarse con un clic mediante la extensión **REST Client** de VS Code o el cliente HTTP de WebStorm/IntelliJ:
@@ -587,7 +672,11 @@ Se incluye el archivo [`server/test.http`](server/test.http) con la colección c
 ## 🚀 Guía de Ejecución Rápida
 
 ### 1. Iniciar el Servidor de la API REST:
-En una terminal ejecuta:
+La primera vez crea tu archivo de entorno:
+```bash
+cp .env.example .env
+```
+Después, en una terminal ejecuta:
 ```bash
 npm run api
 ```
