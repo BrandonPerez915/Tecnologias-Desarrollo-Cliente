@@ -1,6 +1,16 @@
 import express from 'express';
 import cors from 'cors';
 import { loadDatabase, saveDatabase } from './db.mjs';
+import {
+  ROLES,
+  authenticate,
+  hashPassword,
+  requireRole,
+  signToken,
+  tenantId,
+  toSafeUser,
+  verifyPassword
+} from './auth.mjs';
 
 const app = express();
 const PORT = process.env['PORT'] || 3000;
@@ -26,30 +36,13 @@ app.use((req, res, next) => {
   next();
 });
 
-// Auth helper function to extract the authenticated user from the request
-function getAuthUser(req, db) {
-  const authHeader = req.headers['authorization'] || '';
-  if (!authHeader.startsWith('Bearer ')) return null;
-  // Extract the token 'Bareer ' has 7 characters, so we skip them
-  const token = authHeader.substring(7);
-  try {
-    // Decode the token and find the corresponding user in the database
-    const raw = token.replace('imeihub-jwt-', '');
-    const decoded = JSON.parse(Buffer.from(raw, 'base64').toString('utf-8'));
-    // If the decoded token doesn't have an id or email, return null, its not valid token
-    if (!decoded || (!decoded.id && !decoded.email)) return null;
-    return db.users?.find(
-      user => user.id === decoded.id || (user.email && user.email.toLowerCase() === (decoded.email || '').toLowerCase())
-    ) || null;
-  } catch {
-    return null;
-  }
-}
 // Middleware to inject the db into the request
 app.use((req, res, next) => {
   req.db = loadDatabase();
   next();
 });
+// Every route except health, login and register requires a valid JWT
+app.use(authenticate);
 
 // ==========================================
 // 1. HEALTH CHECK
@@ -79,7 +72,7 @@ app.post('/api/auth/login', (req, res) => {
   }
 
   const user = db.users?.find(u => (u.email || '').toLowerCase() === email);
-  if (!user || user.password !== password) {
+  if (!user || !verifyPassword(password, user.password)) {
     return res.status(401).json({
       statusCode: 401,
       error: 'Unauthorized',
@@ -87,14 +80,10 @@ app.post('/api/auth/login', (req, res) => {
     });
   }
 
-  // Generate a simple token for the session (not secure, just for demonstration)
-  const token = 'imeihub-jwt-' + Buffer.from(JSON.stringify({ id: user.id, email: user.email, time: Date.now() })).toString('base64');
-  const { password: _, ...userSafe } = user;
-
   res.json({
     message: 'Sesión iniciada con éxito',
-    token,
-    user: userSafe
+    token: signToken(user),
+    user: toSafeUser(user)
   });
 });
 
@@ -117,6 +106,14 @@ app.post('/api/auth/register', (req, res) => {
     });
   }
 
+  if (password.length < 8) {
+    return res.status(400).json({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: 'La contraseña debe tener al menos 8 caracteres'
+    });
+  }
+
   const exists = db.users.some(user => user.email?.toLowerCase() === email);
   if (exists) {
     return res.status(409).json({
@@ -130,8 +127,9 @@ app.post('/api/auth/register', (req, res) => {
     id: 'usr_' + Date.now(),
     name,
     email,
-    password,
-    role: 'Propietaria',
+    password: hashPassword(password),
+    // Whoever registers a store is its owner, the role is never taken from the request
+    role: ROLES.OWNER,
     storeName,
     stallNumber,
     phone,
@@ -141,54 +139,15 @@ app.post('/api/auth/register', (req, res) => {
   db.users.push(newUser);
   saveDatabase(db);
 
-  const token = 'imeihub-jwt-' + Buffer.from(JSON.stringify({ id: newUser.id, email: newUser.email, time: Date.now() })).toString('base64');
-  const { password: _, ...userSafe } = newUser;
-
   res.status(201).json({
     message: 'Cuenta registrada exitosamente',
-    token,
-    user: userSafe
+    token: signToken(newUser),
+    user: toSafeUser(newUser)
   });
 });
 
 app.get('/api/auth/me', (req, res) => {
-  const db = req.db;
-  const authHeader = req.headers['authorization'];
-  if (!authHeader?.startsWith('Bearer ')) {
-    return res.status(401).json({
-      statusCode: 401,
-      error: 'Unauthorized',
-      message: 'Token no proporcionado'
-    });
-  }
-
-  // Extract the token 'Bareer ' has 7 characters, so we skip them
-  const token = authHeader.substring(7);
-  try {
-    // Decode the token and find the corresponding user in the database
-    const payloadStr = Buffer.from(token.replace('imeihub-jwt-', ''), 'base64').toString('utf-8');
-    const payload = JSON.parse(payloadStr);
-    const user = db.users?.find(
-      user => user.id === payload.id || user.email?.toLowerCase() === payload?.email.toLowerCase()
-    );
-
-    if (!user) {
-      return res.status(401).json({
-        statusCode: 401,
-        error: 'Unauthorized',
-        message: 'Usuario no encontrado'
-      });
-    }
-
-    const { password: _, ...userSafe } = user;
-    res.json({ user: userSafe });
-  } catch {
-    res.status(401).json({
-      statusCode: 401,
-      error: 'Unauthorized',
-      message: 'Token no válido'
-    });
-  }
+  res.json({ user: toSafeUser(req.user) });
 });
 
 // ==========================================
@@ -196,12 +155,7 @@ app.get('/api/auth/me', (req, res) => {
 // ==========================================
 app.get('/api/products', (req, res) => {
   const db = req.db;
-  const authUser = getAuthUser(req, db);
-  if (!authUser) {
-    return res.json([]);
-  }
-
-  let list = db.products?.filter(product => product.userId === authUser.id);
+  let list = db.products?.filter(product => product.userId === tenantId(req.user));
   const category = req.query.category;
   const search = req.query.search;
 
@@ -219,9 +173,8 @@ app.get('/api/products', (req, res) => {
 
 app.get('/api/products/:id', (req, res) => {
   const db = req.db;
-  const authUser = getAuthUser(req, db);
   const id = parseInt(req.params.id, 10);
-  const product = db.products?.find(product => product.id === id && product.userId === authUser?.id);
+  const product = db.products?.find(product => product.id === id && product.userId === tenantId(req.user));
 
   if (!product) {
     return res.status(404).json({
@@ -236,16 +189,6 @@ app.get('/api/products/:id', (req, res) => {
 
 app.post('/api/products', (req, res) => {
   const db = req.db;
-  const authUser = getAuthUser(req, db);
-
-  if (!authUser) {
-    return res.status(401).json({
-      statusCode: 401,
-      error: 'Unauthorized',
-      message: 'Debes iniciar sesión para añadir productos'
-    });
-  }
-
   const body = req.body;
   if (!body.name || !body.name.trim()) {
     return res.status(400).json({
@@ -304,7 +247,7 @@ app.post('/api/products', (req, res) => {
 
   const newProduct = {
     id: nextId,
-    userId: authUser.id,
+    userId: tenantId(req.user),
     name: body.name.trim(),
     sku: body.sku?.trim() || `SKU-${nextId}`,
     stock: totalStock,
@@ -328,11 +271,11 @@ app.post('/api/products', (req, res) => {
   res.status(201).json(newProduct);
 });
 
-app.put('/api/products/:id', (req, res) => {
+// Only the owner can change prices and data of the catalog
+app.put('/api/products/:id', requireRole(ROLES.OWNER), (req, res) => {
   const db = req.db;
-  const authUser = getAuthUser(req, db);
   const id = parseInt(req.params.id, 10);
-  const index = (db.products || []).findIndex(p => p.id === id && (!authUser || p.userId === authUser.id));
+  const index = (db.products || []).findIndex(p => p.id === id && p.userId === tenantId(req.user));
 
   if (index === -1) {
     return res.status(404).json({
@@ -381,11 +324,11 @@ app.put('/api/products/:id', (req, res) => {
   res.json(updated);
 });
 
-app.delete('/api/products/:id', (req, res) => {
+// Only the owner can remove products from the inventory
+app.delete('/api/products/:id', requireRole(ROLES.OWNER), (req, res) => {
   const db = req.db;
-  const authUser = getAuthUser(req, db);
   const id = parseInt(req.params.id, 10);
-  const index = (db.products || []).findIndex(p => p.id === id && (!authUser || p.userId === authUser.id));
+  const index = (db.products || []).findIndex(p => p.id === id && p.userId === tenantId(req.user));
 
   if (index === -1) {
     return res.status(404).json({
@@ -405,13 +348,9 @@ app.delete('/api/products/:id', (req, res) => {
 // ==========================================
 app.get('/api/cash', (req, res) => {
   const db = req.db;
-  const authUser = getAuthUser(req, db);
-  if (!authUser) {
-    return res.json({ initialBase: 0, entries: [] });
-  }
-
-  const userEntries = db.cash.entries?.filter(e => e.userId === authUser.id);
-  const initialBase = authUser.id === 'usr_1' ? (db.cash.initialBase || 9834) : 0;
+  const storeId = tenantId(req.user);
+  const userEntries = db.cash.entries?.filter(e => e.userId === storeId);
+  const initialBase = storeId === 'usr_1' ? (db.cash.initialBase || 9834) : 0;
 
   res.json({
     initialBase,
@@ -421,7 +360,7 @@ app.get('/api/cash', (req, res) => {
 
 app.post('/api/cash/entries', (req, res) => {
   const db = req.db;
-  const authUser = getAuthUser(req, db);
+  const authUser = req.user;
   const body = req.body;
   const amountNum = parseFloat(String(body.amount || 0).replace(/[^0-9.]/g, ''));
 
@@ -439,10 +378,10 @@ app.post('/api/cash/entries', (req, res) => {
 
   const newEntry = {
     id: nextId,
-    userId: authUser ? authUser.id : 'usr_1',
+    userId: tenantId(authUser),
     time: timeStr,
     title: body.title || 'Movimiento de caja',
-    note: body.note || (authUser ? `${authUser.name} · Mostrador` : 'Mostrador'),
+    note: body.note || `${authUser.name} · Mostrador`,
     amount: (body.kind === 'out' ? '-' : '+') + amountNum.toLocaleString('es-MX'),
     kind: body.kind === 'out' ? 'out' : 'in'
   };
@@ -452,14 +391,14 @@ app.post('/api/cash/entries', (req, res) => {
   res.status(201).json(newEntry);
 });
 
-app.post('/api/cash/close', (req, res) => {
+// Closing the shift and reconciling cash is reserved to the owner
+app.post('/api/cash/close', requireRole(ROLES.OWNER), (req, res) => {
   const db = req.db;
-  const authUser = getAuthUser(req, db);
   const body = req.body;
 
   const closure = {
     id: Date.now(),
-    userId: authUser ? authUser.id : 'usr_1',
+    userId: tenantId(req.user),
     date: new Date().toISOString(),
     time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     countedCash: body.countedCash,
@@ -479,18 +418,12 @@ app.post('/api/cash/close', (req, res) => {
 // ==========================================
 app.get('/api/loans', (req, res) => {
   const db = req.db;
-  const authUser = getAuthUser(req, db);
-  if (!authUser) {
-    return res.json([]);
-  }
-
-  const userLoans = (db.loans || []).filter(l => l.userId === authUser.id);
+  const userLoans = (db.loans || []).filter(l => l.userId === tenantId(req.user));
   res.json(userLoans);
 });
 
 app.post('/api/loans', (req, res) => {
   const db = req.db;
-  const authUser = getAuthUser(req, db);
   const body = req.body;
 
   if (!body.item || !body.stall || !body.person) {
@@ -508,7 +441,7 @@ app.post('/api/loans', (req, res) => {
 
   const newLoan = {
     id: nextId,
-    userId: authUser ? authUser.id : 'usr_1',
+    userId: tenantId(req.user),
     item: body.item.trim(),
     serial: masked,
     fullSerial: body.serial?.trim() || 'SN-TEMPORAL',
@@ -531,9 +464,8 @@ app.post('/api/loans', (req, res) => {
 
 const returnLoanHandler = (req, res) => {
   const db = req.db;
-  const authUser = getAuthUser(req, db);
   const id = parseInt(req.params.id, 10);
-  const loan = (db.loans || []).find(l => l.id === id && (!authUser || l.userId === authUser.id));
+  const loan = (db.loans || []).find(l => l.id === id && l.userId === tenantId(req.user));
 
   if (!loan) {
     return res.status(404).json({
@@ -557,18 +489,12 @@ app.post('/api/loans/:id/return', returnLoanHandler);
 // ==========================================
 app.get('/api/orders', (req, res) => {
   const db = req.db;
-  const authUser = getAuthUser(req, db);
-  if (!authUser) {
-    return res.json([]);
-  }
-
-  const userOrders = (db.orders || []).filter(o => o.userId === authUser.id);
+  const userOrders = (db.orders || []).filter(o => o.userId === tenantId(req.user));
   res.json(userOrders);
 });
 
 app.post('/api/orders', (req, res) => {
   const db = req.db;
-  const authUser = getAuthUser(req, db);
   const body = req.body;
 
   const nextNum = db.orders.length > 0 ? Math.max(...db.orders.map(o => parseInt(String(o.id).replace(/\D/g, '') || '0', 10))) + 1 : 1043;
@@ -576,7 +502,7 @@ app.post('/api/orders', (req, res) => {
 
   const newOrder = {
     id: nextId,
-    userId: authUser ? authUser.id : 'usr_1',
+    userId: tenantId(req.user),
     name: body.name?.trim() || `#${nextId}`,
     customer: body.customer?.trim() || (body.type === 'Mayorista' ? 'Distribuidor mayorista' : 'Cliente de mostrador'),
     type: body.type || 'Minorista',
@@ -592,7 +518,7 @@ app.post('/api/orders', (req, res) => {
 app.put('/api/orders/:id/items', (req, res) => {
   const db = req.db;
   const orderId = req.params.id;
-  const order = (db.orders || []).find(o => o.id === orderId);
+  const order = (db.orders || []).find(o => o.id === orderId && o.userId === tenantId(req.user));
 
   if (!order) {
     return res.status(404).json({
@@ -610,7 +536,7 @@ app.put('/api/orders/:id/items', (req, res) => {
 app.post('/api/orders/:id/checkout', (req, res) => {
   const db = req.db;
   const orderId = req.params.id;
-  const order = (db.orders || []).find(o => o.id === orderId);
+  const order = (db.orders || []).find(o => o.id === orderId && o.userId === tenantId(req.user));
 
   if (!order) {
     return res.status(404).json({
@@ -638,6 +564,7 @@ app.post('/api/orders/:id/checkout', (req, res) => {
     const nextCashId = db.cash.entries.length > 0 ? Math.max(...db.cash.entries.map(e => e.id || 0)) + 1 : 1;
     db.cash.entries.unshift({
       id: nextCashId,
+      userId: tenantId(req.user),
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       title: `Orden ${order.name}`,
       note: `Venta · ${body.paymentMethod || 'Efectivo'} · Mostrador`,
