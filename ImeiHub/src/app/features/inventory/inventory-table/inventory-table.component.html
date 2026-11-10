@@ -1,0 +1,117 @@
+<section class="inventory-layout">
+  <div class="panel catalog">
+    <div class="catalog-head">
+      <span>Producto</span>
+      <span>Stock</span>
+      <span>Precio de venta</span>
+    </div>
+    @if (products().length > 0) {
+      @for (product of products(); track product.id) {
+        <button
+          type="button"
+          [class.selected]="selectedId() === product.id"
+          class="product-row"
+          (click)="selectProduct.emit(product)"
+        >
+          <span class="product-cell">
+            <span class="product-thumb">
+              <app-icon
+                [name]="product.type === 'Smartphones' ? 'scan' : 'box'"
+                [size]="22"
+              ></app-icon>
+            </span>
+            <span>
+              <strong>{{ product.name }}</strong>
+              <small>{{ product.sku }}</small>
+              <span class="product-variants">
+                @for (variant of getDisplayedVariants(product); track variant.color) {
+                  <span class="variant-chip">
+                    <i
+                      [class]="'color-swatch swatch-' + getSwatchClass(variant.color)"
+                    ></i>
+                    <b>{{ variant.stock }}</b>
+                  </span>
+                }
+                @if (colorFilter() === 'All variants' && product.variants.length > 3) {
+                  <span class="more-variants">
+                    +{{ product.variants.length - 3 }}
+                  </span>
+                }
+              </span>
+            </span>
+          </span>
+          <span
+            class="stock-number"
+            [class.low]="getDisplayedStock(product) <= 2"
+          >
+            <strong>{{ getDisplayedStock(product) }}</strong>
+            <small>
+              {{
+                getDisplayedStock(product) === 0
+                  ? 'Agotado'
+                  : getDisplayedStock(product) <= 2
+                    ? 'Stock bajo'
+                    : colorFilter() === 'All variants'
+                      ? 'Stock total'
+                      : 'Stock en ' + getColorLabel(colorFilter())
+              }}
+            </small>
+          </span>
+          <span class="product-price">
+            <strong>MXN {{ product.price }}</strong>
+            <small>
+              <app-icon name="chevron" [size]="14"></app-icon>
+            </small>
+          </span>
+        </button>
+      }
+    } @else {
+      <div class="empty-state">
+        <app-icon name="search" [size]="28"></app-icon>
+        <strong>No se encontraron artículos</strong>
+        <span>Prueba con otra categoría.</span>
+        <app-button variant="secondary" (clicked)="resetCategory.emit()">
+          Mostrar todos
+        </app-button>
+      </div>
+    }
+
+    @if (totalProductsCount() > 0) {
+      <div class="catalog-pagination">
+        <span>
+          Mostrando {{ (currentPage() - 1) * productsPerPage() + 1 }}–{{
+            Math.min(currentPage() * productsPerPage(), totalProductsCount())
+          }} de {{ totalProductsCount() }} productos
+        </span>
+        <div>
+          <button
+            type="button"
+            aria-label="Página anterior"
+            [disabled]="currentPage() === 1"
+            (click)="pageChange.emit(Math.max(1, currentPage() - 1))"
+          >
+            <app-icon name="chevron" [size]="16"></app-icon>
+          </button>
+          @for (page of pages(); track page) {
+            <button
+              type="button"
+              [class.active]="currentPage() === page"
+              [attr.aria-current]="currentPage() === page ? 'page' : null"
+              (click)="pageChange.emit(page)"
+            >
+              {{ page }}
+            </button>
+          }
+          <button
+            type="button"
+            aria-label="Página siguiente"
+            [disabled]="currentPage() === totalPages()"
+            (click)="pageChange.emit(Math.min(totalPages(), currentPage() + 1))"
+          >
+            <app-icon name="chevron" [size]="16"></app-icon>
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</section>

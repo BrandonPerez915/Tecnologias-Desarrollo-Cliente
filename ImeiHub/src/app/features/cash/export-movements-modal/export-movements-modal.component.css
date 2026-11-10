@@ -1,0 +1,10 @@
+.export-trigger {
+  min-width: 0;
+}
+
+.export-location-note {
+  margin: -3px 0 18px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+}

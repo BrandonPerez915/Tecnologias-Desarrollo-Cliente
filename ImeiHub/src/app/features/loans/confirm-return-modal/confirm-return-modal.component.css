@@ -1,0 +1,16 @@
+.return-verification-warning { margin-bottom: 16px; padding: 13px; border: 1px solid #f0d6c8; border-radius: 11px; display: flex; align-items: flex-start; gap: 10px; color: #a84f2c; background: #fff7f2; }
+.return-verification-warning svg { flex: 0 0 auto; }
+.return-verification-warning > span { display: grid; gap: 4px; }
+.return-verification-warning strong { font-size: 12px; }
+.return-verification-warning small { color: #845f50; font-size: 12px; line-height: 1.5; }
+.return-verification-device { margin-bottom: 18px; padding: 0 13px; border: 1px solid var(--line); border-radius: 11px; }
+.return-verification-device > span { padding: 12px 0; border-bottom: 1px solid #edf0f4; display: grid; gap: 4px; }
+.return-verification-device > span:last-child { border-bottom: 0; }
+.return-verification-device small { color: var(--muted); font-size: 12px; }
+.return-verification-device strong { font-size: 12px; font-variant-numeric: tabular-nums; }
+.return-verification-actions { display: flex; justify-content: flex-end; gap: 9px; }
+
+@media (max-width: 600px) {
+  .return-verification-actions { flex-direction: column-reverse; }
+  .return-verification-actions .btn { width: 100%; }
+}

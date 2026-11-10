@@ -1,0 +1,172 @@
+.register-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  font-size: var(--font-size-caption, 0.78rem);
+  font-weight: 600;
+}
+
+.alert-danger {
+  background: var(--color-danger-soft, #fff0f0);
+  color: var(--color-danger, #d94a4a);
+  border: 1px solid rgba(217, 74, 74, 0.2);
+}
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 580px) {
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
+/* Password Strength Meter */
+.password-meter {
+  margin-top: -6px;
+  margin-bottom: 16px;
+}
+
+.meter-bar-track {
+  height: 4px;
+  width: 100%;
+  background: var(--color-line, #e4e8ee);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.meter-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.25s ease, background-color 0.25s ease;
+}
+
+.strength-weak {
+  width: 33%;
+  background-color: var(--color-danger, #d94a4a);
+}
+
+.strength-medium {
+  width: 66%;
+  background-color: var(--color-warning, #e66c38);
+}
+
+.strength-strong {
+  width: 100%;
+  background-color: var(--color-success, #15966b);
+}
+
+.meter-labels {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Terms Row */
+.terms-row {
+  margin-bottom: 22px;
+}
+
+.custom-checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  cursor: pointer;
+  user-select: none;
+  color: var(--color-ink-secondary, #3b4861);
+  line-height: 1.4;
+}
+
+.custom-checkbox {
+  width: 17px;
+  height: 17px;
+  margin-top: 2px;
+  accent-color: var(--color-primary, #2457e6);
+  cursor: pointer;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.terms-link {
+  color: var(--color-primary, #2457e6);
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+.terms-link:hover {
+  color: var(--color-primary-dark, #173ca8);
+}
+
+.terms-error {
+  display: block;
+  margin-top: 6px;
+  color: var(--color-danger, #d94a4a);
+  font-size: var(--font-size-caption, 0.78rem);
+  font-weight: 600;
+}
+
+.form-actions {
+  margin-bottom: 20px;
+}
+
+:host ::ng-deep .register-btn {
+  height: 48px;
+  font-size: 15px;
+}
+
+/* Spinner */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Switch link prompt */
+.switch-auth-prompt {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-line, #e4e8ee);
+  color: var(--color-muted, #718096);
+  flex-wrap: wrap;
+}
+
+.switch-link-btn {
+  border: 0;
+  background: transparent;
+  color: var(--color-primary, #2457e6);
+  font-weight: 700;
+  font-size: var(--font-size-body-sm, 0.85rem);
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s ease;
+}
+
+.switch-link-btn:hover {
+  color: var(--color-primary-dark, #173ca8);
+  text-decoration: underline;
+}

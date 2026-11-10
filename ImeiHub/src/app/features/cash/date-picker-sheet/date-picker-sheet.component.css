@@ -1,0 +1,96 @@
+.calendar-month {
+  margin-bottom: 14px;
+  display: grid;
+  grid-template-columns: 35px 1fr 35px;
+  align-items: center;
+  text-align: center;
+}
+
+.calendar-month button {
+  width: 35px;
+  height: 35px;
+  border: 0;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: #f4f6f9;
+  cursor: pointer;
+}
+
+.calendar-month button:first-child svg {
+  transform: rotate(180deg);
+}
+
+.calendar-month strong {
+  font-size: 13px;
+}
+
+.calendar-weekdays,
+.calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendar-weekdays {
+  margin-bottom: 5px;
+}
+
+.calendar-weekdays span {
+  padding: 5px;
+  color: #929cab;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.calendar-days > span,
+.calendar-days button {
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  font-size: 12px;
+}
+
+.calendar-days button {
+  cursor: pointer;
+}
+
+.calendar-days button:hover {
+  background: #f1f4f8;
+}
+
+.calendar-days button.selected {
+  color: white;
+  background: var(--primary);
+  box-shadow: 0 4px 10px rgba(36, 87, 230, 0.2);
+  font-weight: 800;
+}
+
+.calendar-footer {
+  margin-top: 15px;
+  padding-top: 13px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.calendar-footer button {
+  border: 0;
+  padding: 6px;
+  color: var(--primary);
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.calendar-footer span {
+  color: #919baa;
+  font-size: 12px;
+}

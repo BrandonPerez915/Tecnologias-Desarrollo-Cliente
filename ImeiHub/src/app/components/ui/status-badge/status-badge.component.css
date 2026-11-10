@@ -1,0 +1,38 @@
+.status {
+  width: max-content;
+  padding: 5px 7px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--type-badge-small, 9px);
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.status-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.status-danger {
+  color: var(--red);
+  background: var(--red-soft);
+}
+
+.status-warning {
+  color: #cb692f;
+  background: var(--orange-soft);
+}
+
+.status-neutral {
+  color: #5f6d82;
+  background: #edf0f4;
+}
+
+.status-success {
+  color: var(--green);
+  background: var(--green-soft);
+}

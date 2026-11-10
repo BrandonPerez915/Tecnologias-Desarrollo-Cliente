@@ -1,0 +1,23 @@
+.two-col-fields { display: grid; grid-template-columns: 1fr 1fr; column-gap: 13px; }
+.two-col-fields .field:first-child { grid-column: span 2; }
+.loan-product-search { position: relative; grid-column: span 2; }
+.loan-product-search .field { margin-bottom: 15px; }
+.loan-product-suggestions { position: absolute; z-index: 5; top: calc(100% - 9px); right: 0; left: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 11px; background: white; box-shadow: 0 14px 32px rgba(22,34,58,.16); }
+.loan-product-suggestions > button { width: 100%; min-height: 58px; padding: 8px 10px; border: 0; border-bottom: 1px solid #edf0f4; display: grid; grid-template-columns: 36px minmax(0, 1fr); align-items: center; gap: 9px; background: white; cursor: pointer; text-align: left; }
+.loan-product-suggestions > button:last-of-type { border-bottom: 0; }
+.loan-product-suggestions > button:hover { background: #f7f9ff; }
+.loan-product-suggestions > button > span:last-child { min-width: 0; display: grid; gap: 3px; }
+.loan-product-suggestions strong { overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.loan-product-suggestions small { color: var(--muted); font-size: 12px; }
+.field-action { min-height: 30px; padding: 0 7px; border: 0; border-radius: 7px; display: flex; align-items: center; gap: 5px; color: var(--primary); background: var(--primary-soft); cursor: pointer; font-size: 12px; font-weight: 700; }
+.loan-reminder { margin: 1px 0 18px; padding: 11px; border-radius: 9px; display: flex; align-items: center; gap: 9px; color: var(--primary); background: var(--primary-soft); }
+.loan-reminder > span { display: grid; gap: 2px; }
+.loan-reminder strong { font-size: 12px; }
+.loan-reminder small { color: #7486ba; font-size: 12px; }
+
+@media (max-width: 600px) {
+  .two-col-fields { grid-template-columns: 1fr; }
+  .two-col-fields .field:first-child { grid-column: auto; }
+  .loan-product-search { grid-column: auto; }
+  .loan-product-search .field-action span { display: none; }
+}

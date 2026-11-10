@@ -1,0 +1,274 @@
+<div class="page inventory-add-page">
+  <button type="button" class="back-button" (click)="close.emit()">
+    <app-icon name="return" [size]="17"></app-icon> Volver al inventario
+  </button>
+  <app-page-heading
+    title="Agregar producto"
+    subtitle="Registra toda la información necesaria para incorporar un artículo al inventario."
+  ></app-page-heading>
+  <form [formGroup]="productForm" (ngSubmit)="submitForm($event)" novalidate>
+    <div class="product-form-layout">
+      <section class="panel product-form-section">
+        <div class="product-form-heading">
+          <span class="product-form-icon">
+            <app-icon name="box"></app-icon>
+          </span>
+          <span>
+            <strong>Información del producto</strong>
+            <small>Datos principales para identificarlo en el catálogo</small>
+          </span>
+        </div>
+        <div class="product-form-grid">
+          <app-field
+            label="Nombre del producto"
+            placeholder="p. ej., iPhone 15 Pro · 256GB"
+            [required]="true"
+            [value]="productForm.controls.name.value"
+            [error]="nameError"
+            (valueChange)="productForm.controls.name.setValue($event)"
+            (blur)="productForm.controls.name.markAsTouched()"
+          ></app-field>
+
+          <app-field
+            label="Marca"
+            placeholder="p. ej., Apple, Samsung, Xiaomi"
+            [value]="productForm.controls.brand.value"
+            (valueChange)="productForm.controls.brand.setValue($event)"
+          ></app-field>
+
+          <app-field
+            label="Modelo"
+            placeholder="p. ej., A3104, SM-S928B"
+            [value]="productForm.controls.model.value"
+            (valueChange)="productForm.controls.model.setValue($event)"
+          ></app-field>
+
+          <label class="form-select-field">
+            <span>Tipo de producto</span>
+            <select formControlName="type">
+              <option value="Smartphones">Smartphone</option>
+              <option value="Tablets">Tablet</option>
+              <option value="Computers">Laptop / Computadora</option>
+              <option value="Accessories">Accesorio</option>
+              <option value="Audio">Audio / Auriculares</option>
+            </select>
+          </label>
+
+          <label class="form-select-field">
+            <span>Categoría</span>
+            <select formControlName="category">
+              <option value="Phones">Teléfonos</option>
+              <option value="Computers">Computadoras</option>
+              <option value="Tablets">Tablets</option>
+              <option value="Chargers">Cargadores</option>
+              <option value="Cases">Fundas</option>
+              <option value="Cables">Cables</option>
+              <option value="Audio">Audio</option>
+            </select>
+          </label>
+
+          <label class="form-select-field">
+            <span>Estado</span>
+            <select formControlName="condition">
+              <option value="Nuevo">Nuevo</option>
+              <option value="Seminuevo">Seminuevo</option>
+              <option value="Reacondicionado">Reacondicionado</option>
+            </select>
+          </label>
+
+          <label class="product-description-field">
+            <span>Descripción</span>
+            <textarea
+              placeholder="Características, capacidad, compatibilidad y notas relevantes"
+              formControlName="description"
+            ></textarea>
+          </label>
+        </div>
+      </section>
+
+      <section class="panel product-form-section">
+        <div class="product-form-heading">
+          <span class="product-form-icon">
+            <app-icon name="scan"></app-icon>
+          </span>
+          <span>
+            <strong>Identificadores</strong>
+            <small>Códigos para búsqueda, escaneo y trazabilidad</small>
+          </span>
+        </div>
+        <div class="product-form-grid">
+          <app-field
+            label="SKU"
+            placeholder="p. ej., APL-IP15P-256-NT"
+            [value]="productForm.controls.sku.value"
+            (valueChange)="productForm.controls.sku.setValue($event)"
+          ></app-field>
+
+          <app-field
+            label="Código de barras"
+            placeholder="Escanea o introduce el código"
+            icon="scan"
+            [value]="productForm.controls.barcode.value"
+            (valueChange)="productForm.controls.barcode.setValue($event)"
+          ></app-field>
+
+          <app-field
+            label="IMEI / Número de serie"
+            placeholder="Identificador único del artículo"
+            icon="tag"
+            [value]="productForm.controls.serial.value"
+            (valueChange)="productForm.controls.serial.setValue($event)"
+          ></app-field>
+        </div>
+      </section>
+
+      <section class="panel product-form-section">
+        <div class="product-form-heading">
+          <span class="product-form-icon">
+            <app-icon name="tag"></app-icon>
+          </span>
+          <span>
+            <strong>Precios</strong>
+            <small>Coste, margen permitido y precio de venta</small>
+          </span>
+        </div>
+        <div class="product-form-grid three-columns">
+          <app-field
+            label="Precio de coste"
+            placeholder="0.00"
+            type="number"
+            inputMode="decimal"
+            [min]="0"
+            [required]="true"
+            [value]="productForm.controls.cost.value"
+            [error]="costError"
+            (valueChange)="onCostChange($event)"
+            (blur)="productForm.controls.cost.markAsTouched()"
+          >
+            <span class="field-suffix">MXN</span>
+          </app-field>
+
+          <app-field
+            label="Precio mínimo"
+            placeholder="0.00"
+            type="number"
+            inputMode="decimal"
+            [min]="0"
+            [required]="true"
+            [value]="productForm.controls.minPrice.value"
+            [error]="minPriceError"
+            (valueChange)="onMinPriceChange($event)"
+            (blur)="productForm.controls.minPrice.markAsTouched()"
+          >
+            <span class="field-suffix">MXN</span>
+          </app-field>
+
+          <app-field
+            label="Precio ideal (venta)"
+            placeholder="0.00"
+            type="number"
+            inputMode="decimal"
+            [min]="0"
+            [required]="true"
+            [value]="productForm.controls.price.value"
+            [error]="priceError"
+            (valueChange)="onPriceChange($event)"
+            (blur)="productForm.controls.price.markAsTouched()"
+          >
+            <span class="field-suffix">MXN</span>
+          </app-field>
+        </div>
+      </section>
+
+      <section class="panel product-form-section">
+        <div class="product-form-heading">
+          <span class="product-form-icon">
+            <app-icon name="box"></app-icon>
+          </span>
+          <span>
+            <strong>Existencias y ubicación</strong>
+            <small>Disponibilidad inicial y localización física</small>
+          </span>
+        </div>
+        <div class="variant-editor">
+          <div class="variant-editor-header">
+            <span>Variantes del producto</span>
+            <strong>{{ totalNewProductStock }} unidades en total</strong>
+          </div>
+          <div class="variant-list">
+            @for (variant of newProductVariants(); track variant.id; let index = $index) {
+              <div class="variant-row">
+                <label>
+                  <span>Color {{ index + 1 }}</span>
+                  <select
+                    [value]="variant.color"
+                    (change)="updateVariant(variant.id, 'color', $any($event.target).value)"
+                  >
+                    <option value="">Seleccionar color</option>
+                    @for (color of colorList; track color) {
+                      <option [value]="color">{{ color }}</option>
+                    }
+                  </select>
+                </label>
+                <label>
+                  <span>Stock</span>
+                  <input
+                    type="number"
+                    min="0"
+                    inputMode="numeric"
+                    placeholder="0"
+                    [value]="variant.stock"
+                    (input)="updateVariant(variant.id, 'stock', $any($event.target).value)"
+                  />
+                </label>
+                <button
+                  type="button"
+                  class="variant-remove"
+                  [attr.aria-label]="'Eliminar variante ' + (index + 1)"
+                  [disabled]="newProductVariants().length === 1"
+                  (click)="removeVariant(variant.id)"
+                >
+                  <app-icon name="close" [size]="17"></app-icon>
+                </button>
+              </div>
+            }
+          </div>
+          <app-button
+            variant="secondary"
+            icon="plus"
+            className="variant-add-button"
+            (clicked)="addVariant()"
+          >
+            Agregar otra variante
+          </app-button>
+        </div>
+        <div class="product-form-grid inventory-location-grid">
+          <app-field
+            label="Ubicación"
+            placeholder="p. ej., Vitrina A · Fila 2"
+            [value]="productForm.controls.location.value"
+            (valueChange)="productForm.controls.location.setValue($event)"
+          ></app-field>
+          <app-field
+            label="Proveedor"
+            placeholder="Nombre del proveedor"
+            [value]="productForm.controls.supplier.value"
+            (valueChange)="productForm.controls.supplier.setValue($event)"
+          ></app-field>
+        </div>
+      </section>
+    </div>
+    <div class="product-form-actions">
+      <app-button variant="secondary" (clicked)="close.emit()">
+        Cancelar
+      </app-button>
+      <app-button type="submit" icon="plus" [disabled]="submitting() || productForm.invalid">
+        @if (submitting()) {
+          Guardando...
+        } @else {
+          Agregar producto
+        }
+      </app-button>
+    </div>
+  </form>
+</div>

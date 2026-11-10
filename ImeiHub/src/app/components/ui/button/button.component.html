@@ -1,0 +1,11 @@
+<button
+  [type]="type()"
+  [class]="'btn btn-' + variant() + (className() ? ' ' + className() : '')"
+  [disabled]="disabled()"
+  (click)="clicked.emit($event)"
+>
+  @if (icon()) {
+    <app-icon [name]="icon()!" [size]="17"></app-icon>
+  }
+  <ng-content></ng-content>
+</button>

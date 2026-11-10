@@ -1,0 +1,430 @@
+<div class="landing-page">
+  <!-- Sticky Topbar / Navbar -->
+  <header class="landing-navbar">
+    <div class="landing-navbar-inner">
+      <app-brand-logo
+        size="md"
+        badge="v1.0 Pro"
+        [clickable]="true"
+        (clicked)="scrollToTop()"
+      ></app-brand-logo>
+
+      <nav class="landing-nav-links" aria-label="Secciones de la página">
+        <a href="#caracteristicas" (click)="scrollToSection($event, 'caracteristicas')">
+          Características
+        </a>
+        <a href="#modulos" (click)="scrollToSection($event, 'modulos')">
+          Módulos interactivos
+        </a>
+        <a href="#flujo" (click)="scrollToSection($event, 'flujo')">
+          Flujo de trabajo
+        </a>
+      </nav>
+
+      <div class="landing-nav-actions">
+        <button
+          type="button"
+          class="nav-demo-link"
+          (click)="enterDemo('home')"
+        >
+          <app-icon name="flash" [size]="15"></app-icon>
+          <span>Ver Demo POS</span>
+        </button>
+        <app-button
+          variant="secondary"
+          (clicked)="navigate.emit('login')"
+        >
+          Iniciar sesión
+        </app-button>
+        <app-button
+          variant="primary"
+          (clicked)="navigate.emit('register')"
+        >
+          Crear cuenta
+        </app-button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="landing-hero">
+    <div class="hero-ambient hero-glow-left"></div>
+    <div class="hero-ambient hero-glow-right"></div>
+
+    <div class="landing-container hero-grid">
+      <div class="hero-copy">
+        <div class="hero-pill">
+          <span class="hero-pill-dot"></span>
+          <span class="type-caption font-bold">
+            Sistema POS especializado para tiendas y puestos de tecnología
+          </span>
+        </div>
+
+        <h1 class="type-hero hero-headline">
+          Controla tu inventario por
+          <span class="text-primary">IMEI</span>,
+          caja y préstamos sin perder ni un equipo.
+        </h1>
+
+        <p class="type-body hero-description">
+          ImeiHub centraliza tus ventas de mostrador, trazabilidad por número de serie,
+          préstamos entre puestos vecinos e impresión de etiquetas térmicas en una interfaz
+          rápida y diseñada para operar turnos reales.
+        </p>
+
+        <div class="hero-cta-group">
+          <app-button
+            variant="primary"
+            icon="check"
+            className="hero-primary-btn"
+            (clicked)="navigate.emit('register')"
+          >
+            Comenzar gratis ahora
+          </app-button>
+          <app-button
+            variant="secondary"
+            icon="flash"
+            className="hero-secondary-btn"
+            (clicked)="enterDemo('home')"
+          >
+            Explorar Demo en vivo
+          </app-button>
+        </div>
+
+        <div class="hero-quick-auth">
+          <span class="type-caption text-muted">¿Ya tienes una cuenta registrada?</span>
+          <button
+            type="button"
+            class="inline-text-btn"
+            (click)="navigate.emit('login')"
+          >
+            Inicia sesión aquí →
+          </button>
+        </div>
+      </div>
+
+      <!-- Interactive Live Preview Card -->
+      <div class="hero-showcase">
+        <div class="showcase-window panel">
+          <div class="showcase-window-bar">
+            <div class="window-dots">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
+            </div>
+            <span class="type-caption window-title">Puesto A-18 · Turno Vespertino</span>
+            <span class="live-pill"><i></i> EN VIVO</span>
+          </div>
+
+          <!-- Mini Cash Hero Card inside Mockup -->
+          <div class="showcase-cash-banner">
+            <div class="showcase-cash-top">
+              <span class="card-label">EFECTIVO ESPERADO EN CAJA</span>
+              <button
+                type="button"
+                class="showcase-jump-btn"
+                (click)="enterDemo('home')"
+              >
+                Abrir panel <app-icon name="chevron" [size]="14"></app-icon>
+              </button>
+            </div>
+            <app-amount size="hero">24,580.00</app-amount>
+            <div class="showcase-cash-splits">
+              <div>
+                <span>Base inicial</span>
+                <strong>MXN 9,834.00</strong>
+              </div>
+              <div>
+                <span>Ventas de hoy</span>
+                <strong class="text-success-light">+MXN 23,196.00</strong>
+              </div>
+              <div>
+                <span>Gastos</span>
+                <strong class="text-warning-light">-MXN 8,450.00</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Live Verified IMEI Card -->
+          <div class="showcase-imei-list">
+            <div class="showcase-list-header">
+              <span class="type-caption font-bold text-ink">Últimos movimientos verificados</span>
+              <span class="type-badge-sm text-primary bg-primary-soft showcase-tag">
+                Escáner activo
+              </span>
+            </div>
+
+            <div class="showcase-item-row" (click)="enterDemo('inventory')">
+              <span class="product-thumb">
+                <app-icon name="phone" [size]="18"></app-icon>
+              </span>
+              <div class="showcase-item-info">
+                <strong>iPhone 13 Pro Max · 256GB Azul Sierra</strong>
+                <small>IMEI: 356789110421983 · En vitrina (6 uds)</small>
+              </div>
+              <app-status-badge tone="success">Disponible</app-status-badge>
+            </div>
+
+            <div class="showcase-item-row" (click)="enterDemo('loans')">
+              <span class="loan-phone">
+                <app-icon name="swap" [size]="18"></app-icon>
+              </span>
+              <div class="showcase-item-info">
+                <strong>MacBook Air M2 · 256GB Medianoche</strong>
+                <small>Puesto B-04 (Carlos Ruiz) · Hace 42 min</small>
+              </div>
+              <app-status-badge tone="warning">En préstamo</app-status-badge>
+            </div>
+
+            <div class="showcase-item-row" (click)="enterDemo('orders')">
+              <span class="product-thumb">
+                <app-icon name="receipt" [size]="18"></app-icon>
+              </span>
+              <div class="showcase-item-info">
+                <strong>Orden #204 · Mostrador Principal</strong>
+                <small>2 artículos · Lista para cobro e impresión</small>
+              </div>
+              <app-status-badge tone="neutral">MXN 28,980</app-status-badge>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Strip -->
+    <div class="landing-container">
+      <div class="stats-strip panel">
+        @for (stat of stats; track stat.label) {
+          <div class="stat-cell">
+            <strong class="type-h1 text-primary">{{ stat.value }}</strong>
+            <span class="type-body-sm text-muted">{{ stat.label }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Modular Feature Grid Section -->
+  <section id="caracteristicas" class="landing-section">
+    <div class="landing-container">
+      <div class="section-heading">
+        <p class="type-eyebrow">DISEÑADO PARA OPERACIONES REALES</p>
+        <h2 class="type-h1">Todo lo que tu local necesita, modularizado y sin complicaciones</h2>
+        <p class="type-body text-muted section-subtitle">
+          Cada componente de ImeiHub está construido para reducir errores de inventario,
+          acelerar la atención en mostrador y cuadrar tu caja al centavo.
+        </p>
+      </div>
+
+      <div class="features-grid">
+        @for (feature of features; track feature.id) {
+          <app-feature-card
+            [icon]="feature.icon"
+            [tone]="feature.tone"
+            [badge]="feature.badge"
+            [title]="feature.title"
+            [description]="feature.description"
+            [highlight]="feature.highlight"
+          ></app-feature-card>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Module Explorer Section -->
+  <section id="modulos" class="landing-section section-alt">
+    <div class="landing-container">
+      <div class="section-heading">
+        <p class="type-eyebrow">EXPLORADOR INTERACTIVO DE LA APP</p>
+        <h2 class="type-h1">Conoce cada vista y pruébala con un clic</h2>
+        <p class="type-body text-muted section-subtitle">
+          Selecciona cualquiera de los módulos principales para inspeccionar su función o
+          ábrelo directamente en el entorno interactivo de demostración.
+        </p>
+      </div>
+
+      <!-- Module Selector Tabs -->
+      <div class="module-tabs" role="tablist">
+        @for (mod of modules; track mod.id) {
+          <button
+            type="button"
+            role="tab"
+            class="module-tab-btn"
+            [class.active]="selectedModuleId() === mod.id"
+            (click)="selectedModuleId.set(mod.id)"
+          >
+            <app-icon [name]="mod.icon" [size]="18"></app-icon>
+            <span>{{ mod.label }}</span>
+          </button>
+        }
+      </div>
+
+      <!-- Selected Module Preview Panel -->
+      @if (activeModule(); as mod) {
+        <div class="module-preview-card panel">
+          <div class="module-preview-info">
+            <p class="type-eyebrow">{{ mod.eyebrow }}</p>
+            <h3 class="type-h1 module-preview-title">{{ mod.title }}</h3>
+            <p class="type-body text-muted module-preview-desc">
+              {{ mod.description }}
+            </p>
+
+            <ul class="module-bullet-list">
+              @for (bullet of mod.bullets; track bullet) {
+                <li>
+                  <span class="bullet-check">
+                    <app-icon name="check" [size]="14"></app-icon>
+                  </span>
+                  <span class="type-body-sm">{{ bullet }}</span>
+                </li>
+              }
+            </ul>
+
+            <div class="module-preview-actions">
+              <app-button
+                variant="primary"
+                [icon]="mod.icon"
+                (clicked)="enterDemo(mod.id)"
+              >
+                Abrir {{ mod.label }} en vivo
+              </app-button>
+              <app-button
+                variant="secondary"
+                (clicked)="navigate.emit('login')"
+              >
+                Iniciar sesión con mi cuenta
+              </app-button>
+            </div>
+          </div>
+
+          <div class="module-preview-kpi">
+            <div class="kpi-spotlight-card">
+              <div class="kpi-spotlight-top">
+                <span class="card-label">{{ mod.kpiLabel }}</span>
+                <app-status-badge [tone]="mod.kpiTone">{{ mod.kpiStatus }}</app-status-badge>
+              </div>
+              <div class="kpi-spotlight-amount">
+                <app-amount size="large">{{ mod.kpiValue }}</app-amount>
+              </div>
+              <div class="kpi-quick-jumps">
+                <span class="type-caption text-muted">Saltar directamente a otra vista:</span>
+                <div class="kpi-jump-pills">
+                  <button type="button" (click)="enterDemo('home')">Panel</button>
+                  <button type="button" (click)="enterDemo('cash')">Movimientos</button>
+                  <button type="button" (click)="enterDemo('orders')">Órdenes</button>
+                  <button type="button" (click)="enterDemo('inventory')">Inventario</button>
+                  <button type="button" (click)="enterDemo('loans')">Préstamos</button>
+                  <button type="button" (click)="enterDemo('close')">Cierre de caja</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- End-to-End Flow Section -->
+  <section id="flujo" class="landing-section">
+    <div class="landing-container">
+      <div class="section-heading">
+        <p class="type-eyebrow">FLUJO COMPLETO CONECTADO</p>
+        <h2 class="type-h1">De la apertura del turno al corte de caja en 4 pasos</h2>
+        <p class="type-body text-muted section-subtitle">
+          Recorre el flujo completo de la aplicación desde el registro e inicio de sesión hasta
+          la operación diaria y el arqueo final.
+        </p>
+      </div>
+
+      <div class="workflow-grid">
+        @for (item of workflowSteps; track item.step) {
+          <div class="workflow-card panel">
+            <div class="workflow-card-head">
+              <span class="workflow-step-badge">{{ item.step }}</span>
+              <span class="quick-icon primary">
+                <app-icon [name]="item.icon" [size]="18"></app-icon>
+              </span>
+            </div>
+            <h3 class="type-h3 workflow-card-title">{{ item.title }}</h3>
+            <p class="type-body-sm text-muted workflow-card-desc">
+              {{ item.description }}
+            </p>
+            <button
+              type="button"
+              class="workflow-action-link"
+              (click)="navigate.emit(item.targetScreen)"
+            >
+              <span>{{ item.actionLabel }}</span>
+              <app-icon name="chevron" [size]="15"></app-icon>
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Bottom CTA Banner -->
+  <section class="landing-cta-section">
+    <div class="landing-container">
+      <div class="cta-banner">
+        <div class="cta-banner-copy">
+          <span class="live-pill"><i></i> LISTO PARA USAR</span>
+          <h2 class="type-h1 cta-banner-title">
+            Lleva el control profesional de tu tienda hoy mismo
+          </h2>
+          <p class="type-body cta-banner-subtitle">
+            Crea tu cuenta en menos de un minuto o entra directamente al modo demostración con
+            datos reales precargados.
+          </p>
+        </div>
+        <div class="cta-banner-actions">
+          <app-button
+            variant="primary"
+            icon="plus"
+            (clicked)="navigate.emit('register')"
+          >
+            Registrar mi tienda
+          </app-button>
+          <app-button
+            variant="secondary"
+            icon="user"
+            (clicked)="navigate.emit('login')"
+          >
+            Iniciar sesión
+          </app-button>
+          <button
+            type="button"
+            class="cta-demo-btn"
+            (click)="enterDemo('home')"
+          >
+            Entrar al Panel Demo →
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="landing-footer">
+    <div class="landing-container landing-footer-inner">
+      <app-brand-logo
+        size="sm"
+        badge="v1.0 Pro"
+        subtitle="Gestión de inventario IMEI, punto de venta y caja para tiendas de electrónica."
+      ></app-brand-logo>
+
+      <div class="landing-footer-links">
+        <button type="button" (click)="navigate.emit('login')">Iniciar sesión</button>
+        <button type="button" (click)="navigate.emit('register')">Crear cuenta</button>
+        <button type="button" (click)="enterDemo('home')">Panel Principal</button>
+        <button type="button" (click)="enterDemo('inventory')">Inventario</button>
+        <button type="button" (click)="enterDemo('orders')">Órdenes</button>
+        <button type="button" (click)="enterDemo('loans')">Préstamos</button>
+      </div>
+
+      <p class="type-caption text-muted landing-copyright">
+        © 2026 ImeiHub. Todos los derechos reservados.
+      </p>
+    </div>
+  </footer>
+</div>

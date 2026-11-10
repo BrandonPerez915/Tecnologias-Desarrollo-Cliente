@@ -1,0 +1,6 @@
+<span [class]="'status status-' + tone() + ' badge badge-' + tone()">
+  @if (showDot()) {
+    <span class="status-dot"></span>
+  }
+  <ng-content></ng-content>
+</span>

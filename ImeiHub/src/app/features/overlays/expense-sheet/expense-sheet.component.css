@@ -1,0 +1,13 @@
+.form-section { margin-bottom: 18px; }
+.form-label { display: block; margin-bottom: 8px; color: #586579; font-size: 12px; font-weight: 800; letter-spacing: .2px; }
+.category-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
+.category-grid button { min-height: 82px; padding: 10px 5px; border: 1px solid var(--line); border-radius: 10px; display: grid; place-items: center; align-content: center; gap: 8px; color: #6f7a8d; background: white; cursor: pointer; font-size: 12px; line-height: 1.35; }
+.category-grid button.selected { border-color: var(--primary); color: var(--primary); background: var(--primary-soft); box-shadow: 0 0 0 1px var(--primary); }
+.form-total { margin: 5px 0 18px; padding: 14px 0; border-top: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; }
+.form-total span { color: #808b9d; font-size: 12px; }
+.form-total strong { font-size: 13px; }
+
+@media (max-width: 600px) {
+  .category-grid { grid-template-columns: repeat(2, 1fr); }
+  .category-grid button { min-height: 65px; grid-template-columns: 23px 1fr; place-items: center start; text-align: left; }
+}

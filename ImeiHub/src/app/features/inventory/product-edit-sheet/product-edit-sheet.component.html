@@ -1,0 +1,102 @@
+<app-sheet
+  title="Editar producto"
+  [subtitle]="'Actualiza la información de ' + product().name + '.'"
+  (close)="close.emit()"
+  [wide]="true"
+>
+  <form [formGroup]="editForm" (ngSubmit)="submitForm($event)" novalidate>
+    <div class="edit-product-grid">
+      <app-field
+        label="Nombre del producto"
+        [required]="true"
+        [value]="editForm.controls.name.value"
+        [error]="nameError"
+        (valueChange)="editForm.controls.name.setValue($event)"
+        (blur)="editForm.controls.name.markAsTouched()"
+      ></app-field>
+
+      <app-field
+        label="SKU"
+        [required]="true"
+        [value]="editForm.controls.sku.value"
+        [error]="skuError"
+        (valueChange)="editForm.controls.sku.setValue($event)"
+        (blur)="editForm.controls.sku.markAsTouched()"
+      ></app-field>
+
+      <app-field
+        label="Precio ideal (venta)"
+        type="number"
+        inputMode="decimal"
+        [min]="0"
+        [required]="true"
+        [value]="editForm.controls.price.value"
+        [error]="priceError"
+        (valueChange)="editForm.controls.price.setValue($event)"
+        (blur)="editForm.controls.price.markAsTouched()"
+      >
+        <span class="field-suffix">MXN</span>
+      </app-field>
+
+      <app-field
+        label="Precio mínimo"
+        type="number"
+        inputMode="decimal"
+        [min]="0"
+        [required]="true"
+        [value]="editForm.controls.minPrice.value"
+        [error]="minPriceError"
+        (valueChange)="editForm.controls.minPrice.setValue($event)"
+        (blur)="editForm.controls.minPrice.markAsTouched()"
+      >
+        <span class="field-suffix">MXN</span>
+      </app-field>
+
+      <app-field
+        label="Precio de coste"
+        type="number"
+        inputMode="decimal"
+        [min]="0"
+        [required]="true"
+        [value]="editForm.controls.cost.value"
+        [error]="costError"
+        (valueChange)="editForm.controls.cost.setValue($event)"
+        (blur)="editForm.controls.cost.markAsTouched()"
+      >
+        <span class="field-suffix">MXN</span>
+      </app-field>
+
+      <app-field
+        label="Stock total"
+        type="number"
+        inputMode="numeric"
+        [min]="0"
+        [required]="true"
+        [value]="editForm.controls.stock.value"
+        [error]="stockError"
+        (valueChange)="editForm.controls.stock.setValue($event)"
+        (blur)="editForm.controls.stock.markAsTouched()"
+      ></app-field>
+    </div>
+
+    <div class="edit-product-note">
+      <app-icon name="warning" [size]="17"></app-icon>
+      <span>
+        Los precios mínimo e ideal ayudan al equipo a negociar sin vender
+        por debajo del margen permitido.
+      </span>
+    </div>
+
+    <app-button
+      type="submit"
+      className="full-button"
+      [disabled]="submitting() || editForm.invalid"
+    >
+      @if (submitting()) {
+        Guardando cambios...
+      } @else {
+        Guardar cambios
+      }
+    </app-button>
+  </form>
+</app-sheet>

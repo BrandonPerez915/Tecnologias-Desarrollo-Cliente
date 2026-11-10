@@ -1,0 +1,128 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+}
+
+.brand-logo-root {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  user-select: none;
+}
+
+.brand-logo-root.is-clickable {
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.brand-logo-root.is-clickable:hover {
+  opacity: 0.92;
+}
+
+.brand-mark-frame {
+  position: relative;
+  flex: 0 0 auto;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: var(--color-primary, #2457e6);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(36, 87, 230, 0.24);
+}
+
+.brand-mark-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transform: scale(1.38);
+}
+
+.brand-mark-fallback {
+  width: 68%;
+  height: 68%;
+}
+
+/* Sizes */
+.size-sm .brand-mark-frame {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+}
+
+.size-sm .brand-name {
+  font-size: 18px;
+}
+
+.size-md .brand-mark-frame {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+}
+
+.size-md .brand-name {
+  font-size: 19px;
+}
+
+.size-lg .brand-mark-frame {
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
+}
+
+.size-lg .brand-name {
+  font-size: 21px;
+}
+
+.brand-text-group {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+}
+
+.brand-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-name {
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+}
+
+/* Themes */
+.theme-light .brand-name {
+  color: var(--color-ink, #172033);
+}
+
+.theme-light .brand-badge {
+  background: var(--color-primary-soft, #edf2ff);
+  color: var(--color-primary, #2457e6);
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-weight: 800;
+}
+
+.theme-light .brand-subtitle {
+  color: var(--color-muted, #718096);
+}
+
+.theme-dark .brand-name {
+  color: #ffffff;
+}
+
+.theme-dark .brand-badge {
+  background: rgba(94, 131, 255, 0.2);
+  color: #b4c8ff;
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-weight: 800;
+}
+
+.theme-dark .brand-subtitle {
+  color: #9ba7bc;
+}

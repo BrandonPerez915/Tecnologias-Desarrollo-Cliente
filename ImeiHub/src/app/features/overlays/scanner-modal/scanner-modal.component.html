@@ -1,0 +1,125 @@
+<div
+  class="scanner-overlay"
+  [class.flashlight-on]="flashlightOn()"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Escáner de código de barras"
+>
+  <div class="scanner-top">
+    <button type="button" class="scanner-close" (click)="close.emit()">
+      <app-icon name="close"></app-icon> Cancelar
+    </button>
+    <strong>Escanear código o IMEI</strong>
+    <span></span>
+  </div>
+
+  <div class="scanner-view">
+    <div class="scanner-glow"></div>
+    <div class="scan-frame" [class.detected]="detectedProduct() !== null">
+      <i></i>
+      <i></i>
+      <i></i>
+      <i></i>
+      <span></span>
+    </div>
+
+    @if (!detectedProduct()) {
+      <div class="scan-copy">
+        <strong>Alinea el código de barras o IMEI dentro del marco</strong>
+        <span>O escribe el código/SKU directamente abajo para probar</span>
+      </div>
+    } @else {
+      <!-- Scanned result card overlay -->
+      <div class="scan-result-card panel">
+        <div class="scan-result-header">
+          <span class="scan-badge">¡Artículo Detectado!</span>
+          <button type="button" class="btn-clear" (click)="clearDetection()">
+            <app-icon name="close" [size]="14"></app-icon>
+          </button>
+        </div>
+        <h4>{{ detectedProduct()!.name }}</h4>
+        <div class="scan-result-meta">
+          <span>SKU: <strong>{{ detectedProduct()!.sku }}</strong></span>
+          <span>Precio: <strong>MXN {{ detectedProduct()!.price }}</strong></span>
+          <span>Stock: <strong>{{ detectedProduct()!.stock }} disp.</strong></span>
+        </div>
+        <div class="scan-result-actions">
+          <app-button
+            variant="primary"
+            size="sm"
+            icon="plus"
+            (clicked)="proceedToSale()"
+          >
+            Cobrar en venta
+          </app-button>
+          <app-button
+            variant="secondary"
+            size="sm"
+            icon="swap"
+            (clicked)="proceedToLoan()"
+          >
+            Prestar equipo
+          </app-button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Quick manual code tester -->
+  <div class="scanner-manual-input">
+    <div class="input-row">
+      <input
+        type="text"
+        [(ngModel)]="manualCode"
+        placeholder="Escribe IMEI, código de barras o SKU..."
+        (keydown.enter)="handleSearchCode()"
+      />
+      <button type="button" class="btn-search-code" (click)="handleSearchCode()">
+        Buscar
+      </button>
+    </div>
+    <div class="quick-code-chips">
+      <small>Prueba rápida:</small>
+      @for (prod of quickProducts(); track prod.id) {
+        <button
+          type="button"
+          class="chip"
+          (click)="selectQuickCode(prod.sku)"
+        >
+          {{ prod.sku }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="scanner-controls">
+    <button
+      type="button"
+      [class.active]="flashlightOn()"
+      (click)="toggleFlashlight()"
+    >
+      <span>
+        <app-icon name="flash"></app-icon>
+      </span>
+      {{ flashlightOn() ? 'Apagar luz' : 'Linterna' }}
+    </button>
+
+    <button
+      type="button"
+      class="simulate-scan"
+      (click)="handleSimulateRandom()"
+    >
+      <span>
+        <app-icon name="scan"></app-icon>
+      </span>
+      Escanear al azar
+    </button>
+
+    <button type="button" (click)="handleSimulateGallery()">
+      <span>
+        <app-icon name="image"></app-icon>
+      </span>
+      Galería
+    </button>
+  </div>
+</div>

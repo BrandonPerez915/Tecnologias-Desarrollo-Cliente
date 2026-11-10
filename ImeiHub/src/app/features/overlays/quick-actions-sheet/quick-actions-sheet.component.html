@@ -1,0 +1,38 @@
+<app-sheet
+  title="Acciones rápidas"
+  subtitle="¿Qué quieres hacer?"
+  (close)="close.emit()"
+>
+  <div class="action-sheet-list">
+    <button type="button" (click)="open.emit('scanner')">
+      <span class="quick-icon primary">
+        <app-icon name="scan"></app-icon>
+      </span>
+      <span>
+        <strong>Escaneo rápido</strong>
+        <small>Buscar un producto o precio</small>
+      </span>
+      <app-icon name="chevron"></app-icon>
+    </button>
+    <button type="button" (click)="open.emit('sale')">
+      <span class="quick-icon success">
+        <app-icon name="plus"></app-icon>
+      </span>
+      <span>
+        <strong>Añadir venta</strong>
+        <small>Registrar un nuevo pago</small>
+      </span>
+      <app-icon name="chevron"></app-icon>
+    </button>
+    <button type="button" (click)="open.emit('expense')">
+      <span class="quick-icon warning">
+        <app-icon name="arrow-up"></app-icon>
+      </span>
+      <span>
+        <strong>Registrar gasto</strong>
+        <small>Anotar una salida de caja</small>
+      </span>
+      <app-icon name="chevron"></app-icon>
+    </button>
+  </div>
+</app-sheet>

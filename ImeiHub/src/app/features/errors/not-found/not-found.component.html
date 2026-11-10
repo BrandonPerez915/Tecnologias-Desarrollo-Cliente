@@ -1,0 +1,12 @@
+<section class="error-view standalone">
+  <div class="error-card">
+    <span class="error-code">404</span>
+    <h1>Página no encontrada</h1>
+    <p>La ruta <code>{{ path }}</code> no existe en ImeiHub. Revisa la dirección o regresa al inicio.</p>
+    <div class="error-actions">
+      <app-button icon="home" (clicked)="goBack()">
+        {{ isAuthenticated() ? 'Ir al panel' : 'Ir a iniciar sesión' }}
+      </app-button>
+    </div>
+  </div>
+</section>

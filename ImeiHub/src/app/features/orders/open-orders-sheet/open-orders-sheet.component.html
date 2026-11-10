@@ -1,0 +1,27 @@
+<app-sheet
+  title="Órdenes abiertas"
+  subtitle="Selecciona una orden para continuar trabajando."
+  (close)="close.emit()"
+  [wide]="true"
+>
+  <div class="orders-modal-list">
+    @for (order of orders(); track order.id) {
+      <button
+        type="button"
+        [class.active]="activeOrder() === order.id"
+        (click)="selectOrder(order.id)"
+      >
+        <span class="orders-modal-number">
+          <app-icon name="receipt" [size]="18"></app-icon> {{ order.name }}
+        </span>
+        <span>
+          <strong>{{ order.customer }}</strong>
+          <small>
+            {{ order.items }} artículos · MXN {{ order.total }}
+          </small>
+        </span>
+        <app-icon name="chevron" [size]="17"></app-icon>
+      </button>
+    }
+  </div>
+</app-sheet>
